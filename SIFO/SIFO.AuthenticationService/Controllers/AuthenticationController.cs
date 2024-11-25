@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using SIFO.AuthenticationService.Service.Contracts;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using SIFO.Utility.Implementations;
 
 namespace SIFO.AuthenticationService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class AuthenticationController : ControllerBase
     { 
 
@@ -30,6 +30,22 @@ namespace SIFO.AuthenticationService.Controllers
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
+        {
+            try
+            {
+                var result = await _authService.ChangePassword(changePasswordRequest);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception)
             {
                 var result = ApiResponse<string>.InternalServerError;
                 return StatusCode(StatusCodes.Status500InternalServerError, result);

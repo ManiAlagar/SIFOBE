@@ -65,10 +65,9 @@ namespace SIFO.Utility.Implementations
             var user = new TokenResponse
             {
                 UserId = claims.FirstOrDefault(c => c.Type == "UserId")?.Value,
-                Role = claims.FirstOrDefault(c => c.Type == "Role")?.Value,
+                Role = claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value,
                 FullName = claims.FirstOrDefault(c => c.Type == "UserName")?.Value,
-                Email = claims.FirstOrDefault(c => c.Type == "Email")?.Value,
-                TenantId = claims.FirstOrDefault(c => c.Type == "TenantId")?.Value
+                Email = claims.FirstOrDefault(c => c.Type == "Email")?.Value
             };
             return user;
         }

@@ -29,9 +29,7 @@ namespace SIFO.AuthenticationService
             services.AddTransient<IAuthenticationRepository, AuthenticationRepository>();
             services.AddTransient<ICommonService,CommonService>();
             services.AddTransient<SIFOContext>();
-
             services.AddHttpContextAccessor();
-
 
             services.AddAuthentication(options =>
             {
@@ -71,9 +69,7 @@ namespace SIFO.AuthenticationService
                 };
             });
 
-
             return services;
-
         }
     }
 }

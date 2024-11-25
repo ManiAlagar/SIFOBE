@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SIFO.Model.Entity;
 using SIFO.Model.Response;
@@ -12,17 +13,13 @@ namespace SIFO.AuthenticationService
     {
         private readonly JwtSettings _jwtSettings;
 
-        public JwtTokenGenerator(
-            IOptions<JwtSettings> jwtOptions
-        )
+        public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions)
         {
             _jwtSettings = jwtOptions.Value;
         }
 
         public string GenerateToken(User user)
         {
-
-
             var signingCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
                 SecurityAlgorithms.HmacSha256
@@ -34,13 +31,14 @@ namespace SIFO.AuthenticationService
             Claim UserId = new Claim("UserId", user.Id.ToString());
             Claim GivenName = new Claim(JwtRegisteredClaimNames.GivenName, user.Email);
             Claim Jti = new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString());
-            Claim Roles = new Claim(ClaimTypes.Role, user.RoleId.ToString());
+            Claim Roles = new Claim(ClaimTypes.Role, user.RoleName);
             claims.Add(sub);
             claims.Add(UserName);
             claims.Add(UserId);
             claims.Add(GivenName);
             claims.Add(Jti);
             claims.Add(Roles);
+
             //if (user.RoleNames != null && user.RoleNames.Count() > 0)
             //{
             //    foreach (string role in user.RoleNames)
@@ -49,7 +47,7 @@ namespace SIFO.AuthenticationService
             //    }
             //}
 
-            var securityToken = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor()
+            var securityToken = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
                 IssuedAt = DateTime.UtcNow,
@@ -59,14 +57,12 @@ namespace SIFO.AuthenticationService
                 Audience = _jwtSettings.Audience,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(_jwtSettings.Secret)), 
+                            Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
                             SecurityAlgorithms.HmacSha256)
             };
-            
 
-            
             var token = new Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler().CreateToken(securityToken);
-            Console.WriteLine($"Generated JWT Token: {token}"); 
+            Console.WriteLine($"Generated JWT Token: {token}");
             return token;
         }
     }

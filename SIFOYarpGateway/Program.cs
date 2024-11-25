@@ -27,9 +27,7 @@ namespace SIFOYarpGateway
             options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
             ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
 
-
-            
-            ServiceCollectionExtension.ConfigureServices(builder.Services);
+            ServiceCollectionExtension.ConfigureServices(builder.Services, builder.Configuration);
 
             var app = builder.Build();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
