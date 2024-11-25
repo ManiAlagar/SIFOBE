@@ -55,8 +55,8 @@ namespace SIFOYarpGateway
                 // Load routes from database
                 var routes = dbContext.Routes.Select(rc => new RouteConfig
                 {
-                    RouteId = rc.RouteId,
-                    ClusterId = rc.ClusterId,
+                    RouteId = rc.Route,
+                    ClusterId = rc.Cluster,
                     Match = new RouteMatch { Path = rc.PathPattern }
                 }).ToList();
 
@@ -73,7 +73,7 @@ namespace SIFOYarpGateway
                 // Load clusters from database
                 var clusters = dbContext.Clusters
                     .ToList()
-                    .GroupBy(cc => cc.ClusterId)
+                    .GroupBy(cc => cc.Cluster)
                     .Select(g => new ClusterConfig
                     {
                         ClusterId = g.Key,

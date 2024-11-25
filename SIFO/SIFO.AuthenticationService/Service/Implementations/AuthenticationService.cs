@@ -12,11 +12,14 @@ namespace SIFO.AuthenticationService.Service.Implementations
         private readonly IConfiguration _configuration;
         private readonly IAuthenticationRepository _authenticationRepository;
         private readonly ICommonService _commonService;
-        public AuthenticationService(IConfiguration configuration,IAuthenticationRepository authenticationRepository, ICommonService commonService)
+        private readonly JwtTokenGenerator _tokenGenerator;
+
+        public AuthenticationService(IConfiguration configuration,IAuthenticationRepository authenticationRepository, ICommonService commonService, JwtTokenGenerator tokenGenerator)
         {
             _configuration = configuration; 
             _authenticationRepository = authenticationRepository;  
             _commonService = commonService;
+            _tokenGenerator = tokenGenerator;
         }
         public async Task<ApiResponse<string>> LoginAsync(LoginRequest request)
         {
@@ -29,13 +32,14 @@ namespace SIFO.AuthenticationService.Service.Implementations
                 return ApiResponse<string>.UnAuthorized("invalid email and/or password");
 
             var isFirstLogin = userData.LastLogin == null;
-            var isTempPassword = userData.IsTempPassword == true;
-            if (isFirstLogin || isTempPassword)
-            {
-                var errorMessage = isFirstLogin ? Constants.FIRST_LOGIN : Constants.USED_TEMP_PASSWORD;
-                return ApiResponse<string>.Forbidden(errorMessage);
-            }
-            return ApiResponse<string>.Success();
+            //var isTempPassword = userData.IsTempPassword == true;
+            //if (isFirstLogin || isTempPassword)
+            //{
+            //    var errorMessage = isFirstLogin ? Constants.FIRST_LOGIN : Constants.USED_TEMP_PASSWORD;
+            //    return ApiResponse<string>.Forbidden(errorMessage);
+            //} 
+            var JwtTokenGenerator = _tokenGenerator.GenerateToken(userData);
+            return ApiResponse<string>.Success("succdes", JwtTokenGenerator);
         }
 
         public async Task<ApiResponse<string>> Login2FAAsync(Login2FARequest request)

@@ -1,9 +1,9 @@
 ﻿namespace SIFOYarpGateway.Models
 {
-    public class Cluster
+    public class Clusters
     {
         public int Id { get; set; }
-        public string ClusterId { get; set; }
+        public string Cluster { get; set; }
         public string Destinations { get; set; }
     }
 }

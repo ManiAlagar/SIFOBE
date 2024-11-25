@@ -6,7 +6,7 @@ namespace SIFOYarpGateway.Models
     {
         public GatewayDbContext(DbContextOptions<GatewayDbContext> options) : base(options) { }
 
-        public DbSet<Route> Routes { get; set; }
-        public DbSet<Cluster> Clusters { get; set; }
+        public DbSet<Routes> Routes { get; set; }
+        public DbSet<Clusters> Clusters { get; set; }
     }
 }

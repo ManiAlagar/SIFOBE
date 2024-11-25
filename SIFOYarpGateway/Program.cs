@@ -21,8 +21,6 @@ namespace SIFOYarpGateway
             builder.Logging.AddSerilog(logger);
 
             builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
             
             builder.Services.AddDbContext<GatewayDbContext>(options =>

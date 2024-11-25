@@ -20,7 +20,8 @@ namespace SIFO.AuthenticationService.Controllers
         }
 
         [HttpPost]
-        [Route("Login")] 
+        [Route("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> LoginAsync(LoginRequest request)
         {
             try
