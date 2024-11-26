@@ -7,7 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace SIFO.AuthenticationService
+namespace SIFO.APIService.Authentication
 {
     public class JwtTokenGenerator
     {

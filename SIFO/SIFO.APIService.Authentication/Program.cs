@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using SIFO.AuthenticationService;
+using SIFO.APIService.Authentication;
 using SIFO.Model.Entity;
 using System.Text;
 

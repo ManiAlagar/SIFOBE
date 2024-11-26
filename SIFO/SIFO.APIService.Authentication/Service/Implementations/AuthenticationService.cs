@@ -1,13 +1,11 @@
-﻿using SIFO.AuthenticationService.Repository.Contracts;
-using SIFO.AuthenticationService.Service.Contracts;
+﻿using SIFO.APIService.Authentication.Repository.Contracts;
+using SIFO.APIService.Authentication.Service.Contracts;
 using SIFO.Common.Contracts;
 using SIFO.Model.Constant;
-using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
-using SIFO.Utility.Implementations;
 
-namespace SIFO.AuthenticationService.Service.Implementations
+namespace SIFO.APIService.Authentication.Service.Implementations
 {
     public class AuthenticationService : IAuthenticationService
     {
@@ -41,7 +39,7 @@ namespace SIFO.AuthenticationService.Service.Implementations
             //    return ApiResponse<string>.Forbidden(errorMessage);
             //} 
             var JwtTokenGenerator = _tokenGenerator.GenerateToken(userData);
-            return ApiResponse<string>.Success("succdes", JwtTokenGenerator);
+            return ApiResponse<string>.Success("success", JwtTokenGenerator);
         }
 
         public async Task<ApiResponse<string>> Login2FAAsync(Login2FARequest request)
@@ -57,6 +55,7 @@ namespace SIFO.AuthenticationService.Service.Implementations
 
                 string[] mail = new string[] { userContactInfo.Email };
                 bool isMailSent = await _commonService.SendMail(mail.ToList(), null, subject, body);
+
                 if (!isMailSent)
                     return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
                 return ApiResponse<string>.Success("successfully sent otp to your mail");

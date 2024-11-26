@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using SIFO.AuthenticationService.Repository.Contracts;
-using SIFO.AuthenticationService.Repository.Implementations;
-using SIFO.AuthenticationService.Service.Contracts;
-using SIFO.AuthenticationService.Service.Implementations;
+using SIFO.APIService.Authentication.Repository.Contracts;
+using SIFO.APIService.Authentication.Repository.Implementations;
+using SIFO.APIService.Authentication.Service.Contracts;
+using SIFO.APIService.Authentication.Service.Implementations;
 using SIFO.Common.Contracts;
 using SIFO.Model.Entity;
 using SIFO.Model.Response;
 using SIFO.Utility.Implementations;
 using System.Text;
 
-namespace SIFO.AuthenticationService
+namespace SIFO.APIService.Authentication
 {
     public static class ServiceCollectionExtension
     {

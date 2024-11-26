@@ -1,7 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
 using System.Data;
 
-namespace SIFO.AuthenticationService
+namespace SIFO.APIService.Authentication
 {
     public static class DependencyInjection
     {

@@ -1,12 +1,10 @@
-﻿
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SIFO.AuthenticationService.Service.Contracts;
+using SIFO.APIService.Authentication.Service.Contracts;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
-using SIFO.Utility.Implementations;
 
-namespace SIFO.AuthenticationService.Controllers
+namespace SIFO.APIService.Authentication.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

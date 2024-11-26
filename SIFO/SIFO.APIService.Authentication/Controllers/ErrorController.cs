@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace SIFO.AuthenticationService.Controllers
+namespace SIFO.APIService.Authentication.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ErrorController : ControllerBase

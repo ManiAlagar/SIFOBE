@@ -3,7 +3,7 @@ using SIFO.Model.Request;
 using SIFO.Model.Response;
 
 
-namespace SIFO.AuthenticationService.Repository.Contracts
+namespace SIFO.APIService.Authentication.Repository.Contracts
 {
     public interface IAuthenticationRepository
     {

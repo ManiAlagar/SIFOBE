@@ -1,4 +1,4 @@
-﻿using SIFO.AuthenticationService.Repository.Contracts;
+﻿using SIFO.APIService.Authentication.Repository.Contracts;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +6,7 @@ using SIFO.Model.Response;
 using Microsoft.Extensions.Configuration;
 using SIFO.Model.Constant;
 
-namespace SIFO.AuthenticationService.Repository.Implementations
+namespace SIFO.APIService.Authentication.Repository.Implementations
 {
     public class AuthenticationRepository : IAuthenticationRepository
     {

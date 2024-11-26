@@ -1,7 +1,7 @@
 ﻿using SIFO.Model.Request;
 using SIFO.Model.Response;
 
-namespace SIFO.AuthenticationService.Service.Contracts
+namespace SIFO.APIService.Authentication.Service.Contracts
 {
     public interface IAuthenticationService
     {
