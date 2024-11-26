@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<InvariantGlobalization>true</InvariantGlobalization>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SIFO.Common\SIFO.Common.csproj" />
+		<ProjectReference Include="..\SIFO.Core\SIFO.Core.csproj" />
+		<ProjectReference Include="..\SIFO.Model\SIFO.Model.csproj" />
+		<ProjectReference Include="..\SIFO.Utility\SIFO.Utility.csproj" />
+	</ItemGroup>
+
+</Project>

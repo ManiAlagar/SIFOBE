@@ -1,6 +1,0 @@
-@SIFO.AuthenticationService_HostAddress = http://localhost:5058
-
-GET {{SIFO.AuthenticationService_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

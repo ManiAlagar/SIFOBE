@@ -1,4 +1,6 @@
-﻿namespace SIFO.Model.Entity
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SIFO.Model.Entity
 {
     public class User
     {
@@ -19,6 +21,8 @@
         public long? UpdatedBy { get; set; }
         public DateTime? LastLogin { get; set; }
         public bool? IsActive { get; set; } = true;
+        [NotMapped]
+        public string? RoleName { get; set; }
         //public bool? IsTempPassword { get; set; } = false;
         //public string? OtpMethod { get; set; } = "Email";
     }
