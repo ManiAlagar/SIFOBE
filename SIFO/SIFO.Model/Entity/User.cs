@@ -10,7 +10,7 @@ namespace SIFO.Model.Entity
         public string? Email { get; set; }
         public string? PasswordHash { get; set; }
         public string? PhoneNumber { get; set; }
-        //public string? ProfilePath { get; set; }
+        public string? ProfileURL { get; set; }
         public string? ZipCode { get; set; }
         public long? RoleId { get; set; }
        // public long? AddressDetailId { get; set; }
@@ -23,7 +23,9 @@ namespace SIFO.Model.Entity
         public bool? IsActive { get; set; } = true;
         [NotMapped]
         public string? RoleName { get; set; }
-        //public bool? IsTempPassword { get; set; } = false;
-        //public string? OtpMethod { get; set; } = "Email";
+        public bool? IsTempPassword { get; set; } = false;
+        public long? AuthenticationType { get; set; }
+        [NotMapped]
+        public string? AuthType { get; set; }
     }
 }

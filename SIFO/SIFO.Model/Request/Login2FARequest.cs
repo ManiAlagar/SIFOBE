@@ -1,8 +1,10 @@
 ﻿namespace SIFO.Model.Request
 {
     public class Login2FARequest
-    {
-        public string  OTPMethod { get; set; } 
+    { 
+        public long AuthenticationType { get; set; }
+        public string AuthenticationFor { get; set; }
+        public string OtpCode { get; set; }
         public long UserId { get; set; }
     }
 }

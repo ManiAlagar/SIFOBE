@@ -9,6 +9,9 @@ using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 
 namespace SIFO.Utility.Implementations
@@ -174,11 +177,24 @@ namespace SIFO.Utility.Implementations
         {
             try
             {
+                string accountSid = _configuration["Twilio:AccountSid"];
+                string authToken = _configuration["Twilio:AuthToken"];
+                string fromPhoneNumber = _configuration["Twilio:PhoneNumber"];
+                TwilioClient.Init(accountSid, authToken);
+                foreach (var phoneNumber in phoneNumbers)
+                {
+                    var toPhoneNumber = new PhoneNumber(phoneNumber);
+                    var message = await MessageResource.CreateAsync(
+                       to: toPhoneNumber,
+                       from: new PhoneNumber(fromPhoneNumber),
+                       body: body
+                   );
+                }
                 return true;
             }
             catch (Exception ex)
             {
-                throw;
+                return false;
             }
         }
 
@@ -227,6 +243,26 @@ namespace SIFO.Utility.Implementations
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public async Task<string> SaveFileAsync(string base64File, string fileType, string destinationFolder)
+        {
+            try
+            {
+                if (!Directory.Exists(destinationFolder))
+                    Directory.CreateDirectory(destinationFolder);
+
+                string fileName = Guid.NewGuid().ToString() + "." + fileType;
+                byte[] fileBytes = Convert.FromBase64String(base64File);
+                string filePath = Path.Combine(destinationFolder, fileName);
+
+                await File.WriteAllBytesAsync(filePath, fileBytes);
+                return filePath;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }

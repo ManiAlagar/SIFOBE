@@ -34,8 +34,26 @@ namespace SIFO.APIService.Authentication.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("Login2FA")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login2FAAsync(Login2FARequest request)
+        {
+            try
+            {
+                var result = await _authService.Login2FAAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpPost]
+        [Route("ChangePassword")]
         [Authorize(Roles = "Admin")]
-        [HttpPost("changePassword")]
         public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
         {
             try
@@ -46,6 +64,23 @@ namespace SIFO.APIService.Authentication.Controllers
             catch (Exception)
             {
                 var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpPost]
+        [Route("ForgotPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
+        {
+            try
+            {
+                var result = await _authService.ForgotPassword(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError($"An error occurred: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
