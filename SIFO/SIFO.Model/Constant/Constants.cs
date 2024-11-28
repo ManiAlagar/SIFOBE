@@ -1,7 +1,20 @@
 ﻿namespace SIFO.Model.Constant
 {
     public static class Constants
-    { 
+    {
+        public const string ROLE_SUPER_ADMIN = "Super Admin";
+        public const string ROLE_PP_ADMINISTRATOR = "PP Administrator"; 
+        public const string ROLE_HOSPITAL_PHARMACY_SUPERVISOR = "Hospital Pharmacy Supervisor"; 
+        public const string ROLE_HOSPITAL_PHARMACY_OPERATOR = "Hospital Pharmacy Operator"; 
+        //public const string ROLE_SUPER_ADMINISTRATOR = "Administrator / Hospital Referent"; 
+        public const string ROLE_SUPER_ADMINISTRATOR = "Administrator"; 
+        public const string ROLE_SUPER_HOSPITAL_REFERENT = "Hospital Referent"; 
+        public const string ROLE_DOCTOR = "Doctor"; 
+        public const string ROLE_PP_OPERATOR = "PP Operator"; 
+        public const string ROLE_RETAIL_PHARMACY_SUPERVISOR = "Retail Pharmacy Supervisor"; 
+        public const string ROLE_RETAIL_PHARMACY_OPERATOR = "Retail Pharmacy Operator"; 
+
+
         public static string SUCCESS = "success";
         public static string CREATED = "successfully created";
         public static string NOT_FOUND = "not found";

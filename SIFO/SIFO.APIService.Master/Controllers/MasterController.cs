@@ -1,13 +1,16 @@
-﻿using SIFO.Model.Response;
-using Microsoft.AspNetCore.Mvc;
-using SIFO.APIService.Master.Service.Contracts;
-using FluentValidation;
+﻿using FluentValidation;
 using SIFO.Model.Request;
+using SIFO.Model.Response;
+using SIFO.Model.Constant;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using SIFO.APIService.Master.Service.Contracts;
 
 namespace SIFO.APIService.Master.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = Constants.ROLE_SUPER_ADMIN)]
     public class MasterController : ControllerBase
     {
         private readonly ICountryService _countryService;
@@ -282,6 +285,7 @@ namespace SIFO.APIService.Master.Controllers
 
         [HttpGet]
         [Route("StateByCountry/{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetStateByCountryIdAsync(long id)
         {
             try
@@ -298,6 +302,7 @@ namespace SIFO.APIService.Master.Controllers
 
         [HttpGet]
         [Route("CityByState/{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCityByStateIdAsync(long id)
         {
             try
