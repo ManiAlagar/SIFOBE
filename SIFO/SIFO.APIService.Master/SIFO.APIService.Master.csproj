@@ -7,15 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.9" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Repository\Implementations\" />
-    <Folder Include="Repository\Contracts\" />
-    <Folder Include="Service\Contracts\" />
-    <Folder Include="Service\Implementations\" />
+    <ProjectReference Include="..\SIFO.Common\SIFO.Common.csproj" />
+    <ProjectReference Include="..\SIFO.Core\SIFO.Core.csproj" />
+    <ProjectReference Include="..\SIFO.Model\SIFO.Model.csproj" />
+    <ProjectReference Include="..\SIFO.Utility\SIFO.Utility.csproj" />
   </ItemGroup>
 
 </Project>

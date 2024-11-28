@@ -12,5 +12,8 @@ namespace SIFO.Model.Entity
         } 
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Country> Countries { get; set; }
+        public virtual DbSet<State> States { get; set; }
+        public virtual DbSet<City> Cities { get; set; }
     }
 }
