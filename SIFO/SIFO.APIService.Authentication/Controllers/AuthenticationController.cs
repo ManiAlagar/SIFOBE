@@ -49,5 +49,21 @@ namespace SIFO.APIService.Authentication.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
+
+        [HttpGet]
+        [Route("Page/{id}")]
+        public async Task<IActionResult> GetPageByUserIdAsync(long id)
+        {
+            try
+            {
+                var result = await _authService.GetPageByUserIdAsync(id);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
     }
 }

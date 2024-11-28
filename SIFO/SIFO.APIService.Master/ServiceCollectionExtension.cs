@@ -1,14 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using SIFO.APIService.Master.Service.Contracts;
-using SIFO.APIService.Master.Repository.Contracts;
-using SIFO.APIService.Master.Repository.Implementations;
-using FluentValidation.AspNetCore;
-using FluentValidation;
-using SIFO.Model.Validator;
+﻿using FluentValidation;
 using System.Text.Json;
 using SIFO.Model.Request;
-using SIFO.APIService.Master.Service.Implementations;
+using SIFO.Model.Validator;
 using SIFO.Model.AutoMapper;
+using FluentValidation.AspNetCore;
+using System.Diagnostics.CodeAnalysis;
+using SIFO.APIService.Master.Service.Contracts;
+using SIFO.APIService.Master.Repository.Contracts;
+using SIFO.APIService.Master.Service.Implementations;
+using SIFO.APIService.Master.Repository.Implementations;
 
 namespace SIFO.APIService.Master
 {

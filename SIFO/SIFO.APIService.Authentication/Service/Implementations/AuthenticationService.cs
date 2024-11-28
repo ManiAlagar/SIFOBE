@@ -90,5 +90,11 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             else
                 return ApiResponse<string>.InternalServerError("something went wrong while changing the password");
         }
+
+        public async Task<ApiResponse<IEnumerable<PageResponse>>> GetPageByUserIdAsync(long id)
+        {
+            var response = await _authenticationRepository.GetPageByUserIdAsync(id);
+            return ApiResponse<IEnumerable<PageResponse>>.Success("success",response);
+        }
     }
 }
