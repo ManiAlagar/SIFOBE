@@ -7,7 +7,7 @@ namespace SIFO.Common.Contracts
     {
         public Task<string> GenerateOTP(long length);
         public Task<string> GenerateRandomPassword(long length);
-        public Task<string> GenerateAccessToken(User user, bool rememberMe);
+        public Task<string> GenerateAccessToken(Users user, bool rememberMe);
         public Task<string> GenerateRefreshToken(long userId);
         public Task<TokenResponse?> GetDataFromToken();
         public Task<string> EncryptPassword(string password);
