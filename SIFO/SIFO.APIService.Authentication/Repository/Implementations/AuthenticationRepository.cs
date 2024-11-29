@@ -41,7 +41,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
             }
         }
 
-        public async Task<User> LoginAsync(LoginRequest request)
+        public async Task<Users> LoginAsync(LoginRequest request)
         {
             try
             {

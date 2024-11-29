@@ -14,8 +14,12 @@
         public static string EMAIL = "email"; 
         public static string SMS = "sms"; 
         public static string TWILIO_AUTHY = "twilio_authy";
+        public static string EMAIL_REGEX = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        public const string REQUIRED = "is required.";
+        public const string INVALID_EMAIL_FORMAT = "Invalid email format.";
+        public const string EMAIL_ALREADY_EXISTS = "Email already exists.";
+        public const string PHONE_ALREADY_EXISTS = "Phone number already exists.";
 
-        
 
     }
 }

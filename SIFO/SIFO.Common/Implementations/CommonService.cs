@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SIFO.Common.Contracts;
@@ -182,7 +183,7 @@ namespace SIFO.Utility.Implementations
             }
         }
 
-        public async Task<string> GenerateAccessToken(User user, bool rememberMe)
+        public async Task<string> GenerateAccessToken(Users user, bool rememberMe)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Convert.FromBase64String(_configuration["Jwt:Key"]);
@@ -228,5 +229,8 @@ namespace SIFO.Utility.Implementations
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+       
+
+
     }
 }
