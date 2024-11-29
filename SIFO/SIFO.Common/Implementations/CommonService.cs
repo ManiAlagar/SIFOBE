@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SIFO.Common.Contracts;
@@ -6,6 +7,7 @@ using SIFO.Model.Entity;
 using SIFO.Model.Response;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mail;
+using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -228,5 +230,7 @@ namespace SIFO.Utility.Implementations
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+        
     }
 }
