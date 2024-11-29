@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using SIFO.Model.Response;
 using Microsoft.Extensions.Configuration;
 using SIFO.Model.Constant;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace SIFO.APIService.Authentication.Repository.Implementations
 {
@@ -79,6 +80,33 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                     await _context.Database.RollbackTransactionAsync();
                     return false;
                 }
+            }
+        }
+
+        public async Task<IEnumerable<PageResponse>> GetPageByUserIdAsync(long userId)
+        {
+            try
+            {
+                var result = from user in _context.Users
+                             join pagerolepermission in _context.PageRolePermissions on user.RoleId equals pagerolepermission.RoleId
+                             join page in _context.Pages on pagerolepermission.PageId equals page.Id
+                             where user.Id == userId
+                             select new PageResponse
+                             {
+                                 Id = page.Id,
+                                 PageName = page.PageName,
+                                 Description = page.Description,
+                                 IsActive = page.IsActive,
+                                 ParentPageId = page.ParentPageId,
+                                 MenuIcon = page.MenuIcon,
+                                 PageUrl = page.PageUrl
+                             };
+
+                return result.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
     }

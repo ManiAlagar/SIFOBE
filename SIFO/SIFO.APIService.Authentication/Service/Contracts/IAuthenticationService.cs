@@ -9,5 +9,6 @@ namespace SIFO.APIService.Authentication.Service.Contracts
         public Task<ApiResponse<string>> Login2FAAsync(Login2FARequest request);
         public Task<ApiResponse<string>> ForgotPassword(string email);
         public Task<ApiResponse<string>> ChangePassword(ChangePasswordRequest changePassword);
+        public Task<ApiResponse<IEnumerable<PageResponse>>> GetPageByUserIdAsync(long id);
     }
 }
