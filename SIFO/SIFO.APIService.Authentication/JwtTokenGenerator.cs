@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SIFO.Model.Entity;
 using SIFO.Model.Response;
@@ -39,14 +38,6 @@ namespace SIFO.APIService.Authentication
             claims.Add(Jti);
             claims.Add(Roles);
 
-            //if (user.RoleNames != null && user.RoleNames.Count() > 0)
-            //{
-            //    foreach (string role in user.RoleNames)
-            //    {
-            //        claims.Add(new Claim("Roles", role.ToString()));
-            //    }
-            //}
-
             var securityToken = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
@@ -62,7 +53,6 @@ namespace SIFO.APIService.Authentication
             };
 
             var token = new Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler().CreateToken(securityToken);
-            Console.WriteLine($"Generated JWT Token: {token}");
             return token;
         }
     }

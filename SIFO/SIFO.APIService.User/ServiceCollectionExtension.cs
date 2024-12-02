@@ -10,6 +10,7 @@ using SIFO.APIService.User.Repository.Contracts;
 using SIFO.APIService.User.Repository.Implementations;
 using SIFO.Common.Contracts;
 using SIFO.Utility.Implementations;
+using Microsoft.OpenApi.Models;
 
 namespace SIFO.APIService.User
 {
@@ -29,7 +30,31 @@ namespace SIFO.APIService.User
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ICommonService, CommonService>();
             services.AddHttpContextAccessor();
-
+            services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    In = ParameterLocation.Header,
+                    Description = "Here Enter JWT token in bearer format"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                           Reference= new OpenApiReference
+                           {
+                               Type=ReferenceType.SecurityScheme,
+                               Id="Bearer"
+                           }
+                        },
+                        new string[]{}
+                    }
+               });
+            });
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

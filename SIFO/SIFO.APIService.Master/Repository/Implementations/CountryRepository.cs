@@ -131,10 +131,9 @@ namespace SIFO.APIService.Master.Repository.Implementations
         public async Task<bool> CountryExistsByNameAsync(string countryName, long? countryId = null)
         {
             return await _context.Countries
-                .Where(c => c.Name == countryName && (!countryId.HasValue || c.Id != countryId.Value))
+                .Where(c => c.Name == countryName.Trim() || (countryId.HasValue && c.Id == countryId.Value))
                 .AnyAsync();
         }
-
         public async Task<bool> CountryExistsByIdAsync(long? countryId)
         {
             try

@@ -86,6 +86,8 @@ namespace SIFO.APIService.Master.Service.Implementations
         public async Task<ApiResponse<string>> DeleteStateAsync(long id)
         {
             var response = await _stateRepository.DeleteStateAsync(id);
+            if (response == Constants.NOT_FOUND)
+                return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.STATE_NOT_FOUND);
             return ApiResponse<string>.Success(Constants.SUCCESS, response);
         }
 

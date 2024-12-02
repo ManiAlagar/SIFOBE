@@ -34,13 +34,14 @@ namespace SIFO.APIService.Authentication.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpPost("changePassword")]
-        public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
+        [HttpPut]
+        [Route("ChangePassword")]
+        [Authorize(Roles = "Admin,Super Admin")]
+        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequest request)
         {
             try
             {
-                var result = await _authService.ChangePassword(changePasswordRequest);
+                var result = await _authService.ChangePasswordAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception)
@@ -62,6 +63,23 @@ namespace SIFO.APIService.Authentication.Controllers
             catch (Exception ex)
             {
                 var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpPut]
+        [Route("ForgotPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequest request)
+        {
+            try
+            {
+                var result = await _authService.ForgotPasswordAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError($"An error occurred: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }

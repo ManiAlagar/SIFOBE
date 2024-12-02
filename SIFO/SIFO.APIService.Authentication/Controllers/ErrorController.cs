@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using SIFO.Model.Response;
 
 namespace SIFO.APIService.Authentication.Controllers
 {
@@ -11,7 +12,8 @@ namespace SIFO.APIService.Authentication.Controllers
         {
             Exception exception = HttpContext.Features.Get<IExceptionHandlerFeature>()?.Error;
 
-            return StatusCode(500, "Internal Server Error");
+            var result = ApiResponse<string>.InternalServerError(exception.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, result);
         }
     }
 }

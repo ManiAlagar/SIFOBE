@@ -27,7 +27,7 @@ namespace SIFO.APIService.Master
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseMiddleware<OtpValidationMiddleware>();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

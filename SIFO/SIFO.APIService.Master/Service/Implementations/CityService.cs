@@ -96,6 +96,8 @@ namespace SIFO.APIService.Master.Service.Implementations
         public async Task<ApiResponse<string>> DeleteCityAsync(long cityId)
         {
             var response = await _cityRepository.DeleteCityAsync(cityId);
+            if (response == Constants.NOT_FOUND)
+                return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.CITY_NOT_FOUND);
             return ApiResponse<string>.Success(Constants.SUCCESS, response);
         }
     }

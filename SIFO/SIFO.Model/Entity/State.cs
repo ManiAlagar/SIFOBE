@@ -34,12 +34,6 @@ namespace SIFO.Model.Entity
         [Column("Longitude")]
         public decimal? Longitude { get; set; }
 
-        [Column("CreatedDate")]
-        public DateTime? CreatedDate { get; set; }
-
-        [Column("UpdatedDate")]
-        public DateTime? UpdatedDate { get; set; }
-
         [Column("Flag")]
         public bool Flag { get; set; }
 

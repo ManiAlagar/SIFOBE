@@ -31,7 +31,7 @@ namespace SIFO.APIService.User
             }
 
             app.UseHttpsRedirection();
-
+            app.UseMiddleware<OtpValidationMiddleware>();
             app.UseAuthorization();
 
 

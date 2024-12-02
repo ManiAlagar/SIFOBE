@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SIFO.Common.Contracts;
 using SIFO.Model.Entity;
+using SIFO.Model.Request;
 using SIFO.Model.Response;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mail;
@@ -11,6 +12,9 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 
 namespace SIFO.Utility.Implementations
@@ -176,11 +180,24 @@ namespace SIFO.Utility.Implementations
         {
             try
             {
+                string accountSid = _configuration["Twilio:AccountSid"];
+                string authToken = _configuration["Twilio:AuthToken"];
+                string fromPhoneNumber = _configuration["Twilio:PhoneNumber"];
+                TwilioClient.Init(accountSid, authToken);
+                foreach (var phoneNumber in phoneNumbers)
+                {
+                    var toPhoneNumber = new PhoneNumber(phoneNumber);
+                    var message = await MessageResource.CreateAsync(
+                       to: toPhoneNumber,
+                       from: new PhoneNumber(fromPhoneNumber),
+                       body: body
+                   );
+                }
                 return true;
             }
             catch (Exception ex)
             {
-                throw;
+                return false;
             }
         }
 
@@ -229,6 +246,68 @@ namespace SIFO.Utility.Implementations
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public async Task<string> SaveFileAsync(string base64File, string fileType, string destinationFolder)
+        {
+            try
+            {
+                if (!Directory.Exists(destinationFolder))
+                    Directory.CreateDirectory(destinationFolder);
+
+                string fileName = Guid.NewGuid().ToString() + "." + fileType;
+                byte[] fileBytes = Convert.FromBase64String(base64File);
+                string filePath = Path.Combine(destinationFolder, fileName);
+
+                await File.WriteAllBytesAsync(filePath, fileBytes);
+                return filePath;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public async Task<AuthenticationType> GetAuthenticationTypeByIdAsync(long Id)
+        {
+            try
+            {
+                var result = await _context.AuthenticationType.Where(a => a.Id == Id).SingleOrDefaultAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<OtpRequest> CreateOtpRequestAsync(long userId, string authenticationFor, long authenticationType)
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var otp = await GenerateOTP(6);
+                    var otpData = new OtpRequest();
+                    otpData.UserId = userId;
+                    otpData.OtpCode = otp;
+                    var addTime = Convert.ToInt32(_configuration["OtpExpiration"]);
+                    otpData.ExpirationDate = DateTime.UtcNow.AddMinutes(addTime);
+                    otpData.AuthenticationType = authenticationType;
+                    otpData.AuthenticationFor = authenticationFor;
+                    otpData.CreatedDate = DateTime.UtcNow;
+                    otpData.CreatedBy = userId;
+                    var result = await _context.OtpRequests.AddAsync(otpData);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return result.Entity;
+                }
+                catch (Exception ex)
+                { 
+                    await transaction.RollbackAsync();
+                    throw;
+                }  
+            }
         }
     }
 }

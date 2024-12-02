@@ -155,8 +155,8 @@ namespace SIFO.APIService.Master.Repository.Implementations
         public async Task<bool> StateExistsByNameAsync(string stateName, long? stateId = null)
         {
             return await _context.States
-                .Where(c => c.Name == stateName && (!stateId.HasValue || c.Id != stateId.Value))
-                .AnyAsync();
+               .Where(c => c.Name == stateName.Trim() || (stateId.HasValue && c.Id == stateId.Value))
+               .AnyAsync();
         }
 
         public async Task<State> UpdateStateAsync(State entity)

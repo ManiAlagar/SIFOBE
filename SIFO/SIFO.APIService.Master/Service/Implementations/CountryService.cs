@@ -86,7 +86,10 @@ namespace SIFO.APIService.Master.Service.Implementations
         public async Task<ApiResponse<string>> DeleteCountryAsync(long id)
         {
             var response = await _countryRepository.DeleteCountryAsync(id);
+            if (response == Constants.NOT_FOUND)
+                return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.COUNTRY_NOT_FOUND);
             return ApiResponse<string>.Success(Constants.SUCCESS, response);
         }
+
     }
 }
