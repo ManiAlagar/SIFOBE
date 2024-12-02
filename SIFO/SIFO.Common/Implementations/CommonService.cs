@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SIFO.Common.Contracts;
 using SIFO.Model.Entity;
+using SIFO.Model.Request;
 using SIFO.Model.Response;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mail;
+using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -198,7 +201,7 @@ namespace SIFO.Utility.Implementations
             }
         }
 
-        public async Task<string> GenerateAccessToken(User user, bool rememberMe)
+        public async Task<string> GenerateAccessToken(Users user, bool rememberMe)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Convert.FromBase64String(_configuration["Jwt:Key"]);
@@ -262,6 +265,48 @@ namespace SIFO.Utility.Implementations
             catch (Exception ex)
             {
                 return null;
+            }
+        }
+
+        public async Task<AuthenticationType> GetAuthenticationTypeByIdAsync(long Id)
+        {
+            try
+            {
+                var result = await _context.AuthenticationType.Where(a => a.Id == Id).SingleOrDefaultAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<OtpRequest> CreateOtpRequestAsync(long userId, string authenticationFor, long authenticationType)
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var otp = await GenerateOTP(6);
+                    var otpData = new OtpRequest();
+                    otpData.UserId = userId;
+                    otpData.OtpCode = otp;
+                    var addTime = Convert.ToInt32(_configuration["OtpExpiration"]);
+                    otpData.ExpirationDate = DateTime.UtcNow.AddMinutes(addTime);
+                    otpData.AuthenticationType = authenticationType;
+                    otpData.AuthenticationFor = authenticationFor;
+                    otpData.CreatedDate = DateTime.UtcNow;
+                    otpData.CreatedBy = userId;
+                    var result = await _context.OtpRequests.AddAsync(otpData);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return result.Entity;
+                }
+                catch (Exception ex)
+                { 
+                    await transaction.RollbackAsync();
+                    throw;
+                }  
             }
         }
     }

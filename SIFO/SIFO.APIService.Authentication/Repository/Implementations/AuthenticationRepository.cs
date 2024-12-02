@@ -2,6 +2,7 @@
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using Microsoft.EntityFrameworkCore;
+using SIFO.Model.Response;
 
 namespace SIFO.APIService.Authentication.Repository.Implementations
 {
@@ -13,7 +14,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
             _context = context;
         }
 
-        public async Task<User> IsUserExists(long userId)
+        public async Task<Users> IsUserExists(long userId)
         {
             try
             {
@@ -33,7 +34,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
             }
         }
 
-        public async Task<User> LoginAsync(LoginRequest request)
+        public async Task<Users> LoginAsync(LoginRequest request)
         {
             try
             {
@@ -44,6 +45,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                     var authenticationType = await _context.AuthenticationType.Where(a => a.Id == userData.AuthenticationType).SingleOrDefaultAsync();
                     userData.AuthType = authenticationType.AuthType;
                     userData.RoleName = roles.Name;
+                    userData.ParentRole = await _context.Roles.Where(a => a.ParentRoleId == userData.RoleId).ToListAsync();
                 }
                 return userData;
             }
@@ -59,12 +61,12 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
             {
                 try
                 {
-                    var user = await _context.Users.Where(x => x.Id == request.Id && x.IsActive == true).SingleOrDefaultAsync();
+                    var user = await _context.Users.Where(x => x.Id == request.UserId && x.IsActive == true).SingleOrDefaultAsync();
                     if (user != null)
                     {
                         user.PasswordHash = request.Password;
                         user.UpdatedDate = DateTime.UtcNow;
-                        user.UpdatedBy = request.Id;
+                        user.UpdatedBy = request.UserId;
                         await _context.SaveChangesAsync();
                         await _context.Database.CommitTransactionAsync();
                         return true;
@@ -101,7 +103,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
         {
             try
             {
-                var result = await _context.OtpRequests.Where(a => a.OtpCode == request.OtpCode && a.UserId == request.UserId && a.AuthenticatedType == request.AuthenticationType && a.AuthenticatedFor.ToLower() == request.AuthenticationFor.ToLower()).OrderByDescending(a => a.Id).FirstOrDefaultAsync();
+                var result = await _context.OtpRequests.Where(a => a.OtpCode == request.OtpCode && a.UserId == request.UserId && a.AuthenticationType == request.AuthenticationType && a.AuthenticationFor.ToLower() == request.AuthenticationFor.ToLower()).OrderByDescending(a => a.Id).FirstOrDefaultAsync();
                 return result;
             }
             catch (Exception ex)
@@ -116,7 +118,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
             {
                 try
                 {
-                    var result = await _context.OtpRequests.Where(a => a.OtpCode == request.OtpCode && a.UserId == request.UserId && a.AuthenticatedType == request.AuthenticationType && a.AuthenticatedFor.ToLower() == request.AuthenticationFor.ToLower()).OrderByDescending(a => a.Id).FirstOrDefaultAsync();
+                    var result = await _context.OtpRequests.Where(a => a.OtpCode == request.OtpCode && a.UserId == request.UserId && a.AuthenticationType == request.AuthenticationType && a.AuthenticationFor.ToLower() == request.AuthenticationFor.ToLower()).OrderByDescending(a => a.Id).FirstOrDefaultAsync();
                     result.UpdatedDate = DateTime.UtcNow;
                     result.UpdatedBy = request.UserId;
                     result.VerifiedDate = DateTime.UtcNow;
@@ -132,7 +134,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
             }
         }
 
-        public async Task<User> CreateForgotPasswordRequestAsync(ForgotPasswordRequest request)
+        public async Task<Users> CreateForgotPasswordRequestAsync(ForgotPasswordRequest request)
         {
             using (await _context.Database.BeginTransactionAsync())
             {
@@ -166,11 +168,56 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                         return true;
                     } 
                     return false;
-                }
-                catch (Exception ex)
+                } 
+                catch(Exception ex)  
                 {
                     throw;
                 }
+            }
+        }
+
+        public async Task<IEnumerable<PageResponse>> GetPageByUserIdAsync(long userId)
+        {
+            try
+            {
+                var result = from user in _context.Users
+                             join pagerolepermission in _context.PageRolePermissions on user.RoleId equals pagerolepermission.RoleId
+                             join page in _context.Pages on pagerolepermission.PageId equals page.Id
+                             where user.Id == userId
+                             select new PageResponse
+                             {
+                                 Id = page.Id,
+                                 PageName = page.PageName,
+                                 Description = page.Description,
+                                 IsActive = page.IsActive,
+                                 ParentPageId = page.ParentPageId,
+                                 MenuIcon = page.MenuIcon,
+                                 PageUrl = page.PageUrl
+                             };
+
+                return result.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        Task<IEnumerable<PageResponse>> IAuthenticationRepository.GetPageByUserIdAsync(long userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Users> GetUserByEmail(string email)
+        {
+            try
+            {
+                var userData = await _context.Users.Where(a => a.Email == email).SingleOrDefaultAsync();
+                return userData;
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
     }

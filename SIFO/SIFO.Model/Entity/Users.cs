@@ -2,7 +2,7 @@
 
 namespace SIFO.Model.Entity
 {
-    public class User
+    public class Users
     {
         public long Id { get; set; }
         public string? FirstName { get; set; }
@@ -24,8 +24,11 @@ namespace SIFO.Model.Entity
         [NotMapped]
         public string? RoleName { get; set; }
         public bool? IsTempPassword { get; set; } = false;
+        public DateTime? PswdUpdatedAt { get; set; }
         public long? AuthenticationType { get; set; }
         [NotMapped]
         public string? AuthType { get; set; }
+        [NotMapped] 
+        public List<Role> ParentRole { get; set; }
     }
 }

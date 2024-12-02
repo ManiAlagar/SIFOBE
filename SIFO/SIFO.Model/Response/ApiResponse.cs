@@ -30,6 +30,11 @@ namespace SIFO.Model.Response
         {
             return new ApiResponse<T>(StatusCodes.Status404NotFound, message, data, false);
         }
+        public static ApiResponse<T> NoContent(string? message = "No Content", T? data = default)
+        {
+            return new ApiResponse<T>(StatusCodes.Status204NoContent, message, data, false);
+        }
+
 
         public static ApiResponse<T> BadRequest(string? message = "Bad Request")
         {

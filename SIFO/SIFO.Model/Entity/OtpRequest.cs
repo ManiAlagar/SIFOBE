@@ -28,8 +28,8 @@ namespace SIFO.Model.Entity
         [Column("updatedby")]
         public long? UpdatedBy { get; set; }
         [Column("authenticatedtype")]
-        public long? AuthenticatedType { get; set; }
+        public long? AuthenticationType { get; set; }
         [Column("authenticatedfor")]
-        public string? AuthenticatedFor { get; set; }
+        public string? AuthenticationFor { get; set; }
     }
 }

@@ -34,31 +34,14 @@ namespace SIFO.APIService.Authentication.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("Login2FA")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login2FAAsync(Login2FARequest request)
-        {
-            try
-            {
-                var result = await _authService.Login2FAAsync(request);
-                return StatusCode(result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var result = ApiResponse<string>.InternalServerError;
-                return StatusCode(StatusCodes.Status500InternalServerError, result);
-            }
-        }
-
-        [HttpPost]
+        [HttpPut]
         [Route("ChangePassword")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ChangePassword(ChangePasswordRequest changePasswordRequest)
+        [Authorize(Roles = "Admin,Super Admin")]
+        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequest request)
         {
             try
             {
-                var result = await _authService.ChangePassword(changePasswordRequest);
+                var result = await _authService.ChangePasswordAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception)
@@ -68,14 +51,30 @@ namespace SIFO.APIService.Authentication.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("ForgotPassword")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
+        [HttpGet]
+        [Route("Page/{id}")]
+        public async Task<IActionResult> GetPageByUserIdAsync(long id)
         {
             try
             {
-                var result = await _authService.ForgotPassword(request);
+                var result = await _authService.GetPageByUserIdAsync(id);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpPut]
+        [Route("ForgotPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequest request)
+        {
+            try
+            {
+                var result = await _authService.ForgotPasswordAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)

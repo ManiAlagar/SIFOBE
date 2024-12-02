@@ -17,7 +17,7 @@ namespace SIFO.APIService.Authentication
             _jwtSettings = jwtOptions.Value;
         }
 
-        public async Task<string> GenerateToken(User user)
+        public string GenerateToken(Users user)
         {
             var signingCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
