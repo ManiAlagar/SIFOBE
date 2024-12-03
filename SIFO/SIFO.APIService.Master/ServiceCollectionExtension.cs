@@ -1,9 +1,4 @@
-﻿using FluentValidation;
-using System.Text.Json;
-using SIFO.Model.Request;
-using SIFO.Model.Validator;
-using SIFO.Model.AutoMapper;
-using FluentValidation.AspNetCore;
+﻿using SIFO.Model.AutoMapper;
 using System.Diagnostics.CodeAnalysis;
 using SIFO.APIService.Master.Service.Contracts;
 using SIFO.APIService.Master.Repository.Contracts;
@@ -26,16 +21,6 @@ namespace SIFO.APIService.Master
         {
             var jwtSettings = new JwtSettings();
             configuration.Bind(JwtSettings.SectionName, jwtSettings);
-            //Validators
-            services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
-            }).AddFluentValidation();
-
-            services.AddSingleton<IValidator<CountryRequest>, CountryValidator>();
-            services.AddSingleton<IValidator<StateRequest>, StateValidator>();
-            services.AddSingleton<IValidator<CityRequest>, CityValidator>();
 
             //Mapper
             services.AddAutoMapper(typeof(MapperProfile).Assembly);
@@ -52,68 +37,8 @@ namespace SIFO.APIService.Master
             services.AddTransient<IMasterService, MasterService>();
             services.AddTransient<IMasterRepository, MasterRepository>();
             services.AddTransient<ICommonService, CommonService>();
-            services.AddSwaggerGen(c =>
-            {
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    In = ParameterLocation.Header,
-                    Description = "Here Enter JWT token in bearer format"
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                           Reference= new OpenApiReference
-                           {
-                               Type=ReferenceType.SecurityScheme,
-                               Id="Bearer"
-                           }
-                        },
-                        new string[]{}
-                    }
-               });
-            });
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-           .AddJwtBearer(options =>
-           {
-               options.RequireHttpsMetadata = true;
-               options.SaveToken = true;
-               options.IncludeErrorDetails = true;
-               options.UseSecurityTokenValidators = true;
-               options.TokenValidationParameters = new TokenValidationParameters
-               {
-                   ValidateIssuerSigningKey = true,
-                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
-                   ValidateIssuer = true,
-                   ValidateAudience = true,
-                   ValidIssuer = jwtSettings.Issuer,
-                   ValidAudience = jwtSettings.Audience,
-                   ClockSkew = TimeSpan.Zero // Optional: adjust if needed
-               };
-               options.Events = new JwtBearerEvents
-               {
-                   OnAuthenticationFailed = context =>
-                   {
-                       // Log the exception or handle it as needed
-                       var exception = context.Exception;
-                       Console.WriteLine(exception.Message);
-                       return Task.CompletedTask;
-                   },
-                   OnTokenValidated = context =>
-                   {
-                       // Additional validation if needed
-                       return Task.CompletedTask;
-                   }
-               };
-           });
+
+            services.AddHttpContextAccessor();
             return services;
         }
     }

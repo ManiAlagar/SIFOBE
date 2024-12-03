@@ -4,6 +4,7 @@ using SIFO.APIService.User.Service.Contracts;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using SIFO.Model.Validator;
 
 namespace SIFO.APIService.User.Controllers
 {
@@ -59,7 +60,7 @@ namespace SIFO.APIService.User.Controllers
                 var validationResult = await _userValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
-                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
                 }
                 var result = await _userService.CreateUserAsync(request);
@@ -80,7 +81,7 @@ namespace SIFO.APIService.User.Controllers
                 var validationResult = await _userValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
-                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
                 }
                 var result = await _userService.UpdateUserAsync(request);
@@ -100,6 +101,22 @@ namespace SIFO.APIService.User.Controllers
             try
             {
                 var result = await _userService.DeleteUserById(id);
+                return StatusCode(StatusCodes.Status200OK, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<PagedResponse<Users>>.InternalServerError(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpGet]
+        [Route("userByRoleId/{roleId}")]
+        public async Task<IActionResult> GetUserByRoleIdAsync([FromRoute] long? roleId)
+        {
+            try
+            {
+                var result = await _userService.GetUserByRoleId(roleId);
                 return StatusCode(StatusCodes.Status200OK, result);
             }
             catch (Exception ex)

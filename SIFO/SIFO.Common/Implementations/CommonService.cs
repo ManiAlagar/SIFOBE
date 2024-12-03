@@ -70,7 +70,8 @@ namespace SIFO.Utility.Implementations
             var user = new TokenResponse
             {
                 UserId = claims.FirstOrDefault(c => c.Type == "UserId")?.Value,
-                Role = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value,
+                Role = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value, 
+                RoleId = Convert.ToInt64(claims.FirstOrDefault(c => c.Type == "RoleId")?.Value),
                 FullName = claims.FirstOrDefault(c => c.Type == "UserName")?.Value,
                 Email = claims.FirstOrDefault(c => c.Type == "Email")?.Value
             };

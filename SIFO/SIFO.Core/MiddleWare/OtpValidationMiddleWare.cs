@@ -55,21 +55,21 @@ public class OtpValidationMiddleware
 
                 var dbContext = scope.ServiceProvider.GetRequiredService<SIFOContext>();
                 var data = JsonConvert.DeserializeObject<VerifyOtpRequest>(requestBody);
-                if (methodType.ToLower() != "put" && authenticationFor.ToLower() != "login")
+                if (methodType.ToLower() != "put" && !apiName.ToLower().Contains("verify-login"))
                 {
                     await _next(context);
                     return;
                 }
-                if(string.IsNullOrEmpty(otpCode) || data.UserId<=0)
+                if(string.IsNullOrEmpty(otpCode) || data.UserId<=0 || string.IsNullOrEmpty(authenticationFor) || string.IsNullOrEmpty(authenticationType))
                 {
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(JsonConvert.SerializeObject(ApiResponse<string>.BadRequest()));
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(ApiResponse<string>.BadRequest("Please add required header fields")));
                     return;
                 }
 
                 var otpData = await dbContext.OtpRequests.OrderByDescending(a => a.Id).Where(a => a.OtpCode == otpCode
-                                && a.AuthenticationFor.ToLower() == authenticationFor && a.AuthenticationType == authenticationTypeId
+                                && a.AuthenticationFor.ToLower() == authenticationFor.ToLower() && a.AuthenticationType == authenticationTypeId
                                 && a.UserId == data.UserId 
                                 && a.ExpirationDate > DateTime.UtcNow && a.VerifiedDate == null).FirstOrDefaultAsync(); 
 

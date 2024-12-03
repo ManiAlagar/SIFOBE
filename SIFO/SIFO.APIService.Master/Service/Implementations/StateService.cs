@@ -26,7 +26,7 @@ namespace SIFO.APIService.Master.Service.Implementations
             var isValid = await HelperService.ValidateGet(pageNo, pageSize, filter, sortColumn, sortDirection);
 
             if (isValid.Any())
-                return ApiResponse<PagedResponse<StateResponse>>.BadRequest();
+                return ApiResponse<PagedResponse<StateResponse>>.BadRequest(isValid[0]);
 
             var response = await _stateRepository.GetAllStateAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
 
@@ -48,7 +48,7 @@ namespace SIFO.APIService.Master.Service.Implementations
 
         public async Task<ApiResponse<State>> CreateStateAsync(StateRequest entity)
         {
-            bool isNameExists = await _stateRepository.StateExistsByNameAsync(entity.Name, entity.Id);
+            bool isNameExists = await _stateRepository.StateExistsByNameAsync(entity.Name);
 
             if (isNameExists)
                 return new ApiResponse<State>(StatusCodes.Status409Conflict, Constants.STATE_ALREADY_EXISTS);

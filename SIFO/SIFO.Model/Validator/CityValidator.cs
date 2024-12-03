@@ -11,7 +11,9 @@ namespace SIFO.Model.Validator
                 .NotEmpty().WithMessage("Country Name is required.")
                 .MaximumLength(100).WithMessage("Name cannot exceed 100 characters.");
             RuleFor(x => x.CountryCode)
-                .MaximumLength(3).WithMessage("COUNTRY_CODE code cannot exceed 2 characters.");
+                .MaximumLength(3).WithMessage("country code code cannot exceed 2 characters.");
+            RuleFor(x => x.StateCode)
+                .MaximumLength(3).WithMessage("state code code cannot exceed 2 characters.");
         }
     }
 }

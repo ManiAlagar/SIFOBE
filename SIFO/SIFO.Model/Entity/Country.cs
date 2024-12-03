@@ -36,5 +36,8 @@ namespace SIFO.Model.Entity
 
         [Column("EmojiU")]
         public string? EmojiU { get; set; }
+        
+        [Column("IsActive")] 
+        public bool IsActive{ get;set; }
     }
 }

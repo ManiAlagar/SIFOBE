@@ -25,7 +25,7 @@ namespace SIFO.APIService.Master.Service.Implementations
             var isValid = await HelperService.ValidateGet(pageNo, pageSize, filter, sortColumn, sortDirection);
 
             if (isValid.Any())
-                return ApiResponse<PagedResponse<CityResponse>>.BadRequest();
+                return ApiResponse<PagedResponse<CityResponse>>.BadRequest(isValid[0]);
 
             var response = await _cityRepository.GetAllCityAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
 
@@ -60,7 +60,7 @@ namespace SIFO.APIService.Master.Service.Implementations
 
         public async Task<ApiResponse<City>> CreateCityAsync(CityRequest entity)
         {
-            bool isNameExists = await _cityRepository.CityExistsByNameAsync(entity.Name, entity.Id);
+            bool isNameExists = await _cityRepository.CityExistsByNameAsync(entity.Name);
 
             if (isNameExists)
                 return new ApiResponse<City>(StatusCodes.Status409Conflict, Constants.CITY_ALREADY_EXISTS);

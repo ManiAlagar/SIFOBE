@@ -152,10 +152,10 @@ namespace SIFO.APIService.Master.Repository.Implementations
             }
         }
 
-        public async Task<bool> StateExistsByNameAsync(string stateName, long? stateId = null)
+        public async Task<bool> StateExistsByNameAsync(string stateName)
         {
             return await _context.States
-               .Where(c => c.Name == stateName.Trim() || (stateId.HasValue && c.Id == stateId.Value))
+               .Where(c => c.Name.ToLower() == stateName.Trim().ToLower())
                .AnyAsync();
         }
 

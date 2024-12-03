@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using SIFO.Model.AutoMapper;
+using SIFO.Model;
 using SIFO.Model.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace SIFO.APIService.Master
 {
@@ -14,7 +14,7 @@ namespace SIFO.APIService.Master
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+            builder.Services.AddInfrastructure(builder.Configuration, builder.Environment).AddModelExtensions();
             builder.Services.AddDbContext<SIFOContext>(options =>
             options.UseMySql(
                 builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -27,7 +27,6 @@ namespace SIFO.APIService.Master
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            app.UseMiddleware<OtpValidationMiddleware>();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

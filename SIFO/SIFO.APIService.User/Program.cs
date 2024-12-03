@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using SIFO.Model;
 using SIFO.Model.Entity;
 
 namespace SIFO.APIService.User
@@ -16,7 +17,7 @@ namespace SIFO.APIService.User
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+            builder.Services.AddInfrastructure(builder.Configuration, builder.Environment).AddModelExtensions();
             builder.Services.AddDbContext<SIFOContext>(options =>
              options.UseMySql(
              builder.Configuration.GetConnectionString("DefaultConnection"),

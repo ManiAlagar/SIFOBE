@@ -173,5 +173,48 @@ namespace SIFO.APIService.User.Repository.Implementations
 
             return ApiResponse<PagedResponse<UserResponse>>.Success("Data", pagedResponse);
         }
+
+        public async Task<Role> GetRoleById(long? id)
+        {
+            try
+            { 
+                var result = await _context.Roles.Where(a=>a.Id == id).SingleOrDefaultAsync();
+                return result;
+            } 
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<UserResponse>> GetUserByRoleId(long? roleId)
+        {
+            try
+            {
+                var users = await _context.Users
+                .Where(a => a.RoleId == roleId)
+                .Select(user => new UserResponse
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    ZipCode = user.ZipCode,
+                    FiscalCode = user.FiscalCode,
+                    CreatedDate = user.CreatedDate,
+                    CreatedBy = user.CreatedBy,
+                    UpdatedDate = user.UpdatedDate,
+                    UpdatedBy = user.UpdatedBy,
+                    IsActive = user.IsActive
+                })
+                .ToListAsync();
+                return users;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

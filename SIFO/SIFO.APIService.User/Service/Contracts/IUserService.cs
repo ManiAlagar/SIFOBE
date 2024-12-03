@@ -10,5 +10,6 @@ namespace SIFO.APIService.User.Service.Contracts
         Task<ApiResponse<string>> DeleteUserById(long id);
         Task<ApiResponse<string>> UpdateUserAsync(UserRequest user);
         Task<ApiResponse<UserResponse>> GetUserById(long? id);
+        Task<ApiResponse<List<UserResponse>>> GetUserByRoleId(long? roleId);
     }
 }

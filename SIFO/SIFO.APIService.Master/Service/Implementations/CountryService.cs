@@ -25,7 +25,7 @@ namespace SIFO.APIService.Master.Service.Implementations
             var isValid = await HelperService.ValidateGet(pageNo, pageSize, filter, sortColumn, sortDirection);
 
             if (isValid.Any())
-                return ApiResponse<PagedResponse<CountryResponse>>.BadRequest();
+                return ApiResponse<PagedResponse<CountryResponse>>.BadRequest(isValid[0]);
 
             var response = await _countryRepository.GetAllCountryAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
 
@@ -47,7 +47,7 @@ namespace SIFO.APIService.Master.Service.Implementations
 
         public async Task<ApiResponse<Country>> CreateCountryAsync(CountryRequest entity)
         {
-            bool isNameExists = await _countryRepository.CountryExistsByNameAsync(entity.Name, entity.Id);
+            bool isNameExists = await _countryRepository.CountryExistsByNameAsync(entity.Name);
 
             if (isNameExists)
                 return new ApiResponse<Country>(StatusCodes.Status409Conflict, Constants.COUNTRY_ALREADY_EXISTS);

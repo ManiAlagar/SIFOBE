@@ -1,5 +1,6 @@
 ﻿using SIFO.APIService.User.Repository.Contracts;
 using SIFO.APIService.User.Service.Contracts;
+using SIFO.Common.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
@@ -8,11 +9,15 @@ namespace SIFO.APIService.User.Service.Implementations
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUserRepository _userRepository; 
+        private readonly ICommonService _commonService; 
+        private readonly IConfiguration _configuration; 
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, ICommonService commonService , IConfiguration configuration)
         {
-            _userRepository = userRepository;
+            _userRepository = userRepository; 
+            _commonService = commonService;  
+            _configuration = configuration;
         }
 
         public async Task<ApiResponse<string>> CreateUserAsync(UserRequest users)
@@ -87,6 +92,24 @@ namespace SIFO.APIService.User.Service.Implementations
 
                 return ApiResponse<UserResponse>.Success(Constants.SUCCESS, userModel);
             }
+        }
+
+        public async Task<ApiResponse<List<UserResponse>>> GetUserByRoleId(long? roleId)
+        {
+            var tokenData = await _commonService.GetDataFromToken();
+            
+            if (roleId == null)
+                roleId = tokenData.RoleId; 
+
+            var role = await _userRepository.GetRoleById(roleId);
+            if (role is null)
+                return ApiResponse<List<UserResponse>>.NotFound("role not found");
+
+            var users = await _userRepository.GetUserByRoleId(roleId);
+
+
+            return ApiResponse<List<UserResponse>>.Success(Constants.SUCCESS,users);
+
         }
     }
 }

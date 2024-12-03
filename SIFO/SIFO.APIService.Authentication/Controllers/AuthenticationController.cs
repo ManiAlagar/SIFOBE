@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.Authentication.Service.Contracts;
 using SIFO.Model.Constant;
-using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
 
@@ -45,7 +44,7 @@ namespace SIFO.APIService.Authentication.Controllers
         [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> VerifyLoginAsync([FromBody] VerifyLoginRequest  request)
+        public async Task<IActionResult> VerifyLoginAsync([FromBody] VerifyLoginRequest request, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor , [FromHeader] string? OtpCode)
         {
             try
             {
@@ -66,7 +65,7 @@ namespace SIFO.APIService.Authentication.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequest request)
+        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequest request, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
         {
             try
             {
