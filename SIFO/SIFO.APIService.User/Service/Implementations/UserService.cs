@@ -3,7 +3,6 @@ using SIFO.APIService.User.Service.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
-using System.Text.RegularExpressions;
 
 namespace SIFO.APIService.User.Service.Implementations
 {
@@ -18,66 +17,18 @@ namespace SIFO.APIService.User.Service.Implementations
 
         public async Task<ApiResponse<string>> CreateUserAsync(UserRequest users)
         {
-            var errors = new List<string>();
-
-            // Validate LastName
-            if (string.IsNullOrEmpty(users.LastName))
-            {
-                errors.Add($"LastName {Constants.REQUIRED}");
-            }
-
-            // Validate FirstName
-            if (string.IsNullOrEmpty(users.FirstName))
-            {
-                errors.Add($"FirstName {Constants.REQUIRED}");
-            }
-
-            // Validate Email
-            if (string.IsNullOrEmpty(users.Email))
-            {
-                errors.Add($"Email {Constants.REQUIRED}");
-            }
-            else if (!Regex.IsMatch(users.Email, Constants.EMAIL_REGEX))
-            {
-                errors.Add(Constants.INVALID_EMAIL_FORMAT);
-            }
-
-            // Validate PhoneNumber
-            if (string.IsNullOrEmpty(users.PhoneNumber))
-            
-                errors.Add($"PhoneNumber {Constants.REQUIRED}");
-            
-
-            // Validate PasswordHash
-            if (string.IsNullOrEmpty(users.PasswordHash))
-            
-                errors.Add($"Password {Constants.REQUIRED}");
-            
-            // Return all validation errors at once
-            if (errors.Any())
-            {
-                return ApiResponse<string>.BadRequest(string.Join(", ", errors));
-            }
-
-            // Check if email or phone number already exists
             var checkResult = await _userRepository.CheckIfEmailOrPhoneExists(users.Email, users.PhoneNumber);
             if (checkResult != null)
-            {
                 return checkResult;
-            }
 
             bool isUserCreated = await _userRepository.SaveUserAsync(users);
             if (isUserCreated)
-            {
-                return ApiResponse<string>.Created("User Created Successfully!");
-            }
+                return ApiResponse<string>.Created(Constants.SUCCESS);
             else
-            {
                 return ApiResponse<string>.InternalServerError("Something went wrong while creating the user.");
-            }
         }
 
-       public async Task<ApiResponse<PagedResponse<GetUserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
+       public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
         {
 
         try
@@ -86,16 +37,14 @@ namespace SIFO.APIService.User.Service.Implementations
 
             if (result.StatusCode == 200)
             {
-                return ApiResponse<PagedResponse<GetUserResponse>>.Success("Users fetched successfully",result.Data);
+                return ApiResponse<PagedResponse<UserResponse>>.Success("Users fetched successfully",result.Data);
             }
             else
-            {
-                return ApiResponse<PagedResponse<GetUserResponse>>.InternalServerError("Failed to fetch users");
-            }
+                return ApiResponse<PagedResponse<UserResponse>>.InternalServerError("Failed to fetch users");
         }
         catch (Exception ex)
         {
-            return ApiResponse<PagedResponse<GetUserResponse>>.InternalServerError($"An error occurred: {ex.Message}");
+            return ApiResponse<PagedResponse<UserResponse>>.InternalServerError($"An error occurred: {ex.Message}");
         }
     }
 
@@ -105,66 +54,22 @@ namespace SIFO.APIService.User.Service.Implementations
             return result;
         }
 
-        public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest user)
-        {
-            var errors = new List<string>();
-            if (string.IsNullOrEmpty(user.LastName))
-            {
-                errors.Add($"LastName {Constants.REQUIRED}");
-            }
-
-            // Validate FirstName
-            if (string.IsNullOrEmpty(user.FirstName))
-            {
-                errors.Add($"FirstName {Constants.REQUIRED}");
-            }
-
-            // Validate Email
-            if (string.IsNullOrEmpty(user.Email))
-            {
-                errors.Add($"Email {Constants.REQUIRED}");
-            }
-            else if (!Regex.IsMatch(user.Email, Constants.EMAIL_REGEX))
-            {
-                errors.Add(Constants.INVALID_EMAIL_FORMAT);
-            }
-
-            // Validate PhoneNumber
-            if (string.IsNullOrEmpty(user.PhoneNumber))
-            {
-                errors.Add($"PhoneNumber {Constants.REQUIRED}");
-            }
-
-            // Return all validation errors at once
-            if (errors.Any())
-            {
-                return ApiResponse<string>.BadRequest(string.Join(", ", errors));
-            }
-
-            var validUser=await _userRepository.GetUserById(user.Id);
-
-            if (validUser == null)
-            {
-                return ApiResponse<string>.BadRequest("User doesn't exists!");
-            }
-            
-            var result=  await _userRepository.UpdateUserAsync(user);
-
+        public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest request)
+        { 
+            var result=  await _userRepository.UpdateUserAsync(request);
             return result;
         }
-        public async Task<ApiResponse<GetUserResponse>> GetUserById(long? id)
+        public async Task<ApiResponse<UserResponse>> GetUserById(long? id)
         {
+            var user =  await _userRepository.GetUserById(id);
             
-              var user =  await _userRepository.GetUserById(id);
-               
-            
-             if (user == null)
+            if (user == null)
             {
-                return ApiResponse<GetUserResponse>.NotFound("User not found");
+            return ApiResponse<UserResponse>.NotFound("User not found");
             }
             else
             {
-                var userModel = new GetUserResponse
+                var userModel = new UserResponse
                 {
                     Id = user.Id,
                     FirstName = user.FirstName,
@@ -180,9 +85,8 @@ namespace SIFO.APIService.User.Service.Implementations
                     IsActive = user.IsActive
                 };
 
-                return ApiResponse<GetUserResponse>.Success("Users", userModel);
+                return ApiResponse<UserResponse>.Success(Constants.SUCCESS, userModel);
             }
-
         }
     }
 }

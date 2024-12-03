@@ -29,7 +29,16 @@ public class OtpValidationMiddleware
             var apiName = context.Request.Path.ToString();
             var apiData = apiName.Split("/");
             var methodType = context.Request.Method;
-           
+
+            var authenticationType = context.Request.Headers["AuthenticationType"].ToString();
+            long authenticationTypeId = default;
+            if (!string.IsNullOrEmpty(authenticationType))
+                authenticationTypeId = Convert.ToInt64(authenticationType);
+
+            var authenticationFor = context.Request.Headers["AuthenticationFor"].ToString(); 
+            var otpCode = context.Request.Headers["OtpCode"].ToString(); 
+
+
             string requestBody = string.Empty;
             if (context.Request.ContentLength > 0 && context.Request.ContentType?.Contains("application/json") == true)
             {
@@ -46,55 +55,38 @@ public class OtpValidationMiddleware
 
                 var dbContext = scope.ServiceProvider.GetRequiredService<SIFOContext>();
                 var data = JsonConvert.DeserializeObject<VerifyOtpRequest>(requestBody);
-                if (methodType != "PUT" && data?.AuthenticationFor?.ToLower() != "login")
+                if (methodType.ToLower() != "put" && authenticationFor.ToLower() != "login")
                 {
                     await _next(context);
                     return;
                 }
-                if (data.AuthenticationFor.ToLower().Contains("update") || data.AuthenticationFor.ToLower().Contains("login"))
+                if(string.IsNullOrEmpty(otpCode) || data.UserId<=0)
                 {
-                    if(data.AuthenticationFor.ToLower() == "login")
-                    {
-                        var request = JObject.Parse(requestBody);
-                        var results = await dbContext.Users.Where(x => x.Email == request["email"].ToString()).FirstOrDefaultAsync();
-                        if (results == null)
-                        {
-                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            context.Response.ContentType = "application/json";
-                            await context.Response.WriteAsync(JsonConvert.SerializeObject(ApiResponse<string>.UnAuthorized("Email not found")));
-                            return;
-                        }
-                        data.UserId = results.Id;
-                    }
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(ApiResponse<string>.BadRequest()));
+                    return;
+                }
 
-                    if (apiName.Contains("OtpRequest") )
-                    {
-                        await _next(context);
-                        return;
-                    } 
-                    var otpData = await dbContext.OtpRequests.OrderByDescending(a => a.Id).Where(a => a.OtpCode == data.OtpCode && a.AuthenticationFor == data.AuthenticationFor && a.AuthenticationType == data.AuthenticationType && a.UserId == data.UserId 
-                                    && a.ExpirationDate > DateTime.UtcNow && a.VerifiedDate == null).FirstOrDefaultAsync(); 
-                    if (otpData is null)
-                    { 
-                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                        context.Response.ContentType = "application/json";
-                        await context.Response.WriteAsync(JsonConvert.SerializeObject(ApiResponse<string>.Forbidden("invalid OTP")));
-                        return;
-                    } 
+                var otpData = await dbContext.OtpRequests.OrderByDescending(a => a.Id).Where(a => a.OtpCode == otpCode
+                                && a.AuthenticationFor.ToLower() == authenticationFor && a.AuthenticationType == authenticationTypeId
+                                && a.UserId == data.UserId 
+                                && a.ExpirationDate > DateTime.UtcNow && a.VerifiedDate == null).FirstOrDefaultAsync(); 
 
-
-                    //otpData.VerifiedDate = DateTime.UtcNow; 
-                    //otpData.UpdatedDate = DateTime.UtcNow; 
-                    //otpData.UpdatedBy = data.UserId;
-                    //await dbContext.SaveChangesAsync();
-                    await _next(context);
-                    if (context.Response.StatusCode == 200)
-                    {
-                        otpData.VerifiedDate = DateTime.UtcNow;
-                        otpData.UpdatedDate = DateTime.UtcNow;
-                        otpData.UpdatedBy = data.UserId;
-                        await dbContext.SaveChangesAsync();
-                    }
+                if (otpData is null)
+                { 
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(ApiResponse<string>.Forbidden("invalid OTP")));
+                    return;
+                } 
+                await _next(context);
+                if (context.Response.StatusCode == 200)
+                {
+                    otpData.VerifiedDate = DateTime.UtcNow;
+                    otpData.UpdatedDate = DateTime.UtcNow;
+                    otpData.UpdatedBy = data.UserId;
+                    await dbContext.SaveChangesAsync();
                 }
             }
         }

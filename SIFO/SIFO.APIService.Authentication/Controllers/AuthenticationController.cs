@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.Authentication.Service.Contracts;
+using SIFO.Model.Constant;
+using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
 
@@ -20,6 +22,10 @@ namespace SIFO.APIService.Authentication.Controllers
         [HttpPost]
         [Route("Login")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> LoginAsync(LoginRequest request)
         {
             try
@@ -34,9 +40,32 @@ namespace SIFO.APIService.Authentication.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("Verify-Login")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> VerifyLoginAsync([FromBody] VerifyLoginRequest  request)
+        {
+            try
+            {
+                var result = await _authService.VerifyLoginAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
         [HttpPut]
         [Route("ChangePassword")]
-        [Authorize(Roles = "Admin,Super Admin")]
+        [Authorize(Roles = $"{Constants.ROLE_SUPER_ADMIN},{Constants.ROLE_PP_ADMINISTRATOR},{Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR},{Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR},{Constants.ROLE_ADMINISTRATOR},{Constants.ROLE_HOSPITAL_REFERENT},{Constants.ROLE_DOCTOR},{Constants.ROLE_PP_OPERATOR},{Constants.ROLE_RETAIL_PHARMACY_SUPERVISOR},{Constants.ROLE_RETAIL_PHARMACY_OPERATOR}")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequest request)
         {
             try
@@ -51,25 +80,13 @@ namespace SIFO.APIService.Authentication.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("Page/{id}")]
-        public async Task<IActionResult> GetPageByUserIdAsync(long id)
-        {
-            try
-            {
-                var result = await _authService.GetPageByUserIdAsync(id);
-                return StatusCode(result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var result = ApiResponse<string>.InternalServerError;
-                return StatusCode(StatusCodes.Status500InternalServerError, result);
-            }
-        }
-
-        [HttpPut]
+        [HttpPost]
         [Route("ForgotPassword")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
             try

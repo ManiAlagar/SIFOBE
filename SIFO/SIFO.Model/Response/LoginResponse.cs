@@ -1,4 +1,6 @@
-﻿namespace SIFO.Model.Response
+﻿using SIFO.Model.Entity;
+
+namespace SIFO.Model.Response
 {
     public class LoginResponse
     {
@@ -8,6 +10,9 @@
         public string Token { get; set; }
         public long? RoleId { get; set; }
         public string RoleName { get; set; }
-        public List<MenuResponse>? MenuAccess { get; set; }
+        public List<PageResponse>? MenuAccess { get; set; }
+        public bool isFirstAccess { get; set; }
+        public bool IsTempPassword { get; set; }
+        public List<RoleResponse?> hasCreatePermission { get;set;}
     }
 }

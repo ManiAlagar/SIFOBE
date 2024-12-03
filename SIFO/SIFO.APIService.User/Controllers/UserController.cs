@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.User.Service.Contracts;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
@@ -10,10 +11,12 @@ namespace SIFO.APIService.User.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly IUserService _userService; 
+        private readonly IValidator<UserRequest> _userValidator;
+        public UserController(IUserService userService, IValidator<UserRequest> userValidator)
         {
             _userService = userService;
+            _userValidator = userValidator;
         }
 
         [HttpGet]
@@ -32,7 +35,7 @@ namespace SIFO.APIService.User.Controllers
         }
         
         [HttpGet]
-        [Route("/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> GetUserById(long id)
         {
             try
@@ -49,11 +52,17 @@ namespace SIFO.APIService.User.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUserAsync(UserRequest user)
+        public async Task<IActionResult> CreateUserAsync(UserRequest request)
         {
             try
             {
-                var result = await _userService.CreateUserAsync(user);
+                var validationResult = await _userValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                {
+                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    return BadRequest(errors);
+                }
+                var result = await _userService.CreateUserAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -64,11 +73,17 @@ namespace SIFO.APIService.User.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateUserAsync(UserRequest user)
+        public async Task<IActionResult> UpdateUserAsync(UserRequest request)
         {
             try
             {
-                var result = await _userService.UpdateUserAsync(user);
+                var validationResult = await _userValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                {
+                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    return BadRequest(errors);
+                }
+                var result = await _userService.UpdateUserAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -79,7 +94,7 @@ namespace SIFO.APIService.User.Controllers
         }
 
         [HttpDelete]
-        [Route("/{id}")]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteUserById(long id)
         {
             try

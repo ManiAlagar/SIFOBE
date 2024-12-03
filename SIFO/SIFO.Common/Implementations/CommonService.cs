@@ -3,12 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SIFO.Common.Contracts;
+using SIFO.Model.Constant;
 using SIFO.Model.Entity;
-using SIFO.Model.Request;
 using SIFO.Model.Response;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mail;
-using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -291,8 +290,7 @@ namespace SIFO.Utility.Implementations
                     var otpData = new OtpRequest();
                     otpData.UserId = userId;
                     otpData.OtpCode = otp;
-                    var addTime = Convert.ToInt32(_configuration["OtpExpiration"]);
-                    otpData.ExpirationDate = DateTime.UtcNow.AddMinutes(addTime);
+                    otpData.ExpirationDate = DateTime.UtcNow.AddMinutes(Convert.ToInt32(_configuration["OtpExpiration"]));
                     otpData.AuthenticationType = authenticationType;
                     otpData.AuthenticationFor = authenticationFor;
                     otpData.CreatedDate = DateTime.UtcNow;
@@ -308,6 +306,35 @@ namespace SIFO.Utility.Implementations
                     throw;
                 }  
             }
+        }
+
+        public async Task<string> SendOtpRequestAsync(long userId, string authenticationFor,long authenticationType)
+        {
+            var  userData = await _context.Users.Where(a=>a.Id == userId).SingleOrDefaultAsync();
+
+            var authType = await GetAuthenticationTypeByIdAsync(authenticationType);
+            var otpData = await CreateOtpRequestAsync(userId, authenticationFor,authenticationType);
+
+            var filePath = authType.AuthType.ToLower() == Constants.EMAIL ? _configuration["Templates:Email"] : _configuration["Templates:Sms"];
+            string subject = $"Your Otp Code For {authenticationFor}";
+            string body = File.ReadAllText(filePath).Replace("[UserName]", $"{userData.FirstName} {userData.LastName}").Replace("[OTP Code]", otpData.OtpCode).Replace("[X]", _configuration["OtpExpiration"]).Replace("[EventName]", authenticationFor);
+            if (authType.AuthType.ToLower() == Constants.EMAIL)
+            {
+                string[] mail = new string[] { userData.Email };
+                bool isMailSent = await SendMail(mail.ToList(), null, subject, body);
+                if (!isMailSent)
+                    return Constants.INTERNAL_SERVER_ERROR;
+                return Constants.SUCCESS;
+            }
+            else if (authType.AuthType.ToLower() == Constants.SMS)
+            {
+                string[] phoneNumbers = new string[] { userData.PhoneNumber };
+                bool isSmsSent = await SendSms(phoneNumbers.ToList(), body);
+                if (!isSmsSent)
+                    return Constants.INTERNAL_SERVER_ERROR;
+                return Constants.SUCCESS;
+            }
+            return Constants.INTERNAL_SERVER_ERROR;
         }
     }
 }

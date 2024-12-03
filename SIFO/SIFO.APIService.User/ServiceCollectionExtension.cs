@@ -11,20 +11,32 @@ using SIFO.APIService.User.Repository.Implementations;
 using SIFO.Common.Contracts;
 using SIFO.Utility.Implementations;
 using Microsoft.OpenApi.Models;
+using FluentValidation;
+using SIFO.Model.Request;
+using SIFO.Model.Validator;
+using System.Text.Json;
+using FluentValidation.AspNetCore;
 
 namespace SIFO.APIService.User
 {
     public static class ServiceCollectionExtension
     {
-        public static IServiceCollection AddInfrastructure(
-           this IServiceCollection services,
-           ConfigurationManager configuration,
-           IWebHostEnvironment environment
-       )
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services,ConfigurationManager configuration,IWebHostEnvironment environment)
         {
+            //Validators
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+            }).AddFluentValidation();
+
+            services.AddSingleton<IValidator<UserRequest>, UserValidator>();
+
             var jwtSettings = new JwtSettings();
             configuration.Bind(JwtSettings.SectionName, jwtSettings);
             services.AddSingleton(Options.Create(jwtSettings));
+
+            //Services
             services.AddTransient<SIFOContext>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IUserRepository, UserRepository>();

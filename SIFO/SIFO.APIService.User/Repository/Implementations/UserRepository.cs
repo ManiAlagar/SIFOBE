@@ -120,10 +120,10 @@ namespace SIFO.APIService.User.Repository.Implementations
 
             }
         }
-        public async Task<ApiResponse<PagedResponse<GetUserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
+        public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
         {
 
-            var query = _context.Users.Select(user => new GetUserResponse
+            var query = _context.Users.Select(user => new UserResponse
             {
                 Id = user.Id,
                 FirstName = user.FirstName,
@@ -140,7 +140,7 @@ namespace SIFO.APIService.User.Repository.Implementations
             });
 
             var count = query.Count();
-            PagedResponse<GetUserResponse> pagedResponse = new PagedResponse<GetUserResponse>();
+            PagedResponse<UserResponse> pagedResponse = new PagedResponse<UserResponse>();
 
             if (isAll)
             {
@@ -150,7 +150,7 @@ namespace SIFO.APIService.User.Repository.Implementations
                 pagedResponse.TotalCount = count;
                 pagedResponse.TotalPages = 1;
                 pagedResponse.CurrentPage = 1;
-                return ApiResponse<PagedResponse<GetUserResponse>>.Success("Data", pagedResponse);
+                return ApiResponse<PagedResponse<UserResponse>>.Success("Data", pagedResponse);
             }
 
             string orderByExpression = $"{sortColumn} {sortDirection}";
@@ -171,7 +171,7 @@ namespace SIFO.APIService.User.Repository.Implementations
             pagedResponse.TotalPages = (int)Math.Ceiling((pagedResponse.TotalCount ?? 0) / (double)pageSize);
             pagedResponse.CurrentPage = pageIndex;
 
-            return ApiResponse<PagedResponse<GetUserResponse>>.Success("Data", pagedResponse);
+            return ApiResponse<PagedResponse<UserResponse>>.Success("Data", pagedResponse);
         }
     }
 }

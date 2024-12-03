@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SIFO.Model.Entity
 {
-    [Table("pagerolepermissions")]
-    public class PageRolePermission
+    [Table("pageroleMapping")]
+    public class PageRoleMapping
     {
         [Column("Id")]
         [Key]
@@ -15,8 +15,8 @@ namespace SIFO.Model.Entity
 
         [Column("RoleId")]
         public long RoleId { get; set; }
-
-        [Column("PermissionsId")]
-        public long? PermissionsId { get; set; }
+        
+        [Column("IsActive")]
+        public bool IsActive { get; set; }
     }
 }
