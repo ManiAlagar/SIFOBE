@@ -19,5 +19,9 @@ namespace SIFO.Model.Entity
         public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<Page> Pages { get; set; }
         public virtual DbSet<PageRolePermission> PageRolePermissions { get; set; }
+        public virtual DbSet<Hospitals> Hospitals{ get; set; }
+        public virtual DbSet<AddressDetails> AddressDetails { get; set; }
+        public virtual DbSet<Pharmacy> Pharmacies { get; set; }
+        public virtual DbSet<Contact> Contacts { get; set; }
     }
 }
