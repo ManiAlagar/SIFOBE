@@ -1,18 +1,48 @@
-﻿using SIFO.Model.Response;
+﻿using FluentValidation;
+using SIFO.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.Hospital.Service.Contracts;
+using SIFO.Model.Request;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SIFO.APIService.Hospital.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class HospitalController : ControllerBase
     {
         private readonly IHospitalService _hospitalService;
-
-        public HospitalController(IHospitalService hospitalService)
+        private readonly IValidator<HospitalRequest> _hospitalValidator;
+        public HospitalController(IHospitalService hospitalService, IValidator<HospitalRequest> hospitalValidator)
         {
             _hospitalService = hospitalService;
+            _hospitalValidator = hospitalValidator;
+        }
+
+        [HttpPost]
+        [Route("Hospital")]
+        [ProducesResponseType(typeof(ApiResponse<Model.Entity.Hospital>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateHospitalasync(HospitalRequest request)
+        {
+            try
+            {
+                var validationResult = await _hospitalValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                {
+                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    return BadRequest(errors);
+                }
+                var result = await _hospitalService.CreateHospitalAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
         }
 
         [HttpGet]
@@ -43,8 +73,16 @@ namespace SIFO.APIService.Hospital.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteHospitalAsync([FromRoute] long hospitalId)
         {
-            var result = await _hospitalService.DeleteHospitalAsync(hospitalId);
-            return StatusCode(result.StatusCode, result);
+            try
+            {
+                var result = await _hospitalService.DeleteHospitalAsync(hospitalId);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
         }
 
         [HttpGet]
@@ -65,5 +103,28 @@ namespace SIFO.APIService.Hospital.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
+
+        [HttpPut]
+        [Route("{HospitalId}")]
+        public async Task<IActionResult> UpdateHospitalAsync(HospitalRequest request, [FromRoute] long HospitalId)
+        {
+            try
+            {
+                var validationResult = await _hospitalValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                {
+                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    return BadRequest(errors);
+                }
+                var result = await _hospitalService.UpdateHospitalAsync(request, HospitalId);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
     }
 }
+

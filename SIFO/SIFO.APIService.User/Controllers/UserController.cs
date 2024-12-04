@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.User.Service.Contracts;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
@@ -8,6 +9,7 @@ namespace SIFO.APIService.User.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
