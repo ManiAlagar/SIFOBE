@@ -25,7 +25,7 @@ namespace SIFO.APIService.Master.Service.Implementations
             var isValid = await HelperService.ValidateGet(pageNo, pageSize, filter, sortColumn, sortDirection);
 
             if (isValid.Any())
-                return ApiResponse<PagedResponse<CountryResponse>>.BadRequest();
+                return ApiResponse<PagedResponse<CountryResponse>>.BadRequest(isValid[0]);
 
             var response = await _countryRepository.GetAllCountryAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
 

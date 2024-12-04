@@ -36,6 +36,7 @@ namespace SIFO.APIService.Master.Repository.Implementations
             try
             {
                 var result = await _context.AddAsync(entity);
+                entity.CreatedDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
                 return result.Entity;
             }
@@ -127,7 +128,7 @@ namespace SIFO.APIService.Master.Repository.Implementations
 
                 if (isAll)
                 {
-                    var result = await query.ToListAsync();
+                    var result = await query.Where(a => a.IsActive == true).ToListAsync();
                     pagedResponse.Result = result;
                     pagedResponse.TotalCount = count;
                     pagedResponse.TotalPages = 0;

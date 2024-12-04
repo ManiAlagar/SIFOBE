@@ -34,7 +34,8 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 CountryId = city.CountryId,
                                 CountryCode = city.CountryCode,
                                 Latitude = city.Latitude,
-                                Longitude = city.Longitude
+                                Longitude = city.Longitude,
+                                IsActive = city.IsActive
                             };
 
 
@@ -45,7 +46,7 @@ namespace SIFO.APIService.Master.Repository.Implementations
 
                 if (isAll)
                 {
-                    var result = await query.ToListAsync();
+                    var result = await query.Where(a => a.IsActive).ToListAsync();
                     pagedResponse.Result = result;
                     pagedResponse.TotalCount = count;
                     pagedResponse.TotalPages = 0;
@@ -95,7 +96,8 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 CountryId = city.CountryId,
                                 CountryCode = city.CountryCode,
                                 Latitude = city.Latitude,
-                                Longitude = city.Longitude
+                                Longitude = city.Longitude,
+                                IsActive = city.IsActive
                             };
 
                 var result = await query.FirstOrDefaultAsync();

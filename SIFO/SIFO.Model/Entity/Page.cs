@@ -27,5 +27,7 @@ namespace SIFO.Model.Entity
 
         [Column("PageUrl")]
         public string PageUrl { get; set; }
+        [Column("EventName")] 
+        public string EventName { get; set; }
     }
 }

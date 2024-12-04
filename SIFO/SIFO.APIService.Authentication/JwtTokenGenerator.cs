@@ -25,18 +25,16 @@ namespace SIFO.APIService.Authentication
             );
 
             List<Claim> claims = new();
-            Claim sub = new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString());
-            Claim UserName = new Claim("Email", user.Email);
+            Claim Email = new Claim("Email", user.Email);
             Claim UserId = new Claim("UserId", user.Id.ToString());
-            Claim GivenName = new Claim(JwtRegisteredClaimNames.GivenName, user.Email);
-            Claim Jti = new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString());
+            Claim RoleId = new Claim("RoleId", user.RoleId.ToString());
+            Claim UserName = new Claim("UserName",$"{user.FirstName} {user.LastName}");
             Claim Roles = new Claim(ClaimTypes.Role, user.RoleName);
-            claims.Add(sub);
-            claims.Add(UserName);
+            claims.Add(Email);
             claims.Add(UserId);
-            claims.Add(GivenName);
-            claims.Add(Jti);
+            claims.Add(UserName);
             claims.Add(Roles);
+            claims.Add(RoleId);
 
             var securityToken = new SecurityTokenDescriptor()
             {

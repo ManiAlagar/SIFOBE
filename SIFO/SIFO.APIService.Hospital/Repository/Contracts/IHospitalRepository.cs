@@ -1,5 +1,4 @@
-﻿
-using SIFO.Model.Request;
+﻿using SIFO.Model.Request;
 using SIFO.Model.Response;
 
 namespace SIFO.APIService.Hospital.Repository.Contracts

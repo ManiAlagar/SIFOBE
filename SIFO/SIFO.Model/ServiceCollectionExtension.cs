@@ -1,8 +1,9 @@
 ﻿using FluentValidation;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
-namespace SIFO.Core
+namespace SIFO.Model
 {
     public static class ServiceCollectionExtension
     {

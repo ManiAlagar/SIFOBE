@@ -30,6 +30,6 @@ namespace SIFO.Model.Entity
         [Column("authenticatedtype")]
         public long? AuthenticationType { get; set; }
         [Column("authenticatedfor")]
-        public string? AuthenticationFor { get; set; }
+        public string AuthenticationFor { get; set; }
     }
 }

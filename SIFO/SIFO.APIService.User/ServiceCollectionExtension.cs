@@ -11,25 +11,31 @@ using SIFO.APIService.User.Repository.Implementations;
 using SIFO.Common.Contracts;
 using SIFO.Utility.Implementations;
 using Microsoft.OpenApi.Models;
+using FluentValidation;
+using System.Reflection;
+using SIFO.Model.AutoMapper; 
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace SIFO.APIService.User
 {
     public static class ServiceCollectionExtension
     {
-        public static IServiceCollection AddInfrastructure(
-           this IServiceCollection services,
-           ConfigurationManager configuration,
-           IWebHostEnvironment environment
-       )
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services,ConfigurationManager configuration,IWebHostEnvironment environment)
         {
             var jwtSettings = new JwtSettings();
             configuration.Bind(JwtSettings.SectionName, jwtSettings);
             services.AddSingleton(Options.Create(jwtSettings));
+
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            //mapper 
+            services.AddAutoMapper(typeof(MapperProfile).Assembly);
+            //Services 
             services.AddTransient<SIFOContext>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ICommonService, CommonService>();
             services.AddHttpContextAccessor();
+
             services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

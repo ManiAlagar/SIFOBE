@@ -4,16 +4,23 @@ using SIFO.Utility.Implementations;
 using SIFO.APIService.Hospital.Service.Contracts;
 using SIFO.APIService.Hospital.Repository.Contracts;
 using SIFO.Model.Request;
+using AutoMapper;
+using SIFO.Model.Entity;
+using SIFO.Common.Contracts;
 
 namespace SIFO.APIService.Hospital.Service.Implementations
 {
     public class HospitalService : IHospitalService
     {
         private readonly IHospitalRepository _hospitalRepository;
+        private readonly ICommonService _commonService;
+        private readonly IMapper _mapper;
 
-        public HospitalService(IHospitalRepository hospitalRepository)
+        public HospitalService(IHospitalRepository hospitalRepository, IMapper mapper, ICommonService commonService)
         {
             _hospitalRepository = hospitalRepository;
+            _mapper = mapper;
+            _commonService = commonService;
         }
 
         public async Task<ApiResponse<HospitalResponse>> GetHospitalByIdAsync(long hospitalId)
@@ -55,7 +62,11 @@ namespace SIFO.APIService.Hospital.Service.Implementations
         {
             try
             {
+                var tokenData = await _commonService.GetDataFromToken();
+                var mappedResult = _mapper.Map<Model.Entity.Hospital>(request);
+
                 bool isSuccess = await _hospitalRepository.SaveHospitalAsync(request);
+
 
                 if (isSuccess)
                     return ApiResponse<string>.Success("Hospital, contact, and pharmacy created successfully!!");

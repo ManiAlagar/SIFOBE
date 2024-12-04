@@ -19,14 +19,8 @@ namespace SIFO.Model.Entity
         [Column("Country_Code")]
         public string? CountryCode { get; set; }
 
-        [Column("Fips_Code")]
-        public string? FipsCode { get; set; }
-
         [Column("Iso2")]
         public string? Iso2 { get; set; }
-
-        [Column("Type")]
-        public string? Type { get; set; }
 
         [Column("Latitude")]
         public decimal? Latitude { get; set; }
@@ -34,11 +28,8 @@ namespace SIFO.Model.Entity
         [Column("Longitude")]
         public decimal? Longitude { get; set; }
 
-        [Column("Flag")]
-        public bool Flag { get; set; }
-
-        [Column("WikiDataId")]
-        public string? WikiDataId { get; set; }
+        [Column("IsActive")]
+        public bool IsActive { get; set; }
 
         [Column("createdDate")]
         public DateTime? createdDate { get; set; }

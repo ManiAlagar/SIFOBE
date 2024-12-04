@@ -2,8 +2,8 @@
 using SIFO.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.Hospital.Service.Contracts;
-using SIFO.Model.Request;
 using Microsoft.AspNetCore.Authorization;
+using SIFO.Model.Request;
 
 namespace SIFO.APIService.Hospital.Controllers
 {
@@ -32,7 +32,7 @@ namespace SIFO.APIService.Hospital.Controllers
                 var validationResult = await _hospitalValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
-                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
                 }
                 var result = await _hospitalService.CreateHospitalAsync(request);

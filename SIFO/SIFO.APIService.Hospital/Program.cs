@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SIFO.APIService.Hospital;
 using SIFO.Core;
+using SIFO.Model;
 using SIFO.Model.Entity;
 
 var builder = WebApplication.CreateBuilder(args);

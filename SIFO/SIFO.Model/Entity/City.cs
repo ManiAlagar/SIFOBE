@@ -33,5 +33,8 @@ namespace SIFO.Model.Entity
 
         [Column("createdDate")]
         public DateTime? createdDate { get; set; }
+
+        [Column("IsActive")]
+        public bool IsActive { get; set; }
     }
 }

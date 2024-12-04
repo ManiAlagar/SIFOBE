@@ -31,7 +31,8 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 Timezones = country.Timezones,
                                 Latitude = country.Latitude,
                                 Longitude = country.Longitude,
-                                EmojiU = country.EmojiU
+                                EmojiU = country.EmojiU, 
+                                IsActive = country.IsActive,
                             };
 
                 var count = (from country in _context.Countries
@@ -41,9 +42,9 @@ namespace SIFO.APIService.Master.Repository.Implementations
 
                 if (isAll)
                 {
-                    var result = await query.ToListAsync();
+                    var result = await query.Where(a=>a.IsActive==true).ToListAsync();
                     pagedResponse.Result = result;
-                    pagedResponse.TotalCount = count;
+                    pagedResponse.TotalCount = result.Count;
                     pagedResponse.TotalPages = 0;
                     pagedResponse.CurrentPage = 0;
                     return pagedResponse;
@@ -88,7 +89,8 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 Timezones = country.Timezones,
                                 Latitude = country.Latitude,
                                 Longitude = country.Longitude,
-                                EmojiU = country.EmojiU
+                                EmojiU = country.EmojiU, 
+                                IsActive = country.IsActive
                             };
 
                 var result = await query.FirstOrDefaultAsync();

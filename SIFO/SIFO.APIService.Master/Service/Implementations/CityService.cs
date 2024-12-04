@@ -25,7 +25,7 @@ namespace SIFO.APIService.Master.Service.Implementations
             var isValid = await HelperService.ValidateGet(pageNo, pageSize, filter, sortColumn, sortDirection);
 
             if (isValid.Any())
-                return ApiResponse<PagedResponse<CityResponse>>.BadRequest();
+                return ApiResponse<PagedResponse<CityResponse>>.BadRequest(isValid[0]);
 
             var response = await _cityRepository.GetAllCityAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
 

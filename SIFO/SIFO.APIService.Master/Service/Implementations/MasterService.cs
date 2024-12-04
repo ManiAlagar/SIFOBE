@@ -21,20 +21,14 @@ namespace SIFO.APIService.Master.Service.Implementations
         }
         public async Task<ApiResponse<string>> SendOtpRequestAsync(SendOtpRequest request)
         {
-            var userData = new Users();
-            if (request.UserId != null && request.UserId != 0)
-            {
-                userData = await _masterRepository.IsUserExists(request.UserId.Value);
-            }
-            if (!string.IsNullOrEmpty(request.Email) && request.AuthenticationFor == "Login")
-            {
-                userData = await _masterRepository.GetUserByEmail(request.Email);
-                if (userData == null)
-                    return ApiResponse<string>.NotFound("user not found");
-                request.UserId = userData.Id;
-            }
+
+            var userData = await _masterRepository.IsUserExists(request.UserId); 
+            if(userData is null)
+                return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
             var authType = await _commonService.GetAuthenticationTypeByIdAsync(request.AuthenticationType);
-            var otpData = await _commonService.CreateOtpRequestAsync(request.UserId.Value, request.AuthenticationFor, request.AuthenticationType);
+            if (authType is null)
+                return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
+            var otpData = await _commonService.CreateOtpRequestAsync(request.UserId, request.AuthenticationFor, request.AuthenticationType);
 
             var filePath = authType.AuthType.ToLower() == Constants.EMAIL ? _configuration["Templates:Email"] : _configuration["Templates:Sms"];
             string subject = $"Your Otp Code For {request.AuthenticationFor}";

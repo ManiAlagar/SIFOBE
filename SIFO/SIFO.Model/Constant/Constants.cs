@@ -7,8 +7,8 @@
         public const string ROLE_HOSPITAL_PHARMACY_SUPERVISOR = "Hospital Pharmacy Supervisor"; 
         public const string ROLE_HOSPITAL_PHARMACY_OPERATOR = "Hospital Pharmacy Operator"; 
         //public const string ROLE_SUPER_ADMINISTRATOR = "Administrator / Hospital Referent"; 
-        public const string ROLE_SUPER_ADMINISTRATOR = "Administrator"; 
-        public const string ROLE_SUPER_HOSPITAL_REFERENT = "Hospital Referent"; 
+        public const string ROLE_ADMINISTRATOR = "Administrator"; 
+        public const string ROLE_HOSPITAL_REFERENT = "Hospital Referent"; 
         public const string ROLE_DOCTOR = "Doctor"; 
         public const string ROLE_PP_OPERATOR = "PP Operator"; 
         public const string ROLE_RETAIL_PHARMACY_SUPERVISOR = "Retail Pharmacy Supervisor"; 
@@ -29,7 +29,6 @@
         public static string SMS = "sms"; 
         public static string TWILIO_AUTHY = "twilio_authy";
         public static string EMAIL_REGEX = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-        public const string REQUIRED = "is required.";
         public const string INVALID_EMAIL_FORMAT = "Invalid email format.";
         public const string EMAIL_ALREADY_EXISTS = "Email already exists.";
         public const string PHONE_ALREADY_EXISTS = "Phone number already exists.";
@@ -42,7 +41,7 @@
         public static string COUNTRY_NOT_FOUND = "country not found";
         public static string HOSPITAL_NOT_FOUND = "hospital not found";
         public static string ADDRESSDETAIL_NOT_FOUND = "address detail not found";
-        public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists";
+        public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists"; 
 
     }
 }

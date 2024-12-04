@@ -10,6 +10,7 @@
         public string Timezones { get; set; }
         public decimal? Latitude { get; set; } 
         public decimal? Longitude { get; set; }
-        public string EmojiU { get; set; }
+        public string EmojiU { get; set; } 
+        public bool IsActive{ get; set;}
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SIFO.Core;
+using SIFO.Model;
 using SIFO.Model.AutoMapper;
 using SIFO.Model.Entity;
 

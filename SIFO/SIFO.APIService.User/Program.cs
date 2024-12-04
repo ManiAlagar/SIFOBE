@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using SIFO.Model;
 using SIFO.Model.Entity;
 
 namespace SIFO.APIService.User
@@ -10,20 +11,18 @@ namespace SIFO.APIService.User
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+            builder.Services.AddInfrastructure(builder.Configuration, builder.Environment).AddModelExtensions();
             builder.Services.AddDbContext<SIFOContext>(options =>
              options.UseMySql(
              builder.Configuration.GetConnectionString("DefaultConnection"),
              new MySqlServerVersion(new Version(8, 0, 25))));
             var app = builder.Build();
             
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

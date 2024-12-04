@@ -3,11 +3,13 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SIFO.APIService.Hospital.Repository.Contracts;
 using SIFO.APIService.Hospital.Repository.Implementations;
 using SIFO.APIService.Hospital.Service.Contracts;
 using SIFO.APIService.Hospital.Service.Implementations;
 using SIFO.Common.Contracts;
+using SIFO.Model.AutoMapper;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
@@ -29,12 +31,41 @@ namespace SIFO.APIService.Hospital
             var jwtSettings = new JwtSettings();
             configuration.Bind(JwtSettings.SectionName, jwtSettings);
             services.AddSingleton(Options.Create(jwtSettings));
+
+            //mapper 
+            services.AddAutoMapper(typeof(MapperProfile).Assembly);
+
             services.AddTransient<IHospitalService,HospitalService>();
             services.AddTransient<IHospitalRepository, HospitalRepository>();
             services.AddTransient<ICommonService,CommonService>();
             services.AddTransient<SIFOContext>();
             services.AddHttpContextAccessor();
 
+            services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    In = ParameterLocation.Header,
+                    Description = "Here Enter JWT token in bearer format"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                           Reference= new OpenApiReference
+                           {
+                               Type=ReferenceType.SecurityScheme,
+                               Id="Bearer"
+                           }
+                        },
+                        new string[]{}
+                    }
+               });
+            });
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,20 +85,18 @@ namespace SIFO.APIService.Hospital
                     ValidateAudience = true,
                     ValidIssuer = jwtSettings.Issuer,
                     ValidAudience = jwtSettings.Audience,
-                    ClockSkew = TimeSpan.Zero // Optional: adjust if needed
+                    ClockSkew = TimeSpan.Zero 
                 };
                 options.Events = new JwtBearerEvents
                 {
                     OnAuthenticationFailed = context =>
                     {
-                        // Log the exception or handle it as needed
                         var exception = context.Exception;
                         Console.WriteLine(exception.Message);
                         return Task.CompletedTask;
                     },
                     OnTokenValidated = context =>
                     {
-                        // Additional validation if needed
                         return Task.CompletedTask;
                     }
                 };
