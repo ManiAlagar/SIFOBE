@@ -14,7 +14,7 @@ namespace SIFO.Model.Entity
         public string? Name { get; set; }
 
         [Column("Country_Id")]
-        public int? CountryId { get; set; }
+        public long? CountryId { get; set; }
 
         [Column("Country_Code")]
         public string? CountryCode { get; set; }
@@ -39,5 +39,8 @@ namespace SIFO.Model.Entity
 
         [Column("WikiDataId")]
         public string? WikiDataId { get; set; }
+
+        [Column("createdDate")]
+        public DateTime? createdDate { get; set; }
     }
 }

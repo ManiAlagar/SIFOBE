@@ -8,7 +8,7 @@ namespace SIFO.APIService.Master.Repository.Contracts
         public Task<PagedResponse<StateResponse>> GetAllStateAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll = false);
         public Task<StateResponse> GetStateByIdAsync(long stateId);
         public Task<State> CreateStateAsync(State entity);
-        public Task<bool> StateExistsByNameAsync(string stateName, long? stateId = null);
+        public Task<bool> StateExistsByNameAsync(string stateName);
         public Task<State> UpdateStateAsync(State entity);
         public Task<bool> StateExistsByIdAsync(long? stateId);
         public Task<string> DeleteStateAsync(long stateId);

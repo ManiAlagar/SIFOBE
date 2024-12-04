@@ -8,7 +8,7 @@ namespace SIFO.Model.Entity
     {
         [Column("Id")]
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Column("Name")]
         public string Name { get; set; }
@@ -36,5 +36,8 @@ namespace SIFO.Model.Entity
 
         [Column("EmojiU")]
         public string? EmojiU { get; set; }
+
+        [Column("createdDate")]
+        public DateTime? createdDate { get; set; }
     }
 }

@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using SIFO.Model.Response;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace SIFO.APIService.Master
 {
@@ -27,15 +28,17 @@ namespace SIFO.APIService.Master
             var jwtSettings = new JwtSettings();
             configuration.Bind(JwtSettings.SectionName, jwtSettings);
             //Validators
-            services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
-            }).AddFluentValidation();
+            //services.AddControllers().AddJsonOptions(options =>
+            //{
+            //    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            //    options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+            //}).AddFluentValidation();
+            services.AddHttpContextAccessor();
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-            services.AddSingleton<IValidator<CountryRequest>, CountryValidator>();
-            services.AddSingleton<IValidator<StateRequest>, StateValidator>();
-            services.AddSingleton<IValidator<CityRequest>, CityValidator>();
+            //services.AddSingleton<IValidator<CountryRequest>, CountryValidator>();
+            //services.AddSingleton<IValidator<StateRequest>, StateValidator>();
+            //services.AddSingleton<IValidator<CityRequest>, CityValidator>();
 
             //Mapper
             services.AddAutoMapper(typeof(MapperProfile).Assembly);
@@ -44,6 +47,7 @@ namespace SIFO.APIService.Master
             services.AddTransient<ICountryRepository, CountryRepository>();
             services.AddTransient<ICountryService, CountryService>();
             services.AddTransient<IStateRepository, StateRepository>();
+            services.AddTransient<IAddressRepository, AddressRepository>();
 
             //Services
             services.AddTransient<IStateService, StateService>();
@@ -51,6 +55,7 @@ namespace SIFO.APIService.Master
             services.AddTransient<ICityService, CityService>();
             services.AddTransient<IMasterService, MasterService>();
             services.AddTransient<IMasterRepository, MasterRepository>();
+            services.AddTransient<IAddressService, AddressService>();
             services.AddTransient<ICommonService, CommonService>();
             services.AddSwaggerGen(c =>
             {
@@ -102,14 +107,12 @@ namespace SIFO.APIService.Master
                {
                    OnAuthenticationFailed = context =>
                    {
-                       // Log the exception or handle it as needed
                        var exception = context.Exception;
                        Console.WriteLine(exception.Message);
                        return Task.CompletedTask;
                    },
                    OnTokenValidated = context =>
                    {
-                       // Additional validation if needed
                        return Task.CompletedTask;
                    }
                };

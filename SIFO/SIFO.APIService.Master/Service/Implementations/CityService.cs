@@ -60,7 +60,7 @@ namespace SIFO.APIService.Master.Service.Implementations
 
         public async Task<ApiResponse<City>> CreateCityAsync(CityRequest entity)
         {
-            bool isNameExists = await _cityRepository.CityExistsByNameAsync(entity.Name, entity.Id);
+            bool isNameExists = await _cityRepository.CityExistsByNameAsync(entity.Name);
 
             if (isNameExists)
                 return new ApiResponse<City>(StatusCodes.Status409Conflict, Constants.CITY_ALREADY_EXISTS);

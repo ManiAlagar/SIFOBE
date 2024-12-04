@@ -48,7 +48,7 @@ namespace SIFO.APIService.Master.Service.Implementations
 
         public async Task<ApiResponse<State>> CreateStateAsync(StateRequest entity)
         {
-            bool isNameExists = await _stateRepository.StateExistsByNameAsync(entity.Name, entity.Id);
+            bool isNameExists = await _stateRepository.StateExistsByNameAsync(entity.Name);
 
             if (isNameExists)
                 return new ApiResponse<State>(StatusCodes.Status409Conflict, Constants.STATE_ALREADY_EXISTS);

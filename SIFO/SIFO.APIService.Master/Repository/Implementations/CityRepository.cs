@@ -148,10 +148,10 @@ namespace SIFO.APIService.Master.Repository.Implementations
             }
         }
 
-        public async Task<bool> CityExistsByNameAsync(string cityName, long? cityId = null)
+        public async Task<bool> CityExistsByNameAsync(string cityName)
         {
             return await _context.Cities
-                 .Where(c => c.Name == cityName.Trim() || (cityId.HasValue && c.Id == cityId.Value))
+                 .Where(c => c.Name.ToLower() == cityName.Trim().ToLower())
                  .AnyAsync();
         }
 

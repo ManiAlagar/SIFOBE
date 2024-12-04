@@ -11,6 +11,7 @@ namespace SIFO.Model.AutoMapper
             CreateMap<CountryRequest, Country>();
             CreateMap<StateRequest, State>();
             CreateMap<CityRequest, City>();
+            CreateMap<AddressDetailRequest, AddressDetail>();
         }
     }
 }
