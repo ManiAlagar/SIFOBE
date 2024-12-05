@@ -1,11 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SIFO.APIService.User.Repository.Contracts;
-using SIFO.Common.Contracts;
+﻿using SIFO.Common.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Entity;
-using SIFO.Model.Request;
 using SIFO.Model.Response;
 using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore;
+using SIFO.APIService.User.Repository.Contracts;
 
 
 namespace SIFO.APIService.User.Repository.Implementations
@@ -14,12 +13,14 @@ namespace SIFO.APIService.User.Repository.Implementations
     {
         private readonly SIFOContext _context;
         private readonly ICommonService _commonService;
+
         public UserRepository(SIFOContext context, ICommonService commonService)
         {
             _context = context;
             _commonService = commonService;
         }
-        public async Task<Users> CreateUserAsync(Users user)
+
+        public async Task<string> CreateUserAsync(Users user)
         {
             using (var context = await _context.Database.BeginTransactionAsync()) 
             {
@@ -43,7 +44,7 @@ namespace SIFO.APIService.User.Repository.Implementations
                     var result = await _context.Users.AddAsync(userData);
                     await _context.SaveChangesAsync();
                     await _context.Database.CommitTransactionAsync();
-                    return result.Entity;
+                    return Constants.SUCCESS;
                 }
                 catch (Exception ex)
                 {
@@ -52,13 +53,14 @@ namespace SIFO.APIService.User.Repository.Implementations
                 } 
             }
         }
+
         public async Task<string> CheckIfEmailOrPhoneExists(string email, string phoneNumber, long? userId)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == email && u.Id != userId && u.IsActive == true))
+            if (await _context.Users.AsNoTracking().AnyAsync(u => u.Email == email && u.Id != userId && u.IsActive == true))
             {
                 return Constants.EMAIL_ALREADY_EXISTS;
             }
-            if (await _context.Users.AnyAsync(u => u.PhoneNumber == phoneNumber && u.Id != userId && u.IsActive == true))
+            if (await _context.Users.AsNoTracking().AnyAsync(u => u.PhoneNumber == phoneNumber && u.Id != userId && u.IsActive == true))
             {
                 return Constants.PHONE_ALREADY_EXISTS;
             }
@@ -67,20 +69,9 @@ namespace SIFO.APIService.User.Repository.Implementations
 
         public IQueryable<Users> GetUsersQueryable()
         {
-            return _context.Users.AsQueryable();
-        }
-        public async Task<string> DeleteUserById(long id)
-        {
             try
             {
-                var entity = await _context.Users.Where(x => x.Id == id).SingleOrDefaultAsync();
-                if (entity != null)
-                {
-                    _context.Users.Remove(entity);
-                    await _context.SaveChangesAsync();
-                    return Constants.SUCCESS;
-                }
-                return Constants.NOT_FOUND;
+                return _context.Users.AsQueryable();
             }
             catch (Exception ex)
             {
@@ -88,24 +79,52 @@ namespace SIFO.APIService.User.Repository.Implementations
             }
         }
 
+        public async Task<string> DeleteUserById(long id)
+        {
+            using (var context = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var otpDelete = await _context.OtpRequests.Where(x => x.UserId == id).ToListAsync();
+                    _context.OtpRequests.RemoveRange(otpDelete);
+
+                    var entity = await _context.Users.Where(x => x.Id == id).SingleOrDefaultAsync();
+                    if (entity != null)
+                    {
+                        _context.Users.Remove(entity);
+                        await _context.SaveChangesAsync();
+                        await _context.Database.CommitTransactionAsync();
+                        return Constants.SUCCESS;
+                    }
+                    return Constants.NOT_FOUND;
+                }
+                catch (Exception ex)
+                {
+                    await _context.Database.RollbackTransactionAsync();
+                    throw;
+                }
+            }
+        }
+
          public async Task<Users> GetUserById(long? id)
         {
-            return await _context.Users.FindAsync(id);
-            
+            return await _context.Users.AsNoTracking().Where(a=>a.Id == id).SingleOrDefaultAsync();
         }
-        public async Task<Users> UpdateUserAsync(Users user)
+
+        public async Task<string> UpdateUserAsync(Users user)
         {
             try
             {
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync(); 
-                return user;
+                return Constants.SUCCESS;
             }
             catch (Exception ex)
             {
                 throw;
             }
         }
+
         public async Task<PagedResponse<UserResponse>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
         {
 

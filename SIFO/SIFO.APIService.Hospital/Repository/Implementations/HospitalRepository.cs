@@ -1,14 +1,11 @@
 ﻿using SIFO.Model.Entity;
+using SIFO.Model.Request;
 using SIFO.Model.Response;
 using SIFO.Model.Constant;
+using SIFO.Common.Contracts;
 using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using SIFO.APIService.Hospital.Repository.Contracts;
-using SIFO.Common.Contracts;
-using SIFO.Model.Entity;
-using SIFO.Model.Request;
-using System.Threading.Tasks;
-using System;
 
 namespace SIFO.APIService.Hospital.Repository.Implementations
 {
@@ -23,33 +20,55 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
             _commonService = commonService;
         }
 
-        public async Task<bool> SaveHospitalAsync(HospitalRequest request)
+        public async Task<bool> CreateHospitalAsync(HospitalRequest request)
         {
             using (var context = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
+                    var data = await _commonService.GetDataFromToken();
+                    long? addressId = 0;
+                    long? addressDetailResult = await _commonService.AddressDetailExistsAsync(request.Address, request.City, request.Region, request.CountryId, request.ZipCode);
+
+                    if (addressDetailResult > 0 && addressDetailResult is not null)
+                    {
+                        addressId = addressDetailResult;
+                    }
+                    else
+                    {
+                        AddressDetail addressDetail = new AddressDetail()
+                        {
+                            Address = request.Address,
+                            CityId = request.City,
+                            Region = request.Region,
+                            CountryId = request.CountryId,
+                            Zipcode = request.ZipCode
+                        };
+
+                        var addressEntity = await _commonService.CreateAddressDetailAsync(addressDetail);
+                        addressId = addressEntity.Id;
+                    }
+
                     var hospital = new Model.Entity.Hospital()
                     {
                         Name = request.HospitalName,
-                        AddressId = 1,
+                        AddressId = addressId,
                         ASL = request.ASL,
                         PhoneNumber = request.PhoneNumber,
                         Province = request.Province,
                         CreatedDate = DateTime.UtcNow,
-                        CreatedBy = 1,
+                        CreatedBy = Convert.ToInt64(data.UserId),
                         IsActive = true,
-                        CAB= request.CAB,
+                        CAB = request.CAB,
                     };
 
                     var addedData = await _context.Hospitals.AddAsync(hospital);
                     await _context.SaveChangesAsync();
                     var hospitalId = hospital.Id;
 
-
                     foreach (var contact in request.Contact)
                     {
-                        var contactCreated = await SaveContact(contact, hospitalId);
+                        var contactCreated = await CreateContactAsync(contact, hospitalId);
                         if (!contactCreated)
                         {
                             await _context.Database.RollbackTransactionAsync();
@@ -57,10 +76,9 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                         }
                     }
 
-
                     foreach (var pharmacy in request.Pharmacy)
                     {
-                        var pharmacyCreated = await SavePharmacy(pharmacy, hospitalId);
+                        var pharmacyCreated = await CreatePharmacyAsync(pharmacy, hospitalId);
                         if (!pharmacyCreated)
                         {
                             await _context.Database.RollbackTransactionAsync();
@@ -86,57 +104,52 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
 
         }
 
-        public async Task<bool> SaveContact(ContactRequest contact, long hospitalId)
+        public async Task<bool> CreateContactAsync(ContactRequest contact, long hospitalId)
         {
             try
             {
-                //var data= await _commonService.GetDataFromToken();
+                var data = await _commonService.GetDataFromToken();
                 var newContact = new Contact()
                 {
-                    ContactName=contact.ContactName,
+                    ContactName = contact.ContactName,
                     ContactSurname = contact.ContactSurname,
                     PhoneNumber = contact.PhoneNumber,
                     Role = contact.Role,
                     HospitalId = hospitalId,
                     CreatedDate = DateTime.UtcNow,
-                    CreatedBy = 1,
+                    CreatedBy = Convert.ToInt64(data.UserId),
                 };
                 await _context.Contacts.AddAsync(newContact);
                 _context.SaveChanges();
-
                 return true;
-
             }
-            catch 
+            catch
             {
-
                 return false;
             }
-
-
         }
-        public async Task<bool> SavePharmacy(PharmacyRequest pharmacy, long hospitalId)
-        {
 
+        public async Task<bool> CreatePharmacyAsync(PharmacyRequest pharmacy, long hospitalId)
+        {
             try
             {
+                var data = await _commonService.GetDataFromToken();
+
                 var newPharmacy = new Pharmacy()
                 {
                     PharmacyName = pharmacy.PharmacyName,
                     HospitalId = hospitalId,
                     CreatedDate = DateTime.UtcNow,
-                    CreatedBy = 1
+                    CreatedBy = Convert.ToInt64(data.UserId),
                 };
 
                 await _context.Pharmacies.AddAsync(newPharmacy);
                 await _context.SaveChangesAsync();
 
-
                 return true;
             }
             catch (Exception e)
             {
-
                 return false;
             }
         }
@@ -147,18 +160,32 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
             {
                 try
                 {
-                    var hospitalData = await _context.Hospitals.Where(a => a.Id == id).FirstOrDefaultAsync();
+                    AddressDetail addressDetail = new AddressDetail()
+                    { 
+                        Id = request.AddressId,
+                        Address = request.Address,
+                        CityId = request.City,
+                        Region = request.Region,
+                        CountryId = request.CountryId,
+                        Zipcode = request.ZipCode
+                    };
+                    var data = await _commonService.GetDataFromToken();
+                    var addressData = await _commonService.UpdateAddressDetailAsync(addressDetail);
+                    if (addressData is null)
+                        return false;
 
+                    var hospitalData = await _context.Hospitals.Where(a => a.Id == id).FirstOrDefaultAsync();
                     if (hospitalData != null)
                     {
-
                         hospitalData.Name = request.HospitalName;
                         hospitalData.ASL = request.ASL;
                         hospitalData.PhoneNumber = request.PhoneNumber;
                         hospitalData.Province = request.Province;
                         hospitalData.UpdatedDate = DateTime.UtcNow;
-                        hospitalData.UpdatedBy = 1;
+                        hospitalData.UpdatedBy = Convert.ToInt64(data.UserId);
                         hospitalData.IsActive = request.IsActive;
+                        hospitalData.AddressId = addressData.Id;
+                        hospitalData.CAB = request.CAB;
 
                         _context.Hospitals.Update(hospitalData);
                         await _context.SaveChangesAsync();
@@ -177,10 +204,9 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
 
                                 if (contact.IsNew == true)
                                 {
-                                    var contactCreated = await SaveContact(contact, id);
+                                    var contactCreated = await CreateContactAsync(contact, id);
                                 }
                             }
-
 
                             foreach (var pharmacy in request.Pharmacy)
                             {
@@ -196,7 +222,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
 
                                 if (pharmacy.IsNew == true)
                                 {
-                                    var pharmacyCreated = await SavePharmacy(pharmacy, id);
+                                    var pharmacyCreated = await CreatePharmacyAsync(pharmacy, id);
                                 }
                             }
                             await _context.SaveChangesAsync();
@@ -265,7 +291,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                                   UpdatedDate = pharmacy.UpdatedDate,
                                                   UpdatedBy = pharmacy.UpdatedBy,
                                                   IsActive = pharmacy.IsActive,
-                                                  PharmacyTypeId = pharmacy.PharmacyTypeId,
+                                                  PharmacyTypeId = pharmacy.PharmacyTypeId.Value,
                                                   PharmacyTypes = pharmacyType.Name
                                               }).ToList(),
                             };
@@ -326,7 +352,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                                   UpdatedDate = pharmacies.UpdatedDate,
                                                   UpdatedBy = pharmacies.UpdatedBy,
                                                   IsActive = pharmacies.IsActive,
-                                                  PharmacyTypeId = pharmacies.PharmacyTypeId,
+                                                  PharmacyTypeId = pharmacies.PharmacyTypeId.Value,
                                                   PharmacyTypes = pharmacyType.Name
                                               }).ToList()
                             };
@@ -374,13 +400,12 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
             }
             catch (Exception ex)
             {
-                if (ex.InnerException is MySqlConnector.MySqlException mysqlEx && mysqlEx.Number == 1451)
+                if (ex.InnerException is MySqlConnector.MySqlException mysqlEx && mysqlEx.Number == Constants.DATADEPENDENCYCODE)
                 {
                     return Constants.DATADEPENDENCYERRORMESSAGE;
                 }
                 throw;
             }
         }
-
     }
 }

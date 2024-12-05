@@ -1,11 +1,10 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SIFO.APIService.User.Service.Contracts;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
-using SIFO.Model.Validator;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using SIFO.APIService.User.Service.Contracts;
 
 namespace SIFO.APIService.User.Controllers
 {
@@ -24,7 +23,10 @@ namespace SIFO.APIService.User.Controllers
 
         [HttpGet]
         [Route("")]
-        public async Task<IActionResult> GetAllUsersAsync(int pageNo = 1, int pageSize = 10, string filter = "", string sortColumn = "Id", string sortDirection = "DESC", bool isAll = false)
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllUsersAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false)
         {
             try
             {
@@ -40,6 +42,9 @@ namespace SIFO.APIService.User.Controllers
         
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetUserById(long id)
         {
             try
@@ -56,6 +61,9 @@ namespace SIFO.APIService.User.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(ApiResponse<Users>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateUserAsync(UserRequest request)
         {
             try
@@ -78,6 +86,10 @@ namespace SIFO.APIService.User.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [ProducesResponseType(typeof(ApiResponse<Users>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateUserAsync([FromRoute]long id,[FromBody] UserRequest request, [FromHeader] long UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
         {
             try
@@ -101,6 +113,9 @@ namespace SIFO.APIService.User.Controllers
 
         [HttpDelete]
         [Route("{id}")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteUserById(long id)
         {
             try
@@ -117,6 +132,9 @@ namespace SIFO.APIService.User.Controllers
 
         [HttpGet]
         [Route("userByRoleId/{roleId}")]
+        [ProducesResponseType(typeof(ApiResponse<List<UserResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetUserByRoleIdAsync([FromRoute] long? roleId)
         {
             try
@@ -126,7 +144,7 @@ namespace SIFO.APIService.User.Controllers
             }
             catch (Exception ex)
             {
-                var result = ApiResponse<PagedResponse<Users>>.InternalServerError(ex.Message);
+                var result = ApiResponse<List<UserResponse>>.InternalServerError(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }

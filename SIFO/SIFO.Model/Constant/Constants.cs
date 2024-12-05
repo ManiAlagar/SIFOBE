@@ -22,6 +22,7 @@
         public static string INTERNAL_SERVER_ERROR = "something went wrong";
         public static string CONFLICT = "conflict"; 
         public static string DATADEPENDENCYERRORMESSAGE = "cannot delete data due to data dependency"; 
+        public static long DATADEPENDENCYCODE = 1451; 
 
         public static string FIRST_LOGIN = "conflict"; 
         public static string USED_TEMP_PASSWORD = "conflict"; 

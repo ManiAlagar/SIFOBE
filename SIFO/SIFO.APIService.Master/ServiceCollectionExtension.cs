@@ -24,7 +24,6 @@ namespace SIFO.APIService.Master
             services.AddTransient<ICountryRepository, CountryRepository>();
             services.AddTransient<ICountryService, CountryService>();
             services.AddTransient<IStateRepository, StateRepository>();
-            services.AddTransient<IAddressRepository, AddressRepository>();
 
             //Services
             services.AddTransient<IStateService, StateService>();
@@ -32,7 +31,6 @@ namespace SIFO.APIService.Master
             services.AddTransient<ICityService, CityService>();
             services.AddTransient<IMasterService, MasterService>();
             services.AddTransient<IMasterRepository, MasterRepository>();
-            services.AddTransient<IAddressService, AddressService>();
             services.AddTransient<ICommonService, CommonService>();
 
             services.AddHttpContextAccessor();

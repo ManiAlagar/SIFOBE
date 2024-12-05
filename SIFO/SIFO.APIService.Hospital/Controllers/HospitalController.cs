@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
+using SIFO.Model.Request;
 using SIFO.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.Hospital.Service.Contracts;
 using Microsoft.AspNetCore.Authorization;
-using SIFO.Model.Request;
+using SIFO.Model.Entity;
 
 namespace SIFO.APIService.Hospital.Controllers
 {
@@ -25,7 +26,7 @@ namespace SIFO.APIService.Hospital.Controllers
         [ProducesResponseType(typeof(ApiResponse<Model.Entity.Hospital>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateHospitalasync(HospitalRequest request)
+        public async Task<IActionResult> CreateHospitalAsync(HospitalRequest request)
         {
             try
             {
@@ -106,14 +107,18 @@ namespace SIFO.APIService.Hospital.Controllers
 
         [HttpPut]
         [Route("{HospitalId}")]
-        public async Task<IActionResult> UpdateHospitalAsync(HospitalRequest request, [FromRoute] long HospitalId)
+        [ProducesResponseType(typeof(ApiResponse<Model.Entity.Hospital>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateHospitalAsync(HospitalRequest request, [FromRoute] long HospitalId, [FromHeader] long UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
         {
             try
             {
                 var validationResult = await _hospitalValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
-                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
                 }
                 var result = await _hospitalService.UpdateHospitalAsync(request, HospitalId);

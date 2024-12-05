@@ -1,12 +1,11 @@
-﻿using SIFO.Model.Response;
+﻿using AutoMapper;
+using SIFO.Model.Request;
+using SIFO.Common.Contracts;
+using SIFO.Model.Response;
 using SIFO.Model.Constant;
 using SIFO.Utility.Implementations;
 using SIFO.APIService.Hospital.Service.Contracts;
 using SIFO.APIService.Hospital.Repository.Contracts;
-using SIFO.Model.Request;
-using AutoMapper;
-using SIFO.Model.Entity;
-using SIFO.Common.Contracts;
 
 namespace SIFO.APIService.Hospital.Service.Implementations
 {
@@ -41,8 +40,10 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             var response = await _hospitalRepository.DeleteHospitalAsync(hospitalId);
             if (response == Constants.NOT_FOUND)
                 return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.HOSPITAL_NOT_FOUND);
+
             if (response == Constants.DATADEPENDENCYERRORMESSAGE)
                 return new ApiResponse<string>(StatusCodes.Status400BadRequest, Constants.DATADEPENDENCYERRORMESSAGE);
+
             return ApiResponse<string>.Success(Constants.SUCCESS, response);
         }
 
@@ -65,8 +66,7 @@ namespace SIFO.APIService.Hospital.Service.Implementations
                 var tokenData = await _commonService.GetDataFromToken();
                 var mappedResult = _mapper.Map<Model.Entity.Hospital>(request);
 
-                bool isSuccess = await _hospitalRepository.SaveHospitalAsync(request);
-
+                bool isSuccess = await _hospitalRepository.CreateHospitalAsync(request);
 
                 if (isSuccess)
                     return ApiResponse<string>.Success("Hospital, contact, and pharmacy created successfully!!");
@@ -84,15 +84,16 @@ namespace SIFO.APIService.Hospital.Service.Implementations
         {
             try
             {
+                var addressData = await _commonService.GetAddressDetailByIdAsync(request.AddressId);
+
+                if (addressData is null)
+                    return ApiResponse<string>.NotFound();
+
                 var isSuccess = await _hospitalRepository.UpdateHospitalAsync(request, id);
                 if (isSuccess)
-                {
                     return ApiResponse<string>.Success(Constants.SUCCESS);
-                }
                 else
-                {
                     return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
-                }
             }
             catch (Exception e)
             {

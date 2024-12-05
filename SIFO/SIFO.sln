@@ -21,9 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIFO.APIService.User", "SIF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIFO.APIService.Master", "SIFO.APIService.Master\SIFO.APIService.Master.csproj", "{F35A2C72-C2E9-4823-A66E-59F2251DA1DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIFO.APIService.Hospital", "SIFO.APIService.Hospital\SIFO.APIService.Hospital.csproj", "{91196EDB-0989-499A-BD08-6CC7421513E8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIFO.APIService.Hospital", "SIFO.APIService.Hospital\SIFO.APIService.Hospital.csproj", "{119375B2-DDD7-4E59-A6C3-D66348E0B05F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIFO.APIService.Hospital", "SIFO.APIService.Hospital\SIFO.APIService.Hospital.csproj", "{91196EDB-0989-499A-BD08-6CC7421513E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,10 +61,10 @@ Global
 		{F35A2C72-C2E9-4823-A66E-59F2251DA1DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F35A2C72-C2E9-4823-A66E-59F2251DA1DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F35A2C72-C2E9-4823-A66E-59F2251DA1DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{119375B2-DDD7-4E59-A6C3-D66348E0B05F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{119375B2-DDD7-4E59-A6C3-D66348E0B05F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{119375B2-DDD7-4E59-A6C3-D66348E0B05F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{119375B2-DDD7-4E59-A6C3-D66348E0B05F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91196EDB-0989-499A-BD08-6CC7421513E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91196EDB-0989-499A-BD08-6CC7421513E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91196EDB-0989-499A-BD08-6CC7421513E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91196EDB-0989-499A-BD08-6CC7421513E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
