@@ -20,7 +20,7 @@ namespace SIFO.Model.Entity
         public string? StateCode { get; set; }
 
         [Column("CountryId")]
-        public int? CountryId { get; set; }
+        public long? CountryId { get; set; }
 
         [Column("CountryCode")]
         public string? CountryCode { get; set; }
@@ -30,5 +30,11 @@ namespace SIFO.Model.Entity
 
         [Column("Longitude")]
         public decimal? Longitude { get; set; }
+
+        [Column("createdDate")]
+        public DateTime? createdDate { get; set; }
+
+        [Column("IsActive")]
+        public bool IsActive { get; set; }
     }
 }

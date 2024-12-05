@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace SIFO.Model
 {

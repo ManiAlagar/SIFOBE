@@ -1,6 +1,8 @@
-using SIFO.Model;
-using SIFO.Model.Entity;
 using Microsoft.EntityFrameworkCore;
+using SIFO.Core;
+using SIFO.Model;
+using SIFO.Model.AutoMapper;
+using SIFO.Model.Entity;
 
 namespace SIFO.APIService.Master
 {
@@ -27,6 +29,7 @@ namespace SIFO.APIService.Master
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            //app.UseMiddleware<OtpValidationMiddleware>();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

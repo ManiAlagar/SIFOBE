@@ -8,8 +8,8 @@ namespace SIFO.APIService.Master.Service.Contracts
     {
         public Task<ApiResponse<PagedResponse<CityResponse>>> GetAllCityAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll);
         public Task<ApiResponse<CityResponse>> GetCityByIdAsync(long cityId);
-        public Task<ApiResponse<City>> CreateCityAsync(CityRequest entity);
-        public Task<ApiResponse<City>> UpdateCityAsync(CityRequest entity);
+        public Task<ApiResponse<City>> CreateCityAsync(CityRequest request);
+        public Task<ApiResponse<City>> UpdateCityAsync(CityRequest request);
         public Task<ApiResponse<string>> DeleteCityAsync(long cityId);
         public Task<ApiResponse<List<CityResponse>>> GetCityByStateIdAsync(long stateId);
     }

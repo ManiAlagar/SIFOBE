@@ -37,7 +37,11 @@ public class OtpValidationMiddleware
 
             var authenticationFor = context.Request.Headers["AuthenticationFor"].ToString(); 
             var otpCode = context.Request.Headers["OtpCode"].ToString(); 
+            var user = context.Request.Headers["UserId"].ToString();
 
+            long userId = default;
+            if (!string.IsNullOrEmpty(user))
+                userId = Convert.ToInt64(user);
 
             string requestBody = string.Empty;
             if (context.Request.ContentLength > 0 && context.Request.ContentType?.Contains("application/json") == true)
@@ -54,13 +58,13 @@ public class OtpValidationMiddleware
             {
 
                 var dbContext = scope.ServiceProvider.GetRequiredService<SIFOContext>();
-                var data = JsonConvert.DeserializeObject<VerifyOtpRequest>(requestBody);
+                //var data = JsonConvert.DeserializeObject<VerifyOtpRequest>(requestBody);
                 if (methodType.ToLower() != "put" && !apiName.ToLower().Contains("verify-login"))
                 {
                     await _next(context);
                     return;
                 }
-                if(string.IsNullOrEmpty(otpCode) || data.UserId<=0 || string.IsNullOrEmpty(authenticationFor) || string.IsNullOrEmpty(authenticationType))
+                if(string.IsNullOrEmpty(otpCode) || userId <= 0 || string.IsNullOrEmpty(authenticationFor) || string.IsNullOrEmpty(authenticationType))
                 {
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     context.Response.ContentType = "application/json";
@@ -70,7 +74,7 @@ public class OtpValidationMiddleware
 
                 var otpData = await dbContext.OtpRequests.OrderByDescending(a => a.Id).Where(a => a.OtpCode == otpCode
                                 && a.AuthenticationFor.ToLower() == authenticationFor.ToLower() && a.AuthenticationType == authenticationTypeId
-                                && a.UserId == data.UserId 
+                                && a.UserId == userId
                                 && a.ExpirationDate > DateTime.UtcNow && a.VerifiedDate == null).FirstOrDefaultAsync(); 
 
                 if (otpData is null)
@@ -85,7 +89,7 @@ public class OtpValidationMiddleware
                 {
                     otpData.VerifiedDate = DateTime.UtcNow;
                     otpData.UpdatedDate = DateTime.UtcNow;
-                    otpData.UpdatedBy = data.UserId;
+                    otpData.UpdatedBy = userId;
                     await dbContext.SaveChangesAsync();
                 }
             }

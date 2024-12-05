@@ -139,7 +139,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
             try
             {
                 var result = from user in _context.Users
-                             join pagerolepermission in _context.PageRolePermissions on user.RoleId equals pagerolepermission.RoleId
+                             join pagerolepermission in _context.PageRoleMapping on user.RoleId equals pagerolepermission.RoleId
                              join page in _context.Pages on pagerolepermission.PageId equals page.Id
                              where user.Id == userId && pagerolepermission.IsActive == true
                              select new PageResponse

@@ -2,7 +2,7 @@
 {
     public class CountryResponse
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; } 
         public string Iso3 { get; set; } 
         public string Iso2 { get; set; } 

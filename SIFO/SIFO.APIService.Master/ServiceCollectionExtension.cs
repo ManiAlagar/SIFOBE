@@ -6,11 +6,8 @@ using SIFO.APIService.Master.Service.Implementations;
 using SIFO.APIService.Master.Repository.Implementations;
 using SIFO.Common.Contracts;
 using SIFO.Utility.Implementations;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using SIFO.Model.Response;
-using System.Text;
-using Microsoft.OpenApi.Models;
+using System.Reflection;
+using FluentValidation;
 
 namespace SIFO.APIService.Master
 {
@@ -19,9 +16,7 @@ namespace SIFO.APIService.Master
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, ConfigurationManager configuration, IWebHostEnvironment environment)
         {
-            var jwtSettings = new JwtSettings();
-            configuration.Bind(JwtSettings.SectionName, jwtSettings);
-
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             //Mapper
             services.AddAutoMapper(typeof(MapperProfile).Assembly);
 

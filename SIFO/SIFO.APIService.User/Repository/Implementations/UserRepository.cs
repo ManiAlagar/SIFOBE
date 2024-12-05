@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SIFO.APIService.User.Repository.Contracts;
-using SIFO.Common.Contracts;
+﻿using SIFO.Common.Contracts;
+using SIFO.Model.Constant;
 using SIFO.Model.Entity;
-using SIFO.Model.Request;
 using SIFO.Model.Response;
 using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore;
+using SIFO.APIService.User.Repository.Contracts;
 
 
 namespace SIFO.APIService.User.Repository.Implementations
@@ -13,16 +13,20 @@ namespace SIFO.APIService.User.Repository.Implementations
     {
         private readonly SIFOContext _context;
         private readonly ICommonService _commonService;
+
         public UserRepository(SIFOContext context, ICommonService commonService)
         {
             _context = context;
             _commonService = commonService;
         }
-        public async Task<bool> SaveUserAsync(UserRequest user)
+
+        public async Task<string> CreateUserAsync(Users user)
         {
-            using (var context = await _context.Database.BeginTransactionAsync())
+            using (var context = await _context.Database.BeginTransactionAsync()) 
+            {
                 try
                 {
+                    var tokenData = _commonService.GetDataFromToken();
                     var encryptedPassword = await _commonService.EncryptPassword(user.PasswordHash);
                     var userData = new Users()
                     {
@@ -31,96 +35,97 @@ namespace SIFO.APIService.User.Repository.Implementations
                         Email = user.Email,
                         PasswordHash = encryptedPassword,
                         PhoneNumber = user.PhoneNumber,
-                        RoleId= 2,
+                        RoleId = user.RoleId,
                         FiscalCode = user.FiscalCode,
                         CreatedDate = DateTime.UtcNow,
-                        CreatedBy = 1,
+                        CreatedBy = tokenData.Id,
                         IsTempPassword = true
                     };
-                    var addedData = await _context.Users.AddAsync(userData);
-                    _context.SaveChanges();
+                    var result = await _context.Users.AddAsync(userData);
+                    await _context.SaveChangesAsync();
                     await _context.Database.CommitTransactionAsync();
-                    return true;
+                    return Constants.SUCCESS;
                 }
                 catch (Exception ex)
                 {
                     await _context.Database.RollbackTransactionAsync();
-                    return false;
-
-                }
+                    throw;
+                } 
+            }
         }
-        public async Task<ApiResponse<string>> CheckIfEmailOrPhoneExists(string email, string phoneNumber, long? userId)
+
+        public async Task<string> CheckIfEmailOrPhoneExists(string email, string phoneNumber, long? userId)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == email && u.Id != userId && u.IsActive == true))
+            if (await _context.Users.AsNoTracking().AnyAsync(u => u.Email == email && u.Id != userId && u.IsActive == true))
             {
-                return ApiResponse<string>.Conflict("Email already exists.");
+                return Constants.EMAIL_ALREADY_EXISTS;
             }
-            if (await _context.Users.AnyAsync(u => u.PhoneNumber == phoneNumber && u.Id != userId && u.IsActive == true))
+            if (await _context.Users.AsNoTracking().AnyAsync(u => u.PhoneNumber == phoneNumber && u.Id != userId && u.IsActive == true))
             {
-                return ApiResponse<string>.Conflict("Phone number already exists.");
+                return Constants.PHONE_ALREADY_EXISTS;
             }
-            return null;
+            return Constants.SUCCESS;
         }
 
         public IQueryable<Users> GetUsersQueryable()
         {
-            return _context.Users.AsQueryable();
-        }
-        public async Task<ApiResponse<string>> DeleteUserById(long id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
+            try
             {
-                _context.Users.Remove(user);
-                _context.SaveChangesAsync();
-                return ApiResponse<string>.Success("User Deleted Successfully");
+                return _context.Users.AsQueryable();
             }
-            else
+            catch (Exception ex)
             {
-                return ApiResponse<string>.InternalServerError("User doesn't exist");
+                throw;
+            }
+        }
+
+        public async Task<string> DeleteUserById(long id)
+        {
+            using (var context = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var otpDelete = await _context.OtpRequests.Where(x => x.UserId == id).ToListAsync();
+                    _context.OtpRequests.RemoveRange(otpDelete);
+
+                    var entity = await _context.Users.Where(x => x.Id == id).SingleOrDefaultAsync();
+                    if (entity != null)
+                    {
+                        _context.Users.Remove(entity);
+                        await _context.SaveChangesAsync();
+                        await _context.Database.CommitTransactionAsync();
+                        return Constants.SUCCESS;
+                    }
+                    return Constants.NOT_FOUND;
+                }
+                catch (Exception ex)
+                {
+                    await _context.Database.RollbackTransactionAsync();
+                    throw;
+                }
             }
         }
 
          public async Task<Users> GetUserById(long? id)
         {
-            return await _context.Users.FindAsync(id);
-            
+            return await _context.Users.AsNoTracking().Where(a=>a.Id == id).SingleOrDefaultAsync();
         }
-        public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest user)
+
+        public async Task<string> UpdateUserAsync(Users user)
         {
-            using (var transaction = _context.Database.BeginTransaction())
+            try
             {
-                var users = await GetUserById(user.Id);
-                try
-                {
-                    var checkResult = await CheckIfEmailOrPhoneExists(user.Email, user.PhoneNumber, user.Id);
-                    if (checkResult != null)
-                    {
-                        return checkResult;
-                    }
-                    users.LastName = user.LastName;
-                    users.FirstName = user.FirstName;
-                    users.Email = user.Email;
-                    users.FiscalCode = user.FiscalCode;
-                    users.PhoneNumber = user.PhoneNumber;
-                    users.UpdatedDate = DateTime.UtcNow;
-                    users.UpdatedBy = 1;
-
-                    _context.Users.Update(users);
-                    _context.SaveChangesAsync();
-
-                    _context.Database.CommitTransaction();
-
-                    return ApiResponse<string>.Success("User Updated Successfully !");
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync(); return ApiResponse<string>.InternalServerError($"Error while updating the user: {ex.Message}");
-                }
-
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync(); 
+                return Constants.SUCCESS;
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
-        public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
+
+        public async Task<PagedResponse<UserResponse>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
         {
 
             var query = _context.Users.Select(user => new UserResponse
@@ -132,10 +137,6 @@ namespace SIFO.APIService.User.Repository.Implementations
                 PhoneNumber = user.PhoneNumber,
                 ZipCode = user.ZipCode,
                 FiscalCode = user.FiscalCode,
-                CreatedDate = user.CreatedDate,
-                CreatedBy = user.CreatedBy,
-                UpdatedDate = user.UpdatedDate,
-                UpdatedBy = user.UpdatedBy,
                 IsActive = user.IsActive
             });
 
@@ -144,18 +145,17 @@ namespace SIFO.APIService.User.Repository.Implementations
 
             if (isAll)
             {
-                var result = query.ToList();
+                var result = query.Where(a=>a.IsActive == true).ToList();
                 
-                pagedResponse.Result = result.AsEnumerable();
+                pagedResponse.Result = result;
                 pagedResponse.TotalCount = count;
                 pagedResponse.TotalPages = 1;
                 pagedResponse.CurrentPage = 1;
-                return ApiResponse<PagedResponse<UserResponse>>.Success("Data", pagedResponse);
+                return pagedResponse;
             }
 
             string orderByExpression = $"{sortColumn} {sortDirection}";
 
-            // Apply filtering
             if (!string.IsNullOrWhiteSpace(filter))
             {
                 query = query.Where(u => u.FirstName.Contains(filter) || u.LastName.Contains(filter) || u.Email.Contains(filter));
@@ -171,7 +171,7 @@ namespace SIFO.APIService.User.Repository.Implementations
             pagedResponse.TotalPages = (int)Math.Ceiling((pagedResponse.TotalCount ?? 0) / (double)pageSize);
             pagedResponse.CurrentPage = pageIndex;
 
-            return ApiResponse<PagedResponse<UserResponse>>.Success("Data", pagedResponse);
+            return pagedResponse;
         }
 
         public async Task<Role> GetRoleById(long? id)
@@ -202,10 +202,6 @@ namespace SIFO.APIService.User.Repository.Implementations
                     PhoneNumber = user.PhoneNumber,
                     ZipCode = user.ZipCode,
                     FiscalCode = user.FiscalCode,
-                    CreatedDate = user.CreatedDate,
-                    CreatedBy = user.CreatedBy,
-                    UpdatedDate = user.UpdatedDate,
-                    UpdatedBy = user.UpdatedBy,
                     IsActive = user.IsActive
                 })
                 .ToListAsync();

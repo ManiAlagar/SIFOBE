@@ -21,5 +21,13 @@ namespace SIFO.Common.Contracts
         public Task<AuthenticationType> GetAuthenticationTypeByIdAsync(long Id);
         public Task<OtpRequest> CreateOtpRequestAsync(long userId, string authenticationFor, long authenticationType);
         public Task<string> SendOtpRequestAsync(long userId, string authenticationFor, long authenticationType);
+
+        public Task<PagedResponse<AddressDetailResponse>> GetAllAddressDetailAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll = false);
+        public Task<AddressDetailResponse> GetAddressDetailByIdAsync(long id);
+        public Task<string> DeleteAddressDetailAsync(long id);
+        public Task<AddressDetail> CreateAddressDetailAsync(AddressDetail entity);
+        public Task<long> AddressDetailExistsAsync(string? address, long? cityId, long? region, long? countryId, long? zipcode);
+        public Task<AddressDetail> UpdateAddressDetailAsync(AddressDetail entity);
+        public Task<bool> AddressDetailExistsByIdAsync(long? id);
     }
 }

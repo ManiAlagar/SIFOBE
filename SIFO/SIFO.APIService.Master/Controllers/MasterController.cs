@@ -1,15 +1,15 @@
 ﻿using FluentValidation;
+using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.Master.Service.Contracts;
-using SIFO.Model.Entity;
 
 namespace SIFO.APIService.Master.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MasterController : ControllerBase 
+    public class MasterController : ControllerBase
     {
         private readonly ICountryService _countryService;
         private readonly IStateService _stateService;
@@ -22,12 +22,12 @@ namespace SIFO.APIService.Master.Controllers
         public MasterController(ICountryService countryService, IStateService stateService, ICityService cityService, IValidator<CountryRequest> countryValidator,
             IValidator<StateRequest> stateValidator, IValidator<CityRequest> cityValidator, IMasterService masterService)
         {
-             _countryService = countryService;
+            _countryService = countryService;
             _stateService = stateService;
             _cityService = cityService;
             _countryValidator = countryValidator;
             _stateValidator = stateValidator;
-            _cityValidator = cityValidator; 
+            _cityValidator = cityValidator;
             _masterService = masterService;
         }
 
@@ -82,7 +82,7 @@ namespace SIFO.APIService.Master.Controllers
                 var validationResult = await _countryValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
-                    var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
+                    var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
                     return BadRequest(errors);
                 }
                 var result = await _countryService.CreateCountryAsync(request);
@@ -100,7 +100,7 @@ namespace SIFO.APIService.Master.Controllers
         [ProducesResponseType(typeof(ApiResponse<Country>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateCountryAsync([FromRoute] int id,CountryRequest request)
+        public async Task<IActionResult> UpdateCountryAsync([FromRoute] long id, CountryRequest request)
         {
             try
             {
@@ -128,8 +128,16 @@ namespace SIFO.APIService.Master.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteCountryAsync([FromRoute] long id)
         {
-            var result = await _countryService.DeleteCountryAsync(id);
-            return StatusCode(result.StatusCode, result);
+            try
+            {
+                var result = await _countryService.DeleteCountryAsync(id);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
         }
 
         [HttpGet]
@@ -201,7 +209,7 @@ namespace SIFO.APIService.Master.Controllers
         [ProducesResponseType(typeof(ApiResponse<State>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateStateAsync([FromRoute] long id,StateRequest request)
+        public async Task<IActionResult> UpdateStateAsync([FromRoute] long id, StateRequest request)
         {
             try
             {
@@ -210,12 +218,12 @@ namespace SIFO.APIService.Master.Controllers
                 {
                     var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
-                } 
+                }
                 request.Id = id;
                 var result = await _stateService.UpdateStateAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 var result = ApiResponse<string>.InternalServerError;
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
@@ -229,8 +237,16 @@ namespace SIFO.APIService.Master.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteStateAsync([FromRoute] long id)
         {
-            var result = await _stateService.DeleteStateAsync(id);
-            return StatusCode(result.StatusCode, result);
+            try
+            {
+                var result = await _stateService.DeleteStateAsync(id);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
         }
 
         [HttpGet]
@@ -258,7 +274,7 @@ namespace SIFO.APIService.Master.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetCityByIdAsync([FromRoute]long id)
+        public async Task<IActionResult> GetCityByIdAsync([FromRoute] long id)
         {
             try
             {
@@ -302,7 +318,7 @@ namespace SIFO.APIService.Master.Controllers
         [ProducesResponseType(typeof(ApiResponse<City>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateCityAsync([FromRoute]long id,CityRequest request)
+        public async Task<IActionResult> UpdateCityAsync([FromRoute] long id, CityRequest request)
         {
             try
             {
@@ -326,12 +342,20 @@ namespace SIFO.APIService.Master.Controllers
         [HttpDelete]
         [Route("City/{id}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteCityAsync([FromRoute]long id)
+        public async Task<IActionResult> DeleteCityAsync([FromRoute] long id)
         {
-            var result = await _cityService.DeleteCityAsync(id);
-            return StatusCode(result.StatusCode, result);
+            try
+            {
+                var result = await _cityService.DeleteCityAsync(id);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
         }
 
         [HttpGet]

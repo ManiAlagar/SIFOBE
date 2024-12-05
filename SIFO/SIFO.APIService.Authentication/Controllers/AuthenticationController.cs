@@ -44,11 +44,11 @@ namespace SIFO.APIService.Authentication.Controllers
         [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> VerifyLoginAsync([FromBody] VerifyLoginRequest request, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor , [FromHeader] string? OtpCode)
+        public async Task<IActionResult> VerifyLoginAsync([FromHeader] long UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor , [FromHeader] string? OtpCode)
         {
             try
             {
-                var result = await _authService.VerifyLoginAsync(request);
+                var result = await _authService.VerifyLoginAsync(UserId);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -65,7 +65,7 @@ namespace SIFO.APIService.Authentication.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequest request, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
+        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequest request, [FromHeader] long? UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
         {
             try
             {

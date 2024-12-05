@@ -28,14 +28,11 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 Name = state.Name,
                                 CountryId = state.CountryId,
                                 CountryCode = state.CountryCode,
-                                FipsCode = state.FipsCode,
                                 Iso2 = state.Iso2,
-                                Type = state.Type,
                                 Latitude = state.Latitude,
                                 Longitude = state.Longitude,
-                                Flag = state.Flag,
-                                WikiDataId = state.WikiDataId,
-                                CountryName = country.Name
+                                CountryName = country.Name, 
+                                IsActive = state.IsActive,
                             };
 
                 var count = (from state in _context.States
@@ -45,7 +42,7 @@ namespace SIFO.APIService.Master.Repository.Implementations
 
                 if (isAll)
                 {
-                    var result = await query.ToListAsync();
+                    var result = await query.Where(a=>a.IsActive).ToListAsync();
                     pagedResponse.Result = result;
                     pagedResponse.TotalCount = count;
                     pagedResponse.TotalPages = 0;
@@ -89,14 +86,11 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 Name = state.Name,
                                 CountryId = state.CountryId,
                                 CountryCode = state.CountryCode,
-                                FipsCode = state.FipsCode,
                                 Iso2 = state.Iso2,
-                                Type = state.Type,
                                 Latitude = state.Latitude,
                                 Longitude = state.Longitude,
-                                Flag = state.Flag,
-                                WikiDataId = state.WikiDataId,
-                                CountryName = country.Name
+                                CountryName = country.Name,
+                                IsActive = state.IsActive,
                             };
 
                 var result = await query.FirstOrDefaultAsync();
@@ -121,14 +115,11 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 Name = state.Name,
                                 CountryId = state.CountryId,
                                 CountryCode = state.CountryCode,
-                                FipsCode = state.FipsCode,
                                 Iso2 = state.Iso2,
-                                Type = state.Type,
                                 Latitude = state.Latitude,
                                 Longitude = state.Longitude,
-                                Flag = state.Flag,
-                                WikiDataId = state.WikiDataId,
-                                CountryName = country.Name
+                                CountryName = country.Name, 
+                                IsActive= state.IsActive,
                             };
                 return await query.ToListAsync();
             }

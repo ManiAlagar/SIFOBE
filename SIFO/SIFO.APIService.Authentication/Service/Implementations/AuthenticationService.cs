@@ -88,9 +88,9 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             return ApiResponse<string>.Success();
         }
 
-        public async Task<ApiResponse<LoginResponse>> VerifyLoginAsync(VerifyLoginRequest request)
+        public async Task<ApiResponse<LoginResponse>> VerifyLoginAsync(long userId)
         {
-            var userData = await _authenticationRepository.IsUserExists(request.UserId);
+            var userData = await _authenticationRepository.IsUserExists(userId);
 
             if (userData == null)
                 return ApiResponse<LoginResponse>.NotFound("user not found");

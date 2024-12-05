@@ -36,7 +36,7 @@ namespace SIFO.Model.Response
         }
 
 
-        public static ApiResponse<T> BadRequest(string? message = "Bad Request", T? data = default)
+        public static ApiResponse<T> BadRequest(string? message = "Bad Request",T? data = default)
         {
             return new ApiResponse<T>(StatusCodes.Status400BadRequest, message, data, false);
         }

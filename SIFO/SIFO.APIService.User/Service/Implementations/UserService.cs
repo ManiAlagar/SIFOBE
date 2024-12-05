@@ -1,9 +1,12 @@
-﻿using SIFO.APIService.User.Repository.Contracts;
+﻿using AutoMapper;
+using SIFO.APIService.User.Repository.Contracts;
 using SIFO.APIService.User.Service.Contracts;
 using SIFO.Common.Contracts;
 using SIFO.Model.Constant;
+using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using SIFO.Utility.Implementations;
 
 namespace SIFO.APIService.User.Service.Implementations
 {
@@ -12,66 +15,79 @@ namespace SIFO.APIService.User.Service.Implementations
         private readonly IUserRepository _userRepository; 
         private readonly ICommonService _commonService; 
         private readonly IConfiguration _configuration; 
+        private readonly IMapper _mapper; 
 
-        public UserService(IUserRepository userRepository, ICommonService commonService , IConfiguration configuration)
+        public UserService(IUserRepository userRepository, ICommonService commonService , IConfiguration configuration, IMapper mapper)
         {
             _userRepository = userRepository; 
             _commonService = commonService;  
-            _configuration = configuration;
+            _configuration = configuration; 
+            _mapper = mapper;
         }
 
-        public async Task<ApiResponse<string>> CreateUserAsync(UserRequest users)
+        public async Task<ApiResponse<string>> CreateUserAsync(UserRequest request)
         {
-            var checkResult = await _userRepository.CheckIfEmailOrPhoneExists(users.Email, users.PhoneNumber);
-            if (checkResult != null)
-                return checkResult;
+            var checkResult = await _userRepository.CheckIfEmailOrPhoneExists(request.Email, request.PhoneNumber);
+            if (checkResult != Constants.SUCCESS)
+                return ApiResponse<string>.Conflict(checkResult);
 
-            bool isUserCreated = await _userRepository.SaveUserAsync(users);
-            if (isUserCreated)
+            var mappedResult  = _mapper.Map<Users>(request);
+            var userData = await _userRepository.CreateUserAsync(mappedResult);
+
+            if (userData is not null)
                 return ApiResponse<string>.Created(Constants.SUCCESS);
-            else
-                return ApiResponse<string>.InternalServerError("Something went wrong while creating the user.");
+
+            return ApiResponse<string>.InternalServerError("Something went wrong while creating the user.");
         }
 
        public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
         {
+            var isValid = await HelperService.ValidateGet(pageIndex, pageSize, filter, sortColumn, sortDirection);
 
-        try
-        {
-            var result = await _userRepository.GetAllUsersAsync(pageIndex, pageSize, filter, sortColumn, sortDirection, isAll);
+            if (isValid.Any())
+                return ApiResponse<PagedResponse<UserResponse>>.BadRequest(isValid[0]);
 
-            if (result.StatusCode == 200)
-            {
-                return ApiResponse<PagedResponse<UserResponse>>.Success("Users fetched successfully",result.Data);
-            }
-            else
-                return ApiResponse<PagedResponse<UserResponse>>.InternalServerError("Failed to fetch users");
-        }
-        catch (Exception ex)
-        {
-            return ApiResponse<PagedResponse<UserResponse>>.InternalServerError($"An error occurred: {ex.Message}");
-        }
-    }
+            var response = await _userRepository.GetAllUsersAsync(pageIndex, pageSize, filter, sortColumn, sortDirection, isAll);
+
+            return ApiResponse<PagedResponse<UserResponse>>.Success(Constants.SUCCESS, response); 
+       }
 
        public async Task<ApiResponse<string>> DeleteUserById(long id)
         {
-           var result = await _userRepository.DeleteUserById(id);
-            return result;
+            var response = await _userRepository.DeleteUserById(id);
+
+            if (response == Constants.NOT_FOUND)
+                return new ApiResponse<string>(StatusCodes.Status404NotFound);
+
+            return ApiResponse<string>.Success(Constants.SUCCESS);
         }
 
         public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest request)
-        { 
-            var result=  await _userRepository.UpdateUserAsync(request);
-            return result;
+        {
+            var tokenData =await _commonService.GetDataFromToken();
+            var users = await GetUserById(request.UserId);
+
+            if (users is null)
+                return ApiResponse<string>.NotFound();
+            var checkResult = await _userRepository.CheckIfEmailOrPhoneExists(request.Email, request.PhoneNumber, request.UserId);
+            
+            if (checkResult != Constants.SUCCESS)
+                return ApiResponse<string>.Conflict(checkResult);
+
+            var mappedResult = _mapper.Map<Users>(request);
+            mappedResult.Id = request.UserId.Value;
+            mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
+
+            var result=  await _userRepository.UpdateUserAsync(mappedResult);
+            return ApiResponse<string>.Success(Constants.SUCCESS);
         }
+
         public async Task<ApiResponse<UserResponse>> GetUserById(long? id)
         {
             var user =  await _userRepository.GetUserById(id);
             
             if (user == null)
-            {
-            return ApiResponse<UserResponse>.NotFound("User not found");
-            }
+                return ApiResponse<UserResponse>.NotFound();
             else
             {
                 var userModel = new UserResponse
@@ -83,10 +99,6 @@ namespace SIFO.APIService.User.Service.Implementations
                     PhoneNumber = user.PhoneNumber,
                     ZipCode = user.ZipCode,
                     FiscalCode = user.FiscalCode,
-                    CreatedDate = user.CreatedDate,
-                    CreatedBy = user.CreatedBy,
-                    UpdatedDate = user.UpdatedDate,
-                    UpdatedBy = user.UpdatedBy,
                     IsActive = user.IsActive
                 };
 
@@ -103,13 +115,11 @@ namespace SIFO.APIService.User.Service.Implementations
 
             var role = await _userRepository.GetRoleById(roleId);
             if (role is null)
-                return ApiResponse<List<UserResponse>>.NotFound("role not found");
+                return ApiResponse<List<UserResponse>>.NotFound();
 
             var users = await _userRepository.GetUserByRoleId(roleId);
 
-
             return ApiResponse<List<UserResponse>>.Success(Constants.SUCCESS,users);
-
         }
     }
 }
