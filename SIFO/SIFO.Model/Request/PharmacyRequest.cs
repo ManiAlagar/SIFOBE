@@ -12,12 +12,12 @@ namespace SIFO.Model.Request
     {
      
         public long? Id { get; set; }
-
         public string PharmacyName { get; set; }
-
-
         public bool? IsActive { get; set; }
         public bool? IsDeleted { get; set; }
         public bool? IsNew { get; set; }
+        public string? PharmacyType { get; set; }
+        public DateTime ValidFrom { get; set; }
+        public DateTime ValidTo { get; set; }
     }
 }

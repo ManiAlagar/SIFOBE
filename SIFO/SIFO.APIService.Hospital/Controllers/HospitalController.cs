@@ -4,7 +4,6 @@ using SIFO.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.Hospital.Service.Contracts;
 using Microsoft.AspNetCore.Authorization;
-using SIFO.Model.Entity;
 
 namespace SIFO.APIService.Hospital.Controllers
 {
@@ -15,14 +14,15 @@ namespace SIFO.APIService.Hospital.Controllers
     {
         private readonly IHospitalService _hospitalService;
         private readonly IValidator<HospitalRequest> _hospitalValidator;
-        public HospitalController(IHospitalService hospitalService, IValidator<HospitalRequest> hospitalValidator)
+        private readonly IValidator<CalendarRequest> _calendarValidator;
+        public HospitalController(IHospitalService hospitalService, IValidator<HospitalRequest> hospitalValidator, IValidator<CalendarRequest> calendarValidator)
         {
             _hospitalService = hospitalService;
             _hospitalValidator = hospitalValidator;
+            _calendarValidator = calendarValidator;
         }
 
         [HttpPost]
-        [Route("Hospital")]
         [ProducesResponseType(typeof(ApiResponse<Model.Entity.Hospital>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
@@ -47,7 +47,7 @@ namespace SIFO.APIService.Hospital.Controllers
         }
 
         [HttpGet]
-        [Route("Hospital/{hospitalId}")]
+        [Route("{hospitalId}")]
         [ProducesResponseType(typeof(ApiResponse<HospitalResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
@@ -67,7 +67,7 @@ namespace SIFO.APIService.Hospital.Controllers
         }
 
         [HttpDelete]
-        [Route("Hospital/{hospitalId}")]
+        [Route("{hospitalId}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
@@ -87,7 +87,6 @@ namespace SIFO.APIService.Hospital.Controllers
         }
 
         [HttpGet]
-        [Route("Hospital")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<HospitalResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
@@ -122,6 +121,77 @@ namespace SIFO.APIService.Hospital.Controllers
                     return BadRequest(errors);
                 }
                 var result = await _hospitalService.UpdateHospitalAsync(request, HospitalId);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpGet]
+        [Route("Calendar/{pharmacyId}")]
+        [ProducesResponseType(typeof(ApiResponse<Dictionary<string, List<CalendarResponse>>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetCalendarByIdAsync([FromRoute] long pharmacyId, [FromHeader] DateTime startDate, [FromHeader] DateTime endDate)
+        {
+            try
+            {
+                var result = await _hospitalService.GetCalendarByIdAsync(pharmacyId, startDate, endDate);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpPost("Calendar")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateCalendarAsync(CalendarRequest request)
+        {
+            try
+            {
+                var validationResult = await _calendarValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                {
+                    var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
+                    return BadRequest(errors);
+                }
+                var result = await _hospitalService.CreateCalendarAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpPut]
+        [Route("Calendar/{id}")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateCalendarAsync(CalendarRequest request, [FromRoute] long id, [FromHeader] long UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
+        {
+            try
+            {
+                var validationResult = await _calendarValidator.ValidateAsync(request);
+                if (!validationResult.IsValid)
+                {
+                    var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
+                    return BadRequest(errors);
+                } 
+                request.id = id;
+                var result = await _hospitalService.UpdateCalendarAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch

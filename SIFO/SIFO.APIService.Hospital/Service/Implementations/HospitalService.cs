@@ -6,6 +6,8 @@ using SIFO.Model.Constant;
 using SIFO.Utility.Implementations;
 using SIFO.APIService.Hospital.Service.Contracts;
 using SIFO.APIService.Hospital.Repository.Contracts;
+using SIFO.Model.Entity;
+using Twilio.Http;
 
 namespace SIFO.APIService.Hospital.Service.Implementations
 {
@@ -98,6 +100,79 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             catch (Exception e)
             {
                 return ApiResponse<string>.BadRequest(e.Message);
+            }
+        }
+        public async Task<ApiResponse<Dictionary<string, List<CalendarResponse>>>> GetCalendarByIdAsync(long pharmacyId, DateTime startDate, DateTime endDate)
+        {
+            if (pharmacyId <= 0)
+                return ApiResponse<Dictionary<string, List<CalendarResponse>>>.BadRequest();
+
+            if (startDate == DateTime.MinValue || endDate == DateTime.MinValue)
+                return ApiResponse<Dictionary<string, List<CalendarResponse>>>.BadRequest();
+
+            var pharmacyData = await _hospitalRepository.GetPharmacyByIdAsync(pharmacyId);
+            if (!pharmacyData)
+                return ApiResponse< Dictionary<string, List<CalendarResponse>>>.BadRequest();
+
+            var response = await _hospitalRepository.GetCalendarByIdAsync(pharmacyId, startDate, endDate);
+
+            if (response != null)
+                return ApiResponse<Dictionary<string, List<CalendarResponse>>>.Success(Constants.SUCCESS, response);
+
+            return ApiResponse<Dictionary<string, List<CalendarResponse>>>.NotFound();
+        }
+
+        public async Task<ApiResponse<string>> CreateCalendarAsync(CalendarRequest request)
+        {
+            try
+            {
+                var pharmacyData = await _hospitalRepository.GetPharmacyByIdAsync(request.PharmacyId); 
+                if(!pharmacyData) 
+                    return ApiResponse<string>.BadRequest();
+
+                var tokenData = await _commonService.GetDataFromToken();
+                var mappedResult = _mapper.Map<Calendar>(request);
+
+                mappedResult.CreatedBy =Convert.ToInt64(tokenData.UserId);
+                string calendarData = await _hospitalRepository.CreateCalendarAsync(mappedResult);
+
+                if (calendarData == Constants.SUCCESS)
+                    return ApiResponse<string>.Created(Constants.SUCCESS);
+                return ApiResponse<string>.InternalServerError();
+
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.InternalServerError(ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse<string>> UpdateCalendarAsync(CalendarRequest request)
+        {
+            try
+            {
+                var tokenData = await _commonService.GetDataFromToken();
+                var pharmacyData = await _hospitalRepository.GetPharmacyByIdAsync(request.PharmacyId);
+                if (!pharmacyData)
+                    return ApiResponse<string>.BadRequest();
+
+                bool isCalendarExists = await _hospitalRepository.CalendarExistsAsync(request.id.Value); 
+                if (!isCalendarExists) 
+                    return ApiResponse<string>.NotFound();
+
+                var mappedResult = _mapper.Map<Calendar>(request);
+                mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
+                mappedResult.UpdatedDate = DateTime.UtcNow;
+
+                var result = await _hospitalRepository.UpdateCalendarAsync(mappedResult);
+
+                if (result == Constants.SUCCESS)
+                    return ApiResponse<string>.Success(); 
+                return ApiResponse<string>.InternalServerError();
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.InternalServerError();
             }
         }
     }

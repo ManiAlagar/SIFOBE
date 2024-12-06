@@ -138,7 +138,10 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                 var newPharmacy = new Pharmacy()
                 {
                     PharmacyName = pharmacy.PharmacyName,
-                    HospitalId = hospitalId,
+                    HospitalId = hospitalId, 
+                    PharmacyType = pharmacy.PharmacyType, 
+                    ValidFrom = pharmacy.ValidFrom,
+                    ValidTo = pharmacy.ValidTo,
                     CreatedDate = DateTime.UtcNow,
                     CreatedBy = Convert.ToInt64(data.UserId),
                 };
@@ -280,7 +283,6 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                                 IsActive = contact.IsActive,
                                             }).ToList(),
                                 Pharmacies = (from pharmacy in _context.Pharmacies
-                                              join pharmacyType in _context.PharmacyTypes on pharmacy.PharmacyTypeId equals pharmacyType.Id
                                               where pharmacy.HospitalId == hospital.Id
                                               select new PharmacyResponse
                                               {
@@ -291,8 +293,9 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                                   UpdatedDate = pharmacy.UpdatedDate,
                                                   UpdatedBy = pharmacy.UpdatedBy,
                                                   IsActive = pharmacy.IsActive,
-                                                  PharmacyTypeId = pharmacy.PharmacyTypeId.Value,
-                                                  PharmacyTypes = pharmacyType.Name
+                                                  PharmacyTypes = pharmacy.PharmacyType,
+                                                  ValidFrom = pharmacy.ValidFrom, 
+                                                  ValidTo = pharmacy.ValidTo,
                                               }).ToList(),
                             };
 
@@ -341,7 +344,6 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                                 IsActive = contact.IsActive,
                                             }).ToList(),
                                 Pharmacies = (from pharmacies in _context.Pharmacies
-                                              join pharmacyType in _context.PharmacyTypes on pharmacies.PharmacyTypeId equals pharmacyType.Id
                                               where pharmacies.HospitalId == hospital.Id && pharmacies.IsActive == true
                                               select new PharmacyResponse
                                               {
@@ -352,8 +354,9 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                                   UpdatedDate = pharmacies.UpdatedDate,
                                                   UpdatedBy = pharmacies.UpdatedBy,
                                                   IsActive = pharmacies.IsActive,
-                                                  PharmacyTypeId = pharmacies.PharmacyTypeId.Value,
-                                                  PharmacyTypes = pharmacyType.Name
+                                                  PharmacyTypes = pharmacies.PharmacyType,
+                                                  ValidFrom = pharmacy.ValidFrom,
+                                                  ValidTo = pharmacy.ValidTo,
                                               }).ToList()
                             };
 
@@ -404,6 +407,120 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                 {
                     return Constants.DATADEPENDENCYERRORMESSAGE;
                 }
+                throw;
+            }
+        }
+        public async Task<Dictionary<string, List<CalendarResponse>>> GetCalendarByIdAsync(long pharmacyId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var calendarResult = await _context.Calendar
+                .Where(a => a.PharmacyId == pharmacyId && a.CalendarDate.Value.Date >= startDate.Date && a.CalendarDate.Value.Date <= endDate.Date)   
+                .Select(a => new CalendarResponse
+                {
+                    OpeningTime = a.OpeningTime,
+                    ClosingTime = a.ClosingTime,
+                    CalendarDate = a.CalendarDate,
+                    IsHoliday = a.IsHoliday,
+                    PharmacyId = a.PharmacyId,
+                })
+                .ToListAsync();
+
+                var defaultCalendarData = await _context.Calendar.Where(a => a.PharmacyId == null && a.CalendarDate == null).Select(a => new CalendarResponse
+                {
+                    OpeningTime = a.OpeningTime,
+                    ClosingTime = a.ClosingTime,
+                    CalendarDate = a.CalendarDate,
+                    IsHoliday = a.IsHoliday,
+                    PharmacyId = a.PharmacyId,
+                }).FirstOrDefaultAsync();
+
+                var dateRange = Enumerable.Range(0, (endDate.Day - startDate.Day) + 1)
+                                      .Select(i => startDate.AddDays(i))
+                                      .ToList();
+
+                Dictionary<string, List<CalendarResponse>> response = new();
+
+                foreach (var date in dateRange)
+                {
+                    string key = date.ToString("dd-MM-yyyy");
+
+                    if (calendarResult.Any(a => a.CalendarDate.Value.ToString("dd-MM-yyyy") == key))
+                    {
+                        response[key] = calendarResult.Where(a => a.CalendarDate.Value.ToString("dd-MM-yyyy") == key).ToList();
+                    }
+                    else
+                    {
+                        List<CalendarResponse> calResponse = new();
+                        CalendarResponse calendarResponse = new CalendarResponse();
+                        calendarResponse.IsHoliday = defaultCalendarData.IsHoliday;
+                        calendarResponse.CalendarDate = Convert.ToDateTime(key);
+                        calendarResponse.PharmacyId = pharmacyId;
+                        calendarResponse.OpeningTime = defaultCalendarData.OpeningTime;
+                        calendarResponse.ClosingTime = defaultCalendarData.ClosingTime;
+                        calResponse.Add(calendarResponse);
+                        response[key] = calResponse;
+                    }
+                }
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> CreateCalendarAsync(Calendar request)
+        {
+            try
+            {
+                var entity = await _context.Calendar.AddAsync(request);
+                await _context.SaveChangesAsync(); 
+                return Constants.SUCCESS;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> UpdateCalendarAsync(Calendar request)
+        {
+            try
+            {
+                _context.Calendar.Update(request);
+                await _context.SaveChangesAsync();
+                return Constants.SUCCESS;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> CalendarExistsAsync(long id)
+        {
+            try
+            {
+                var calendarData = await _context.Calendar.AsNoTracking().Where(a => a.Id == id).SingleOrDefaultAsync();
+                return calendarData != null;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> GetPharmacyByIdAsync(long id)
+        {
+            try
+            {
+                var result = await _context.Pharmacies.Where(a => a.Id == id).SingleOrDefaultAsync(); 
+                return result != null;
+            }
+            catch (Exception ex)
+            {
+
                 throw;
             }
         }

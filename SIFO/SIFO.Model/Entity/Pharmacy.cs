@@ -34,10 +34,13 @@ namespace SIFO.Model.Entity
         [Column("UpdatedDate")]
         public DateTime? UpdatedDate { get; set; }
 
-        [Column("PharmacyTypeId")]
-        public long? PharmacyTypeId { get; set; }
-
-        [NotMapped]
+        [Column("pharmacyType")]
         public string? PharmacyType { get; set; }
+
+        [Column("validFrom")]
+        public DateTime? ValidFrom { get; set; }
+
+        [Column("validTo")]
+        public DateTime? ValidTo { get; set; }
     }
 }

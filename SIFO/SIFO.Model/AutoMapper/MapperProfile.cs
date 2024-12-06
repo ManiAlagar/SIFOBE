@@ -14,6 +14,7 @@ namespace SIFO.Model.AutoMapper
             CreateMap<AddressDetailRequest, AddressDetail>();
             CreateMap<UserRequest, Users>();
             CreateMap<HospitalRequest, Hospital>();
+            CreateMap<CalendarRequest, Calendar>();
         }
     }
 }

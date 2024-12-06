@@ -3,10 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SIFO.Model.Constant;
 using SIFO.Model.Entity;
-using SIFO.Model.Request;
 using SIFO.Model.Response;
 using System.Text.Json.Nodes;
 
@@ -58,7 +55,6 @@ public class OtpValidationMiddleware
             {
 
                 var dbContext = scope.ServiceProvider.GetRequiredService<SIFOContext>();
-                //var data = JsonConvert.DeserializeObject<VerifyOtpRequest>(requestBody);
                 if (methodType.ToLower() != "put" && !apiName.ToLower().Contains("verify-login"))
                 {
                     await _next(context);
@@ -104,51 +100,4 @@ public class OtpValidationMiddleware
             await context.Response.WriteAsync(response);
         }
     }
-
-    private Dictionary<string, string>? ExtractPayloadAsJsonObject(string body)
-    {
-        try
-        {
-            var json = JsonConvert.DeserializeObject<JsonObject>(body);
-
-            if (json == null)
-                return null;
-
-            var result = new Dictionary<string, string>();
-
-            if (json.TryGetPropertyValue("authenticatedType", out JsonNode authenticatedTypeNode))
-                result["authenticatedType"] = authenticatedTypeNode.GetValue<string>();
-
-            if (json.TryGetPropertyValue("eventName", out JsonNode eventNameNode))
-                result["eventName"] = eventNameNode.GetValue<string>();
-
-            if (json.TryGetPropertyValue("otp", out JsonNode otpNode))
-                result["otp"] = otpNode.GetValue<string>();
-
-            if (json.TryGetPropertyValue("userId", out JsonNode userIdNode))
-                result["userId"] = userIdNode.GetValue<string>();
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            return null;
-        }
-    }
-
-    //private async Task<OtpRequest> GetOtpDetailsAsync(long? userId,string OtpCode, string AuthenticationFor, long AuthenticationType)
-    //{
-    //    using (var scope = context.RequestServices.CreateScope())
-    //    {
-    //        try
-    //        {
-    //            var result = 
-    //            return result;
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            throw;
-    //        }
-    //    }
-    //}
 }
