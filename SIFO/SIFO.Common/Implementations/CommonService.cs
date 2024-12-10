@@ -1,21 +1,22 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Twilio;
+using System.Text;
+using Twilio.Types;
+using System.Net.Mail;
+using SIFO.Model.Entity;
+using SIFO.Model.Constant;
+using SIFO.Model.Response;
+using SIFO.Common.Contracts;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using SIFO.Common.Contracts;
-using SIFO.Model.Constant;
-using SIFO.Model.Entity;
-using SIFO.Model.Request;
-using SIFO.Model.Response;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Mail;
-using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
-using Twilio;
 using Twilio.Rest.Api.V2010.Account;
-using Twilio.Types;
-using System.Linq.Dynamic.Core;
+using SIFO.Model.Request;
+using SIFO.Core.Service.Contracts;
 
 
 namespace SIFO.Utility.Implementations
@@ -25,12 +26,18 @@ namespace SIFO.Utility.Implementations
         private readonly IConfiguration _configuration;
         SIFOContext _context;
         IHttpContextAccessor _contextAccessor;
-        public CommonService(IConfiguration configuration, SIFOContext context, IHttpContextAccessor contextAccessor)
+        ISendGridService _sendGridService;
+        ITwilioService _twilioService;
+
+        public CommonService(IConfiguration configuration, SIFOContext context, IHttpContextAccessor contextAccessor, ISendGridService sendGridService, ITwilioService twilioService)
         {
             _configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build();
             _context = context;
             _contextAccessor = contextAccessor;
+            _sendGridService = sendGridService;
+            _twilioService = twilioService;
         }
+
         public async Task<string> GenerateOTP(long length)
         {
             if (length < 1)
@@ -311,29 +318,40 @@ namespace SIFO.Utility.Implementations
             }
         }
 
-        public async Task<string> SendOtpRequestAsync(long userId, string authenticationFor,long authenticationType)
+        public async Task<string> SendOtpRequestAsync(long userId, string authenticationFor, long authenticationType)
         {
-            var  userData = await _context.Users.Where(a=>a.Id == userId).SingleOrDefaultAsync();
+            var userData = await _context.Users.Where(a => a.Id == userId).SingleOrDefaultAsync();
 
             var authType = await GetAuthenticationTypeByIdAsync(authenticationType);
-            var otpData = await CreateOtpRequestAsync(userId, authenticationFor,authenticationType);
+            var otpData = await CreateOtpRequestAsync(userId, authenticationFor, authenticationType);
 
             var filePath = authType.AuthType.ToLower() == Constants.EMAIL ? _configuration["Templates:Email"] : _configuration["Templates:Sms"];
             string subject = $"Your Otp Code For {authenticationFor}";
             string body = File.ReadAllText(filePath).Replace("[UserName]", $"{userData.FirstName} {userData.LastName}").Replace("[OTP Code]", otpData.OtpCode).Replace("[X]", _configuration["OtpExpiration"]).Replace("[EventName]", authenticationFor);
             if (authType.AuthType.ToLower() == Constants.EMAIL)
             {
-                string[] mail = new string[] { userData.Email };
-                bool isMailSent = await SendMail(mail.ToList(), null, subject, body);
-                if (!isMailSent)
+                var mailResponse = await _sendGridService.SendMailAsync(userData.Email, subject, body, $"{userData.FirstName} {userData.LastName}");
+                if (!mailResponse.IsSuccess)
                     return Constants.INTERNAL_SERVER_ERROR;
                 return Constants.SUCCESS;
             }
             else if (authType.AuthType.ToLower() == Constants.SMS)
             {
-                string[] phoneNumbers = new string[] { userData.PhoneNumber };
-                bool isSmsSent = await SendSms(phoneNumbers.ToList(), body);
-                if (!isSmsSent)
+                TwilioSendSmsRequest request = new TwilioSendSmsRequest();
+                request.Body = body;
+                request.To = userData.PhoneNumber;
+                var isSmsSent = await _twilioService.SendSmsAsync(request);
+                if (!isSmsSent.IsSuccess)
+                    return Constants.INTERNAL_SERVER_ERROR;
+                return Constants.SUCCESS;
+            }
+            else if (authType.AuthType.ToLower() == Constants.TWILIO_AUTHY)
+            {
+                TwilioSendSmsRequest request = new TwilioSendSmsRequest();
+                request.Body = body;
+                request.To = userData.PhoneNumber;
+                var isSent = await _twilioService.Send2FaAsync(userId);
+                if (!isSent.IsSuccess)
                     return Constants.INTERNAL_SERVER_ERROR;
                 return Constants.SUCCESS;
             }
@@ -493,6 +511,33 @@ namespace SIFO.Utility.Implementations
             {
                 throw;
             }
+        }
+
+        public async Task<string> GetIpAddress()
+        {
+            var remoteIpAddress = _contextAccessor?.HttpContext?.Connection.RemoteIpAddress;
+            if (remoteIpAddress != null)
+            {
+                if (remoteIpAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    return remoteIpAddress.ToString();
+                }
+                else if (remoteIpAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                {
+                    var ipv4 = System.Net.Dns.GetHostEntry(remoteIpAddress).AddressList
+                                 .First(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+                    return ipv4.ToString();
+                }
+            }
+            return null;
+        }
+
+        public async Task<DateTime> GetStartOfWeek(DateTime date)
+        {
+            int daysToSubtract = (int)date.DayOfWeek - (int)DayOfWeek.Monday;
+            if (daysToSubtract < 0)
+                daysToSubtract += 7;
+            return date.AddDays(-daysToSubtract).Date;
         }
     }
 }

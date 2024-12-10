@@ -1,17 +1,11 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using SIFO.APIService.Authentication;
 using SIFO.Model.Entity;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
 
 builder.Services.AddPresentation(builder.Configuration).
     AddInfrastructure(builder.Configuration, builder.Environment);

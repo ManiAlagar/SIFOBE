@@ -29,5 +29,7 @@ namespace SIFO.Common.Contracts
         public Task<long> AddressDetailExistsAsync(string? address, long? cityId, long? region, long? countryId, long? zipcode);
         public Task<AddressDetail> UpdateAddressDetailAsync(AddressDetail entity);
         public Task<bool> AddressDetailExistsByIdAsync(long? id);
+        public Task<string> GetIpAddress();
+        public Task<DateTime> GetStartOfWeek(DateTime date);
     }
 }

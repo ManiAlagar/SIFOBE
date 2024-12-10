@@ -97,7 +97,6 @@ namespace SIFO.APIService.User.Service.Implementations
                     LastName = user.LastName,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
-                    ZipCode = user.ZipCode,
                     FiscalCode = user.FiscalCode,
                     IsActive = user.IsActive
                 };

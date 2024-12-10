@@ -29,7 +29,16 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             if (hospitalId <= 0)
                 return ApiResponse<HospitalResponse>.BadRequest();
 
+            var startDate = await _commonService.GetStartOfWeek(DateTime.UtcNow.Date);
             var response = await _hospitalRepository.GetHospitalByIdAsync(hospitalId);
+
+            if (response.Pharmacies.Any())
+            {
+                foreach (var pharmacy in response.Pharmacies)
+                {
+                    pharmacy.Calendar = await _hospitalRepository.GetCalendarByIdAsync(pharmacy.Id, startDate, DateTime.UtcNow.AddDays(6));
+                }
+            }
 
             if (response != null)
                 return ApiResponse<HospitalResponse>.Success(Constants.SUCCESS, response);

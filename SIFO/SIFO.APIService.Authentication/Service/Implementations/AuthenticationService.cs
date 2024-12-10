@@ -1,9 +1,12 @@
-﻿using SIFO.APIService.Authentication.Repository.Contracts;
-using SIFO.APIService.Authentication.Service.Contracts;
-using SIFO.Common.Contracts;
+﻿using SIFO.Common.Contracts;
+using SIFO.Core.Repository.Contracts;
+using SIFO.Core.Service.Contracts;
 using SIFO.Model.Constant;
+using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using SIFO.APIService.Authentication.Repository.Contracts;
+using SIFO.APIService.Authentication.Service.Contracts;
 
 namespace SIFO.APIService.Authentication.Service.Implementations
 {
@@ -13,13 +16,18 @@ namespace SIFO.APIService.Authentication.Service.Implementations
         private readonly IAuthenticationRepository _authenticationRepository;
         private readonly ICommonService _commonService;
         private readonly JwtTokenGenerator _tokenGenerator;
+        private readonly ISendGridService _sendGridService;
+        private readonly ITwilioRepository _twilioRepository;
 
-        public AuthenticationService(IConfiguration configuration, IAuthenticationRepository authenticationRepository, ICommonService commonService, JwtTokenGenerator tokenGenerator)
+        public AuthenticationService(IConfiguration configuration, IAuthenticationRepository authenticationRepository, ICommonService commonService, JwtTokenGenerator tokenGenerator,
+            ISendGridService sendGridService, ITwilioRepository twilioRepository)
         {
             _configuration = configuration;
             _authenticationRepository = authenticationRepository;
             _commonService = commonService;
             _tokenGenerator = tokenGenerator;
+            _sendGridService = sendGridService;
+            _twilioRepository = twilioRepository;
         }
         public async Task<ApiResponse<object>> LoginAsync(LoginRequest request)
         {
@@ -35,9 +43,11 @@ namespace SIFO.APIService.Authentication.Service.Implementations
 
             if (otpResponse != Constants.SUCCESS)
                 return ApiResponse<object>.InternalServerError();
+
             var response = new
             {
-                UserId = userData.Id
+                UserId = userData.Id,
+                Sid = await _twilioRepository.GetServiceIdbyUserIDAsync(userData.Id),
             };
             return ApiResponse<object>.Success(otpResponse, response);
         }
@@ -62,9 +72,11 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             string subject = $"Reset password Request";
             string body = File.ReadAllText(filePath).Replace("[UserName]", $"{userData.FirstName} {userData.LastName}").Replace("[Password]",password);
             
-            string[] mail = new string[] { userData.Email };
-            bool isMailSent = await _commonService.SendMail(mail.ToList(), null, subject, body);
-            if (!isMailSent)
+            //string[] mail = new string[] { userData.Email };
+            //bool isMailSent = await _commonService.SendMail(mail.ToList(), null, subject, body);
+            var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");
+            //if (!isMailSent)
+            if (!mailResponse.IsSuccess)
                 return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
             return ApiResponse<string>.Success();
         }
@@ -104,10 +116,31 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             loginResponse.RoleName = userData.RoleName ?? string.Empty;
             loginResponse.MenuAccess = await _authenticationRepository.GetPageByUserIdAsync(userData.Id);
             loginResponse.Id = userData.Id;
-            loginResponse.isFirstAccess = userData.LastLogin == null;
+            //loginResponse.isFirstAccess = userData.LastLogin == null;
             loginResponse.IsTempPassword = userData.IsTempPassword == true;
             loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId.Value);
-            return ApiResponse<LoginResponse>.Success("success", loginResponse);
+
+            var userSessionManagement = new UserSessionManagement
+            {
+                UserId = userData.Id,
+                DtLogin = DateTime.UtcNow,
+                DtCreation = DateTime.UtcNow,
+                DtLogout = null,
+                IPAccess = await _commonService.GetIpAddress(),
+                TokenSession = accessToken
+            };
+            await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
+
+            return ApiResponse<LoginResponse>.Success(Constants.SUCCESS, loginResponse);
+        }
+
+        public async Task<ApiResponse<long>> LogoutAsync()
+        {
+            var userData = await _commonService.GetDataFromToken();
+            string response = await _authenticationRepository.LogoutAsync(Convert.ToInt64(userData.UserId));
+            if (response != Constants.SUCCESS)
+                return ApiResponse<long>.InternalServerError();
+            return ApiResponse<long>.Success(Constants.SUCCESS);
         }
     }
 }

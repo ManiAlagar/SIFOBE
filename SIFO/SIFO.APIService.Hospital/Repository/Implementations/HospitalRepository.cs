@@ -246,6 +246,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                 }
             }
         }
+
         public async Task<HospitalResponse> GetHospitalByIdAsync(long hospitalId)
         {
             try
@@ -296,6 +297,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                                   PharmacyTypes = pharmacy.PharmacyType,
                                                   ValidFrom = pharmacy.ValidFrom, 
                                                   ValidTo = pharmacy.ValidTo,
+                                                  Calendar = null,
                                               }).ToList(),
                             };
 
@@ -436,14 +438,14 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                 }).FirstOrDefaultAsync();
 
                 var dateRange = Enumerable.Range(0, (endDate.Day - startDate.Day) + 1)
-                                      .Select(i => startDate.AddDays(i))
+                                      .Select(i => startDate.AddDays(i).ToString("MM-dd-yyyy"))
                                       .ToList();
 
                 Dictionary<string, List<CalendarResponse>> response = new();
 
                 foreach (var date in dateRange)
                 {
-                    string key = date.ToString("dd-MM-yyyy");
+                    string key = date;
 
                     if (calendarResult.Any(a => a.CalendarDate.Value.ToString("dd-MM-yyyy") == key))
                     {

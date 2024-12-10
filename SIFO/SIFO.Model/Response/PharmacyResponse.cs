@@ -15,6 +15,6 @@
         public DateTime? ValidFrom { get; set;} 
         public DateTime? ValidTo { get; set; }
 
-
+        public Dictionary<string, List<CalendarResponse>> Calendar { get; set; }
     }
 }
