@@ -1,5 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using SIFO.Core.MiddleWare;
 using SIFO.Model;
 using SIFO.Model.Entity;
 
@@ -11,6 +13,12 @@ namespace SIFO.APIService.User
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
+            builder.Logging.ClearProviders();
+            builder.Logging.AddSerilog(logger);
 
             builder.Services.AddControllers();
             
@@ -22,15 +30,13 @@ namespace SIFO.APIService.User
              builder.Configuration.GetConnectionString("DefaultConnection"),
              new MySqlServerVersion(new Version(8, 0, 25))));
             var app = builder.Build();
-            
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
             app.UseMiddleware<OtpValidationMiddleware>();
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseAuthorization();
 
 
