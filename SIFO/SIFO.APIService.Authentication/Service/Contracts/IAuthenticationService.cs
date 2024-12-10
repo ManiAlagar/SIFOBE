@@ -9,5 +9,6 @@ namespace SIFO.APIService.Authentication.Service.Contracts
         public Task<ApiResponse<LoginResponse>> VerifyLoginAsync(long userId);
         public Task<ApiResponse<string>> ForgotPasswordAsync(ForgotPasswordRequest email);
         public Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request);
+        public Task<ApiResponse<long>> LogoutAsync();
     }
 }

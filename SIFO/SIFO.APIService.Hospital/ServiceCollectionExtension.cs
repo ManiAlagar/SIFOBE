@@ -4,11 +4,16 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SendGrid;
 using SIFO.APIService.Hospital.Repository.Contracts;
 using SIFO.APIService.Hospital.Repository.Implementations;
 using SIFO.APIService.Hospital.Service.Contracts;
 using SIFO.APIService.Hospital.Service.Implementations;
 using SIFO.Common.Contracts;
+using SIFO.Core.Repository.Contracts;
+using SIFO.Core.Repository.Implementations;
+using SIFO.Core.Service.Contracts;
+using SIFO.Core.Service.Implementations;
 using SIFO.Model.AutoMapper;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
@@ -30,6 +35,7 @@ namespace SIFO.APIService.Hospital
         {
             var jwtSettings = new JwtSettings();
             configuration.Bind(JwtSettings.SectionName, jwtSettings);
+            var sendGridApiKey = configuration["SendGridSettings:ApiKey"];
             services.AddSingleton(Options.Create(jwtSettings));
 
             //mapper 
@@ -39,8 +45,12 @@ namespace SIFO.APIService.Hospital
             services.AddTransient<IHospitalRepository, HospitalRepository>();
             services.AddTransient<ICommonService,CommonService>();
             services.AddTransient<SIFOContext>();
+            services.AddTransient<ISendGridService, SendGridService>();
+            services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
+            services.AddTransient<ITwilioService, TwilioService>();
+            services.AddTransient<ITwilioRepository, TwilioRepository>();
             services.AddHttpContextAccessor();
-
+            services.AddMemoryCache();
             services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

@@ -10,8 +10,7 @@ namespace SIFO.Model.Entity
         public string? Email { get; set; }
         public string? PasswordHash { get; set; }
         public string? PhoneNumber { get; set; }
-        public string? ProfileURL { get; set; }
-        public string? ZipCode { get; set; }
+        public string? ProfileImage { get; set; }
         public long? RoleId { get; set; }
        // public long? AddressDetailId { get; set; }
         public string? FiscalCode { get; set; }
@@ -19,15 +18,18 @@ namespace SIFO.Model.Entity
         public long? CreatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public long? UpdatedBy { get; set; }
-        public DateTime? LastLogin { get; set; }
         public bool? IsActive { get; set; } = true;
-        [NotMapped]
-        public string? RoleName { get; set; }
         public bool? IsTempPassword { get; set; } = false;
         public DateTime? PswdUpdatedAt { get; set; }
         public long? AuthenticationType { get; set; }
+
+        [NotMapped]
+        public string? RoleName { get; set; }
+
         [NotMapped]
         public string? AuthType { get; set; }
+        public string? UserSid { get; set; }
+
         [NotMapped] 
         public List<Role> ParentRole { get; set; }
     }

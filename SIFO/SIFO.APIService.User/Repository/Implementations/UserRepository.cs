@@ -135,7 +135,6 @@ namespace SIFO.APIService.User.Repository.Implementations
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                ZipCode = user.ZipCode,
                 FiscalCode = user.FiscalCode,
                 IsActive = user.IsActive
             });
@@ -200,7 +199,6 @@ namespace SIFO.APIService.User.Repository.Implementations
                     LastName = user.LastName,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
-                    ZipCode = user.ZipCode,
                     FiscalCode = user.FiscalCode,
                     IsActive = user.IsActive
                 })

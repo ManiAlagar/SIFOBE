@@ -4,6 +4,7 @@ using SIFO.Model.Request;
 using Microsoft.EntityFrameworkCore;
 using SIFO.Model.Response;
 using System.Linq;
+using SIFO.Model.Constant;
 
 namespace SIFO.APIService.Authentication.Repository.Implementations
 {
@@ -55,7 +56,6 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                           RoleName = role.Name,
                                           ParentRole = _context.Roles.Where(r => r.ParentRoleId == user.RoleId).ToList()
                                       }).SingleOrDefaultAsync();
-
                 return userData;
             }
             catch (Exception ex)
@@ -119,7 +119,6 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                         userData.IsTempPassword = isTemp; 
                         userData.UpdatedDate = DateTime.UtcNow; 
                         userData.UpdatedBy = userId;
-                        userData.LastLogin = null;
                         userData.PswdUpdatedAt = DateTime.UtcNow;
                         await _context.SaveChangesAsync(); 
                         await _context.Database.CommitTransactionAsync();
@@ -187,6 +186,40 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                 return userRole;
             }
             catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> LogoutAsync(long id)
+        {
+            try
+            {
+                var result = await _context.UserSessionManagements.FirstOrDefaultAsync(x => x.UserId == id);
+                result.DtLogout = DateTime.UtcNow;
+
+                if (result != null)
+                {
+                    _context.Update(result);
+                    _context.SaveChanges();
+                    return Constants.SUCCESS;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task CreateUserSessionManagementAsync(UserSessionManagement userSessionManagement)
+        {
+            try
+            {
+                await _context.UserSessionManagements.AddAsync(userSessionManagement);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
             {
                 throw;
             }

@@ -14,5 +14,7 @@ namespace SIFO.APIService.Authentication.Repository.Contracts
         public Task<List<PageResponse>> GetPageByUserIdAsync(long userId);
         public Task<Users> GetUserByEmail(string email);
         public Task<List<RoleResponse>> CreatePermission(long roleId);
+        public Task<string> LogoutAsync(long id);
+        public Task CreateUserSessionManagementAsync(UserSessionManagement userSessionManagement);
     }
 }

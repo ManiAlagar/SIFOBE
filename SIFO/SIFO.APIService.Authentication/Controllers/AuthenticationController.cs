@@ -99,5 +99,20 @@ namespace SIFO.APIService.Authentication.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
+
+        [HttpGet("LogOut")]
+        public async Task<IActionResult> LogoutAsync()
+        {
+            try
+            {
+                var result = await _authService.LogoutAsync();
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError($"An error occurred: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
     }
 }

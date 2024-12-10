@@ -14,7 +14,11 @@ using Microsoft.OpenApi.Models;
 using FluentValidation;
 using System.Reflection;
 using SIFO.Model.AutoMapper; 
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using SendGrid;
+using SIFO.Core.Service.Contracts;
+using SIFO.Core.Repository.Contracts;
+using SIFO.Core.Service.Implementations;
+using SIFO.Core.Repository.Implementations;
 
 namespace SIFO.APIService.User
 {
@@ -23,6 +27,7 @@ namespace SIFO.APIService.User
         public static IServiceCollection AddInfrastructure(this IServiceCollection services,ConfigurationManager configuration,IWebHostEnvironment environment)
         {
             var jwtSettings = new JwtSettings();
+            var sendGridApiKey = configuration["SendGridSettings:ApiKey"];
             configuration.Bind(JwtSettings.SectionName, jwtSettings);
             services.AddSingleton(Options.Create(jwtSettings));
 
@@ -34,8 +39,12 @@ namespace SIFO.APIService.User
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ICommonService, CommonService>();
+            services.AddTransient<ISendGridService, SendGridService>();
+            services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
+            services.AddTransient<ITwilioService, TwilioService>();
+            services.AddTransient<ITwilioRepository, TwilioRepository>();
             services.AddHttpContextAccessor();
-
+            services.AddMemoryCache();
             services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

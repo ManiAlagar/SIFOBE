@@ -14,6 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\SIFO.APIService.ThirdPartyAlert\SIFO.APIService.ThirdPartyAlert.csproj" />
 		<ProjectReference Include="..\SIFO.Common\SIFO.Common.csproj" />
 		<ProjectReference Include="..\SIFO.Core\SIFO.Core.csproj" />
 		<ProjectReference Include="..\SIFO.Model\SIFO.Model.csproj" />
