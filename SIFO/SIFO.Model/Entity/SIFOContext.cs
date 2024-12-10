@@ -25,5 +25,8 @@ namespace SIFO.Model.Entity
         public virtual DbSet<AddressDetail> AddressDetails { get; set; }
         public virtual DbSet<PharmacyType> PharmacyTypes { get; set; }
         public virtual DbSet<Calendar> Calendar{ get; set; }
+        public virtual DbSet<Drug> Drugs { get; set; }
+        public virtual DbSet<DrugRegion> DrugRegions { get; set; }
     }
 }
+

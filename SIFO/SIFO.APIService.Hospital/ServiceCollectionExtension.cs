@@ -39,6 +39,8 @@ namespace SIFO.APIService.Hospital
             services.AddTransient<IHospitalRepository, HospitalRepository>();
             services.AddTransient<ICommonService,CommonService>();
             services.AddTransient<SIFOContext>();
+            services.AddTransient<IDrugRepository, DrugRepository>();
+            services.AddTransient<IDrugService, DrugService>();
             services.AddHttpContextAccessor();
 
             services.AddSwaggerGen(c =>
