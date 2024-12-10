@@ -1,9 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using SIFO.APIService.Authentication;
+using SIFO.Core.MiddleWare;
 using SIFO.Model.Entity;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -17,16 +25,15 @@ builder.Services.AddDbContext<SIFOContext>(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseMiddleware<OtpValidationMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseExceptionHandler("/error");
 
 app.MapControllers();
 

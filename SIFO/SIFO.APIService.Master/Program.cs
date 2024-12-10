@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using SIFO.Core;
+using SIFO.Core.MiddleWare;
 using SIFO.Model;
 using SIFO.Model.AutoMapper;
 using SIFO.Model.Entity;
@@ -12,6 +14,12 @@ namespace SIFO.APIService.Master
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
+            builder.Logging.ClearProviders();
+            builder.Logging.AddSerilog(logger);
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -24,12 +32,11 @@ namespace SIFO.APIService.Master
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
             //app.UseMiddleware<OtpValidationMiddleware>();
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

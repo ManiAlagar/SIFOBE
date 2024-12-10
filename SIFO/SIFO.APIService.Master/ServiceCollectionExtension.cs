@@ -8,6 +8,11 @@ using SIFO.Common.Contracts;
 using SIFO.Utility.Implementations;
 using System.Reflection;
 using FluentValidation;
+using SendGrid;
+using SIFO.Core.Repository.Contracts;
+using SIFO.Core.Repository.Implementations;
+using SIFO.Core.Service.Contracts;
+using SIFO.Core.Service.Implementations;
 
 namespace SIFO.APIService.Master
 {
@@ -19,12 +24,17 @@ namespace SIFO.APIService.Master
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             //Mapper
             services.AddAutoMapper(typeof(MapperProfile).Assembly);
-
+            var sendGridApiKey = configuration["SendGridSettings:ApiKey"];
             //Repositories
             services.AddTransient<ICountryRepository, CountryRepository>();
             services.AddTransient<ICountryService, CountryService>();
             services.AddTransient<IStateRepository, StateRepository>();
-
+            services.AddTransient<ISendGridService, SendGridService>();
+            services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
+            services.AddTransient<ITwilioService, TwilioService>();
+            services.AddTransient<ITwilioRepository, TwilioRepository>();
+            services.AddMemoryCache();
+            services.AddHttpContextAccessor();
             //Services
             services.AddTransient<IStateService, StateService>();
             services.AddTransient<ICityRepository, CityRepository>();
