@@ -36,7 +36,7 @@ namespace SIFO.APIService.Master
             app.UseSwaggerUI();
             //app.UseMiddleware<OtpValidationMiddleware>();
             app.UseMiddleware<ExceptionHandlingMiddleware>();
-
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

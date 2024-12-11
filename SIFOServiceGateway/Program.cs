@@ -25,7 +25,7 @@ namespace SIFOServiceGateway
             app.UseRouting();
             app.MapControllers();
             app.MapReverseProxy();
-
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.Run();
         }
     }

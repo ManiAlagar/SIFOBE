@@ -21,8 +21,8 @@
         public static string BAD_REQUEST = "bad request";
         public static string INTERNAL_SERVER_ERROR = "something went wrong";
         public static string CONFLICT = "conflict"; 
-        public static string DATADEPENDENCYERRORMESSAGE = "cannot delete data due to data dependency"; 
-        public static long DATADEPENDENCYCODE = 1451; 
+        public static string DATA_DEPENDENCY_ERROR_MESSAGE = "cannot delete data due to data dependency"; 
+        public static long DATA_DEPENDENCY_CODE = 1451; 
 
         public static string FIRST_LOGIN = "conflict"; 
         public static string USED_TEMP_PASSWORD = "conflict"; 
@@ -43,6 +43,7 @@
         public static string HOSPITAL_NOT_FOUND = "hospital not found";
         public static string ADDRESSDETAIL_NOT_FOUND = "address detail not found";
         public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists"; 
+        public static string USER_NOT_AUTHENTICATED = "user not authenticated"; 
 
     }
 }

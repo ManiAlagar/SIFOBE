@@ -71,12 +71,13 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             var filePath = _configuration["Templates:ForgotPassword"];
             string subject = $"Reset password Request";
             string body = File.ReadAllText(filePath).Replace("[UserName]", $"{userData.FirstName} {userData.LastName}").Replace("[Password]",password);
-            
-            //string[] mail = new string[] { userData.Email };
-            //bool isMailSent = await _commonService.SendMail(mail.ToList(), null, subject, body);
-            var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");
-            //if (!isMailSent)
-            if (!mailResponse.IsSuccess)
+
+
+            //var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");  
+            var toUser = new string[] { userData.Email };
+            var mailResponse = await _commonService.SendMail(toUser.ToList(), null, subject, body); 
+            if(!mailResponse)
+            //if (!mailResponse.IsSuccess)
                 return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
             return ApiResponse<string>.Success();
         }
@@ -116,7 +117,6 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             loginResponse.RoleName = userData.RoleName ?? string.Empty;
             loginResponse.MenuAccess = await _authenticationRepository.GetPageByUserIdAsync(userData.Id);
             loginResponse.Id = userData.Id;
-            //loginResponse.isFirstAccess = userData.LastLogin == null;
             loginResponse.IsTempPassword = userData.IsTempPassword == true;
             loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId.Value);
 
@@ -138,6 +138,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
         {
             var userData = await _commonService.GetDataFromToken();
             string response = await _authenticationRepository.LogoutAsync(Convert.ToInt64(userData.UserId));
+            
             if (response != Constants.SUCCESS)
                 return ApiResponse<long>.InternalServerError();
             return ApiResponse<long>.Success(Constants.SUCCESS);

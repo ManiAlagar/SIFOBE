@@ -33,7 +33,7 @@ namespace SIFO.APIService.User
 
             app.UseSwagger();
             app.UseSwaggerUI();
-
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseHttpsRedirection();
             app.UseMiddleware<OtpValidationMiddleware>();
             app.UseMiddleware<ExceptionHandlingMiddleware>();

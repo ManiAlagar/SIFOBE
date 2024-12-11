@@ -52,8 +52,8 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             if (response == Constants.NOT_FOUND)
                 return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.HOSPITAL_NOT_FOUND);
 
-            if (response == Constants.DATADEPENDENCYERRORMESSAGE)
-                return new ApiResponse<string>(StatusCodes.Status400BadRequest, Constants.DATADEPENDENCYERRORMESSAGE);
+            if (response == Constants.DATA_DEPENDENCY_ERROR_MESSAGE)
+                return new ApiResponse<string>(StatusCodes.Status400BadRequest, Constants.DATA_DEPENDENCY_ERROR_MESSAGE);
 
             return ApiResponse<string>.Success(Constants.SUCCESS, response);
         }

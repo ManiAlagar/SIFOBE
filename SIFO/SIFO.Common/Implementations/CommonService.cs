@@ -330,8 +330,11 @@ namespace SIFO.Utility.Implementations
             string body = File.ReadAllText(filePath).Replace("[UserName]", $"{userData.FirstName} {userData.LastName}").Replace("[OTP Code]", otpData.OtpCode).Replace("[X]", _configuration["OtpExpiration"]).Replace("[EventName]", authenticationFor);
             if (authType.AuthType.ToLower() == Constants.EMAIL)
             {
-                var mailResponse = await _sendGridService.SendMailAsync(userData.Email, subject, body, $"{userData.FirstName} {userData.LastName}");
-                if (!mailResponse.IsSuccess)
+                //var mailResponse = await _sendGridService.SendMailAsync(userData.Email, subject, body, $"{userData.FirstName} {userData.LastName}");
+                var toUser = new string[] { userData.Email };
+                var mailResponse = await SendMail(toUser.ToList(), null, subject, body);
+                //if (!mailResponse.IsSuccess) 
+                if(!mailResponse)
                     return Constants.INTERNAL_SERVER_ERROR;
                 return Constants.SUCCESS;
             }
@@ -401,9 +404,9 @@ namespace SIFO.Utility.Implementations
             }
             catch (Exception ex)
             {
-                if (ex.InnerException is MySqlConnector.MySqlException mysqlEx && mysqlEx.Number == Constants.DATADEPENDENCYCODE)
+                if (ex.InnerException is MySqlConnector.MySqlException mysqlEx && mysqlEx.Number == Constants.DATA_DEPENDENCY_CODE)
                 {
-                    return Constants.DATADEPENDENCYERRORMESSAGE;
+                    return Constants.DATA_DEPENDENCY_ERROR_MESSAGE;
                 }
                 throw;
             }

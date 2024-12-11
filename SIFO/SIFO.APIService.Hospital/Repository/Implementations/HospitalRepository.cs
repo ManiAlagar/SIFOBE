@@ -405,9 +405,9 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
             }
             catch (Exception ex)
             {
-                if (ex.InnerException is MySqlConnector.MySqlException mysqlEx && mysqlEx.Number == Constants.DATADEPENDENCYCODE)
+                if (ex.InnerException is MySqlConnector.MySqlException mysqlEx && mysqlEx.Number == Constants.DATA_DEPENDENCY_CODE)
                 {
-                    return Constants.DATADEPENDENCYERRORMESSAGE;
+                    return Constants.DATA_DEPENDENCY_ERROR_MESSAGE;
                 }
                 throw;
             }
