@@ -30,5 +30,6 @@ namespace SIFO.Model.Entity
         public string? AuthType { get; set; }
         [NotMapped] 
         public List<Role> ParentRole { get; set; }
+        public string  UserSid { get; set; }
     }
 }
