@@ -44,5 +44,18 @@
         public static string ADDRESSDETAIL_NOT_FOUND = "address detail not found";
         public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists"; 
 
+        public const string FILE_FORMAT_PNG = "89504E";
+        public const string FILE_FORMAT_JPG = "/9J/4";
+        public const string FILE_FORMAT_JPEG = "/9J/4";
+        public const string FILE_FORMAT_TXT = "EFBBBF";
+        public const string FILE_FORMAT_PDF = "255044";
+        public const string FILE_TYPE_PNG = ".png";
+        public const string FILE_TYPE_JPG = ".jpg";
+        public const string FILE_TYPE_TXT = ".txt";
+        public const string FILE_TYPE_PDF = ".pdf";
+        public const string FILE_NOT_FOUND = "File not found";
+        public const string FILE_NOT_VALID = "File not valid";
+
+
     }
 }

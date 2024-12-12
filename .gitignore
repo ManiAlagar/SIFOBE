@@ -61,7 +61,7 @@ msbuild.wrn
 /appsettings.json
 
 /Assets
-
+Assets
 */Assets
 .vs
 bin

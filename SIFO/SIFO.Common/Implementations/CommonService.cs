@@ -250,25 +250,71 @@ namespace SIFO.Utility.Implementations
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<string> SaveFileAsync(string base64File, string fileType, string destinationFolder)
+        public async Task<string> SaveFileAsync(string base64File, string fileExtension, string destinationFolder)
         {
             try
             {
-                if (!Directory.Exists(destinationFolder))
-                    Directory.CreateDirectory(destinationFolder);
+                if (string.IsNullOrEmpty(base64File) || base64File.Length < 5)
+                {
+                    return Constants.FILE_NOT_FOUND;
+                }
 
-                string fileName = Guid.NewGuid().ToString() + "." + fileType;
-                byte[] fileBytes = Convert.FromBase64String(base64File);
-                string filePath = Path.Combine(destinationFolder, fileName);
+                string formFileType = base64File.Substring(0, 5).ToUpper();
+                Console.WriteLine($"formFileType: {formFileType}");
 
-                await File.WriteAllBytesAsync(filePath, fileBytes);
-                return filePath;
+                if (formFileType == Constants.FILE_FORMAT_PNG ||
+                    formFileType == Constants.FILE_FORMAT_PDF ||
+                    formFileType == Constants.FILE_FORMAT_JPG ||
+                    formFileType == Constants.FILE_FORMAT_JPEG)
+                {
+                    if (!Directory.Exists(destinationFolder))
+                    {
+                        Directory.CreateDirectory(destinationFolder);
+
+                    }
+                    else
+                    {
+       
+                    }
+                    if (formFileType == Constants.FILE_FORMAT_PNG)
+                    {
+                        fileExtension = Constants.FILE_TYPE_PNG;
+                    }
+                    else if (formFileType == Constants.FILE_FORMAT_JPG || formFileType == Constants.FILE_FORMAT_JPEG)
+                    {
+                        fileExtension = Constants.FILE_TYPE_JPG;
+                    }
+                    else if (formFileType == Constants.FILE_FORMAT_TXT)
+                    {
+                        fileExtension = Constants.FILE_TYPE_TXT;
+                    }
+                    else if (formFileType == Constants.FILE_FORMAT_PDF)
+                    {
+                        fileExtension = Constants.FILE_TYPE_PDF;
+                    }
+                    else
+                    {
+                        return Constants.FILE_NOT_VALID;
+                    }
+
+                    // Convert the base64 string to byte array and write to file
+                    byte[] fileBytes = Convert.FromBase64String(base64File);
+                    string fileName = Guid.NewGuid().ToString() + fileExtension;
+                    string newFilePath = Path.Combine(destinationFolder, fileName);
+                    await File.WriteAllBytesAsync(newFilePath, fileBytes);
+                    return newFilePath;
+                }
+                else
+                {
+                    return Constants.FILE_NOT_VALID;
+                }
             }
             catch (Exception ex)
             {
-                return null;
+                return Constants.FILE_NOT_VALID;
             }
         }
+
 
         public async Task<AuthenticationType> GetAuthenticationTypeByIdAsync(long Id)
         {
