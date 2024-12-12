@@ -44,6 +44,7 @@
         public static string ADDRESSDETAIL_NOT_FOUND = "address detail not found";
         public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists"; 
         public static string USER_NOT_AUTHENTICATED = "user not authenticated"; 
+        public static string INVALID_ROLE = "you are restricted to create user for this role"; 
 
     }
 }

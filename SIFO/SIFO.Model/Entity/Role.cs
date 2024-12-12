@@ -17,6 +17,6 @@ namespace SIFO.Model.Entity
         public string Description { get; set; }
 
         [Column("ParentRoleId")]
-        public long ParentRoleId { get; set; } = 0;
+        public long? ParentRoleId { get; set; } = 0;
     }
 }

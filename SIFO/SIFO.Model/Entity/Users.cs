@@ -31,6 +31,6 @@ namespace SIFO.Model.Entity
         public string? UserSid { get; set; }
 
         [NotMapped] 
-        public List<Role> ParentRole { get; set; }
+        public long? ParentRole { get; set; }
     }
 }

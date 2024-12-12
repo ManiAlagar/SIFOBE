@@ -90,18 +90,7 @@ namespace SIFO.APIService.User.Service.Implementations
                 return ApiResponse<UserResponse>.NotFound();
             else
             {
-                var userModel = new UserResponse
-                {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    FiscalCode = user.FiscalCode,
-                    IsActive = user.IsActive
-                };
-
-                return ApiResponse<UserResponse>.Success(Constants.SUCCESS, userModel);
+                return ApiResponse<UserResponse>.Success(Constants.SUCCESS, user);
             }
         }
 

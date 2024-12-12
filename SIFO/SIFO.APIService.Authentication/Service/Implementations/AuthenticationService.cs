@@ -119,6 +119,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             loginResponse.Id = userData.Id;
             loginResponse.IsTempPassword = userData.IsTempPassword == true;
             loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId.Value);
+            loginResponse.ParentRoleId = userData.ParentRole;
 
             var userSessionManagement = new UserSessionManagement
             {

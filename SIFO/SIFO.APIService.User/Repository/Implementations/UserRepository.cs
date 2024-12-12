@@ -81,21 +81,27 @@ namespace SIFO.APIService.User.Repository.Implementations
 
         public async Task<string> DeleteUserById(long id)
         {
+            var tokenData = _commonService.GetDataFromToken();
             using (var context = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var otpDelete = await _context.OtpRequests.Where(x => x.UserId == id).ToListAsync();
-                    _context.OtpRequests.RemoveRange(otpDelete);
+                    var userToDelete = await (from user in _context.Users
+                                              join role in _context.Roles on user.RoleId equals role.Id
+                                              where role.ParentRoleId == tokenData.Result.RoleId && user.Id == id
+                                              select user).SingleOrDefaultAsync();
 
-                    var entity = await _context.Users.Where(x => x.Id == id).SingleOrDefaultAsync();
-                    if (entity != null)
+                    if (userToDelete != null)
                     {
-                        _context.Users.Remove(entity);
+                        var otpDelete = await _context.OtpRequests.Where(x => x.UserId == userToDelete.Id).ToListAsync();
+                        _context.OtpRequests.RemoveRange(otpDelete);
+
+                        _context.Users.Remove(userToDelete);
                         await _context.SaveChangesAsync();
                         await _context.Database.CommitTransactionAsync();
                         return Constants.SUCCESS;
                     }
+
                     return Constants.NOT_FOUND;
                 }
                 catch (Exception ex)
@@ -106,9 +112,36 @@ namespace SIFO.APIService.User.Repository.Implementations
             }
         }
 
-         public async Task<Users> GetUserById(long? id)
+
+        public async Task<UserResponse> GetUserById(long? id)
         {
-            return await _context.Users.AsNoTracking().Where(a=>a.Id == id).SingleOrDefaultAsync();
+
+            var tokenData = _commonService.GetDataFromToken();
+
+            var userData = from user in _context.Users
+                           join role in _context.Roles on user.RoleId equals role.Id
+                           join authtype in _context.AuthenticationType on user.AuthenticationType equals authtype.Id
+                           where user.RoleId.ToString() == tokenData.Result.ParentRoleId && user.Id == id
+                           select new UserResponse
+                           {
+                               Id = user.Id,
+                               FirstName = user.FirstName,
+                               LastName = user.LastName,
+                               Email = user.Email,
+                               PhoneNumber = user.PhoneNumber,
+                               RoleId = user.RoleId,
+                               RoleName = role.Name,
+                               FiscalCode = user.FiscalCode,
+                               AuthenticationType = user.AuthenticationType,
+                               AuthenticationName = authtype.AuthType,
+                               ProfileImg = user.ProfileImg,
+                               IsActive = user.IsActive,
+                           };
+
+            var query = userData.ToQueryString();
+            Console.WriteLine(query);
+
+            return await userData.FirstOrDefaultAsync();
         }
 
         public async Task<string> UpdateUserAsync(Users user)
@@ -127,17 +160,27 @@ namespace SIFO.APIService.User.Repository.Implementations
 
         public async Task<PagedResponse<UserResponse>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
         {
+            var tokenData = _commonService.GetDataFromToken();
 
-            var query = _context.Users.Select(user => new UserResponse
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                FiscalCode = user.FiscalCode,
-                IsActive = user.IsActive
-            });
+            var query = from user in _context.Users
+                        join role in _context.Roles on user.RoleId equals role.Id
+                        join authtype in _context.AuthenticationType on user.AuthenticationType equals authtype.Id
+                        where user.RoleId.ToString() == tokenData.Result.ParentRoleId 
+                        select new UserResponse
+                        {
+                            Id = user.Id,
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Email = user.Email,
+                            PhoneNumber = user.PhoneNumber,
+                            RoleId = user.RoleId,
+                            RoleName = role.Name,
+                            FiscalCode = user.FiscalCode,
+                            AuthenticationType = user.AuthenticationType,
+                            AuthenticationName = authtype.AuthType,
+                            ProfileImg = user.ProfileImg,
+                            IsActive = user.IsActive,
+                        };
 
             var count = query.Count();
             PagedResponse<UserResponse> pagedResponse = new PagedResponse<UserResponse>();

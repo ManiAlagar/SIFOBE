@@ -27,6 +27,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                     var authenticationType = await _context.AuthenticationType.Where(a => a.Id == userData.AuthenticationType).SingleOrDefaultAsync();
                     userData.AuthType = authenticationType.AuthType;
                     userData.RoleName = roles.Name;
+                    userData.ParentRole = await _context.Roles.Where(x => x.ParentRoleId == roles.Id).Select(a => a.Id).FirstOrDefaultAsync();
                 }
                 return userData;
             }
@@ -54,7 +55,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                           AuthenticationType = user.AuthenticationType,
                                           AuthType = authType.AuthType,
                                           RoleName = role.Name,
-                                          ParentRole = _context.Roles.Where(r => r.ParentRoleId == user.RoleId).ToList()
+                                          ParentRole = role.ParentRoleId
                                       }).SingleOrDefaultAsync();
                 return userData;
             }

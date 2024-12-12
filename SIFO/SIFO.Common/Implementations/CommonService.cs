@@ -82,7 +82,9 @@ namespace SIFO.Utility.Implementations
                 Role = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value, 
                 RoleId = Convert.ToInt64(claims.FirstOrDefault(c => c.Type == "RoleId")?.Value),
                 FullName = claims.FirstOrDefault(c => c.Type == "UserName")?.Value,
-                Email = claims.FirstOrDefault(c => c.Type == "Email")?.Value
+                Email = claims.FirstOrDefault(c => c.Type == "Email")?.Value,
+                ParentRoleId = claims.FirstOrDefault(c => c.Type == "ParentRoleId")?.Value
+
             };
             return user;
         }

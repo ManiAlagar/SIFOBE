@@ -8,7 +8,7 @@ namespace SIFO.APIService.User.Repository.Contracts
         public Task<string> CreateUserAsync(Users user);
         public Task<string> CheckIfEmailOrPhoneExists(string email, string phoneNumber,long? userId = 0);
         public Task<string> DeleteUserById(long id);
-        public Task<Users> GetUserById(long? id);
+        public Task<UserResponse> GetUserById(long? id);
         public Task<Role> GetRoleById(long? id);
         public Task<List<UserResponse>> GetUserByRoleId(long? roleId);
         public Task<string> UpdateUserAsync(Users user);

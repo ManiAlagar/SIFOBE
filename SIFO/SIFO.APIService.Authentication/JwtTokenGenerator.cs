@@ -30,11 +30,13 @@ namespace SIFO.APIService.Authentication
             Claim RoleId = new Claim("RoleId", user.RoleId.ToString());
             Claim UserName = new Claim("UserName",$"{user.FirstName} {user.LastName}");
             Claim Roles = new Claim(ClaimTypes.Role, user.RoleName);
+            Claim ParentRoleId = new Claim("ParentRoleId", user.ParentRole.ToString());
             claims.Add(Email);
             claims.Add(UserId);
             claims.Add(UserName);
             claims.Add(Roles);
             claims.Add(RoleId);
+            claims.Add(ParentRoleId);
 
             var securityToken = new SecurityTokenDescriptor()
             {
