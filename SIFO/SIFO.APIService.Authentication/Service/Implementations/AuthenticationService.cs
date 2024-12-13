@@ -29,27 +29,62 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             _sendGridService = sendGridService;
             _twilioRepository = twilioRepository;
         }
-        public async Task<ApiResponse<object>> LoginAsync(LoginRequest request)
+        //public async Task<ApiResponse<object>> LoginAsync(LoginRequest request)
+        //{
+        //    if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+        //        return ApiResponse<object>.BadRequest("mail or password cannot be empty");
+
+        //    var userData = await _authenticationRepository.LoginAsync(request);
+
+        //    if (userData == null || userData.PswdUpdatedAt < DateTime.UtcNow.AddMonths(-6))
+        //        return ApiResponse<object>.UnAuthorized("invalid email and/or password");
+
+        //    var otpResponse = await _commonService.SendOtpRequestAsync(userData.Id, "Login", userData.AuthenticationType.Value);
+
+        //    if (otpResponse != Constants.SUCCESS)
+        //        return ApiResponse<object>.InternalServerError();
+
+        //    var response = new
+        //    {
+        //        UserId = userData.Id,
+        //        Sid = await _twilioRepository.GetServiceIdbyUserIDAsync(userData.Id),
+        //    };
+        //    return ApiResponse<object>.Success(otpResponse, response);
+        //}
+        public async Task<ApiResponse<LoginResponse>> LoginAsync(LoginRequest request)
         {
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
-                return ApiResponse<object>.BadRequest("mail or password cannot be empty");
+                return ApiResponse<LoginResponse>.BadRequest("mail or password cannot be empty");
 
             var userData = await _authenticationRepository.LoginAsync(request);
-
             if (userData == null || userData.PswdUpdatedAt < DateTime.UtcNow.AddMonths(-6))
-                return ApiResponse<object>.UnAuthorized("invalid email and/or password");
+                return ApiResponse<LoginResponse>.UnAuthorized("invalid email and/or password");
 
-            var otpResponse = await _commonService.SendOtpRequestAsync(userData.Id, "Login", userData.AuthenticationType.Value);
+            var accessToken = _tokenGenerator.GenerateToken(userData);
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.Email = userData.Email;
+            loginResponse.UserName = $"{userData.FirstName} {userData.LastName}";
+            loginResponse.Token = accessToken;
+            loginResponse.RoleId = userData.RoleId;
+            loginResponse.RoleName = userData.RoleName ?? string.Empty;
+            loginResponse.MenuAccess = await _authenticationRepository.GetPageByUserIdAsync(userData.Id);
+            loginResponse.Id = userData.Id;
+            loginResponse.IsTempPassword = userData.IsTempPassword == true;
+            loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId.Value);
+            loginResponse.ParentRoleId = userData.ParentRole;
 
-            if (otpResponse != Constants.SUCCESS)
-                return ApiResponse<object>.InternalServerError();
-
-            var response = new
+            var userSessionManagement = new UserSessionManagement
             {
                 UserId = userData.Id,
-                Sid = await _twilioRepository.GetServiceIdbyUserIDAsync(userData.Id),
+                DtLogin = DateTime.UtcNow,
+                DtCreation = DateTime.UtcNow,
+                DtLogout = null,
+                IPAccess = await _commonService.GetIpAddress(),
+                TokenSession = accessToken
             };
-            return ApiResponse<object>.Success(otpResponse, response);
+            //await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
+
+            return ApiResponse<LoginResponse>.Success(Constants.SUCCESS, loginResponse);
         }
 
         public async Task<ApiResponse<string>> ForgotPasswordAsync(ForgotPasswordRequest request)

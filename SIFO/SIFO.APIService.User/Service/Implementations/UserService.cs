@@ -7,6 +7,7 @@ using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
 using SIFO.Utility.Implementations;
+using System.Diagnostics.Eventing.Reader;
 
 namespace SIFO.APIService.User.Service.Implementations
 {
@@ -34,10 +35,21 @@ namespace SIFO.APIService.User.Service.Implementations
             var mappedResult  = _mapper.Map<Users>(request);
             var userData = await _userRepository.CreateUserAsync(mappedResult);
 
-            if (userData is not null)
+            if (userData == Constants.SUCCESS )
                 return ApiResponse<string>.Created(Constants.SUCCESS);
+            else if (userData==Constants.INVALID_ROLE)
+            {
+                return ApiResponse<string>.BadRequest(Constants.INVALID_ROLE);
+            }
+            else
+            {
+                //success
+            }
 
             return ApiResponse<string>.InternalServerError("Something went wrong while creating the user.");
+
+
+  
         }
 
        public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
@@ -56,8 +68,8 @@ namespace SIFO.APIService.User.Service.Implementations
         {
             var response = await _userRepository.DeleteUserById(id);
 
-            if (response == Constants.NOT_FOUND)
-                return new ApiResponse<string>(StatusCodes.Status404NotFound);
+            if (response == Constants.INVALID_ROLE)
+                return  ApiResponse<string>.BadRequest();
 
             return ApiResponse<string>.Success(Constants.SUCCESS);
         }
@@ -65,10 +77,9 @@ namespace SIFO.APIService.User.Service.Implementations
         public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest request)
         {
             var tokenData =await _commonService.GetDataFromToken();
-            var users = await GetUserById(request.UserId);
-
-            if (users is null)
-                return ApiResponse<string>.NotFound();
+            var users = await _userRepository.GetUserById(request.UserId);
+            if (users == null)
+                return ApiResponse<string>.Forbidden("You are not allowed to edit this user");
             var checkResult = await _userRepository.CheckIfEmailOrPhoneExists(request.Email, request.PhoneNumber, request.UserId);
             
             if (checkResult != Constants.SUCCESS)
@@ -78,8 +89,18 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.Id = request.UserId.Value;
             mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
 
-            var result=  await _userRepository.UpdateUserAsync(mappedResult);
-            return ApiResponse<string>.Success(Constants.SUCCESS);
+            var result=  await _userRepository.UpdateUserAsync(mappedResult, users.RoleId, tokenData.ParentRoleId);
+            if (result == Constants.SUCCESS){
+                return ApiResponse<string>.Success(Constants.SUCCESS);
+            }
+            else if(result == Constants.INVALID_ROLE) 
+            {
+                return ApiResponse<string>.BadRequest(Constants.INVALID_ROLE);
+            }
+            else{
+                //nothing 
+            }
+            return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
         }
 
         public async Task<ApiResponse<UserResponse>> GetUserById(long? id)

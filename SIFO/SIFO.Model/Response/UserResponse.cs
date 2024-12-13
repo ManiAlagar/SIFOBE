@@ -16,6 +16,7 @@
         public bool? IsActive { get; set; } = true;
         public long? AuthenticationType { get; set; }
         public string AuthenticationName { get; set; }
+        public long? ParentRoleId { get; set; }
     }
 
 }

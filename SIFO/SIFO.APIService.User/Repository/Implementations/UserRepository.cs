@@ -26,25 +26,35 @@ namespace SIFO.APIService.User.Repository.Implementations
             {
                 try
                 {
+                    
                     var tokenData = _commonService.GetDataFromToken();
-                    var encryptedPassword = await _commonService.EncryptPassword(user.PasswordHash);
-                    var userData = new Users()
+                    if(user.RoleId.ToString() == tokenData.Result.ParentRoleId)
                     {
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Email = user.Email,
-                        PasswordHash = encryptedPassword,
-                        PhoneNumber = user.PhoneNumber,
-                        RoleId = user.RoleId,
-                        FiscalCode = user.FiscalCode,
-                        CreatedDate = DateTime.UtcNow,
-                        CreatedBy = tokenData.Id,
-                        IsTempPassword = true
-                    };
-                    var result = await _context.Users.AddAsync(userData);
-                    await _context.SaveChangesAsync();
-                    await _context.Database.CommitTransactionAsync();
-                    return Constants.SUCCESS;
+                        var encryptedPassword = await _commonService.EncryptPassword(user.PasswordHash);
+                        var userData = new Users()
+                        {
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Email = user.Email,
+                            PasswordHash = encryptedPassword,
+                            PhoneNumber = user.PhoneNumber,
+                            RoleId = user.RoleId,
+                            FiscalCode = user.FiscalCode,
+                            CreatedDate = DateTime.UtcNow,
+                            CreatedBy = tokenData.Id,
+                            IsTempPassword = true,
+                            AuthenticationType = 1
+                        };
+                        var result = await _context.Users.AddAsync(userData);
+                        await _context.SaveChangesAsync();
+                        await _context.Database.CommitTransactionAsync();
+                        return Constants.SUCCESS;
+                    }
+                    else
+                    {
+                        return Constants.INVALID_ROLE;
+                    }
+              
                 }
                 catch (Exception ex)
                 {
@@ -89,7 +99,7 @@ namespace SIFO.APIService.User.Repository.Implementations
                     var userToDelete = await (from user in _context.Users
                                               join role in _context.Roles on user.RoleId equals role.Id
                                               where role.ParentRoleId == tokenData.Result.RoleId && user.Id == id
-                                              select user).SingleOrDefaultAsync();
+                                              select user).FirstOrDefaultAsync();
 
                     if (userToDelete != null)
                     {
@@ -102,7 +112,7 @@ namespace SIFO.APIService.User.Repository.Implementations
                         return Constants.SUCCESS;
                     }
 
-                    return Constants.NOT_FOUND;
+                    return Constants.INVALID_ROLE;
                 }
                 catch (Exception ex)
                 {
@@ -120,8 +130,8 @@ namespace SIFO.APIService.User.Repository.Implementations
 
             var userData = from user in _context.Users
                            join role in _context.Roles on user.RoleId equals role.Id
-                           join authtype in _context.AuthenticationType on user.AuthenticationType equals authtype.Id
-                           where user.RoleId.ToString() == tokenData.Result.ParentRoleId && user.Id == id
+                           //join authtype in _context.AuthenticationType on user.AuthenticationType equals authtype.Id
+                           where user.RoleId.ToString() == tokenData.Result.ParentRoleId && user.Id == id 
                            select new UserResponse
                            {
                                Id = user.Id,
@@ -132,10 +142,11 @@ namespace SIFO.APIService.User.Repository.Implementations
                                RoleId = user.RoleId,
                                RoleName = role.Name,
                                FiscalCode = user.FiscalCode,
-                               AuthenticationType = user.AuthenticationType,
-                               AuthenticationName = authtype.AuthType,
+                               AuthenticationType = 1,
+                               AuthenticationName = "Email",
                                ProfileImg = user.ProfileImg,
                                IsActive = user.IsActive,
+                               ParentRoleId = role.ParentRoleId,
                            };
 
             var query = userData.ToQueryString();
@@ -144,13 +155,17 @@ namespace SIFO.APIService.User.Repository.Implementations
             return await userData.FirstOrDefaultAsync();
         }
 
-        public async Task<string> UpdateUserAsync(Users user)
+        public async Task<string> UpdateUserAsync(Users user,long? existingUserParentId,string parentRoleId)
         {
             try
             {
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync(); 
-                return Constants.SUCCESS;
+                if (existingUserParentId.ToString() == parentRoleId)
+                {
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                    return Constants.SUCCESS;
+                }
+                return Constants.INVALID_ROLE;
             }
             catch (Exception ex)
             {
@@ -180,7 +195,9 @@ namespace SIFO.APIService.User.Repository.Implementations
                             AuthenticationName = authtype.AuthType,
                             ProfileImg = user.ProfileImg,
                             IsActive = user.IsActive,
+                            ParentRoleId = user.ParentRole,
                         };
+            var sqlQuery = query.ToQueryString();
 
             var count = query.Count();
             PagedResponse<UserResponse> pagedResponse = new PagedResponse<UserResponse>();

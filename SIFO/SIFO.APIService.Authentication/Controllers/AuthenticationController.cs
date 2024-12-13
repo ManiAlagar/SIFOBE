@@ -60,7 +60,7 @@ namespace SIFO.APIService.Authentication.Controllers
 
         [HttpPut]
         [Route("ChangePassword")]
-        [Authorize(Roles = $"{Constants.ROLE_SUPER_ADMIN},{Constants.ROLE_PP_ADMINISTRATOR},{Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR},{Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR},{Constants.ROLE_ADMINISTRATOR},{Constants.ROLE_HOSPITAL_REFERENT},{Constants.ROLE_DOCTOR},{Constants.ROLE_PP_OPERATOR},{Constants.ROLE_RETAIL_PHARMACY_SUPERVISOR},{Constants.ROLE_RETAIL_PHARMACY_OPERATOR}")]
+        [Authorize(Roles = $"{Constants.ROLE_SUPER_ADMIN},{Constants.ROLE_QC_ADMINISTRATOR},{Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR},{Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR},{Constants.ROLE_ADMINISTRATOR},{Constants.ROLE_HOSPITAL_REFERENT},{Constants.ROLE_DOCTOR},{Constants.ROLE_QC_OPERATOR},{Constants.ROLE_RETAIL_PHARMACY_SUPERVISOR},{Constants.ROLE_RETAIL_PHARMACY_OPERATOR}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]

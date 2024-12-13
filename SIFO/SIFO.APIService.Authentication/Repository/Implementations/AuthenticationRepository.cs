@@ -55,7 +55,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                           AuthenticationType = user.AuthenticationType,
                                           AuthType = authType.AuthType,
                                           RoleName = role.Name,
-                                          ParentRole = role.ParentRoleId
+                                          ParentRole = _context.Roles.Where(a=>a.ParentRoleId == role.Id).Select(a=>a.Id).SingleOrDefault()
                                       }).SingleOrDefaultAsync();
                 return userData;
             }

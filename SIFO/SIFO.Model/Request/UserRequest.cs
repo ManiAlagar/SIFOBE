@@ -11,5 +11,6 @@
         public string PhoneNumber { get; set; }
         public string? PasswordHash { get; set; }
         public long? RoleId { get; set; }
+        public long? ParentRoleId { get; set; }
     }
 }
