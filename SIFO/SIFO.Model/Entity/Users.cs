@@ -11,7 +11,7 @@ namespace SIFO.Model.Entity
         public string? PasswordHash { get; set; }
         public string? PhoneNumber { get; set; }
         public string? ProfileImg { get; set; }
-        public long? RoleId { get; set; }
+        public long RoleId { get; set; }
        // public long? AddressDetailId { get; set; }
         public string? FiscalCode { get; set; }
         public DateTime? CreatedDate { get; set; }
@@ -31,6 +31,6 @@ namespace SIFO.Model.Entity
         public string? UserSid { get; set; }
 
         [NotMapped] 
-        public long? ParentRole { get; set; }
+        public List<long> ParentRole { get; set; }
     }
 }

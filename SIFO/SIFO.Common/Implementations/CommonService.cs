@@ -259,7 +259,7 @@ namespace SIFO.Utility.Implementations
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<string> SaveFileAsync(string base64File, string fileType, string destinationFolder)
+        public async Task<string> SaveFileAsync(string base64File, string? fileType, string destinationFolder)
         {
             try
             {
@@ -543,6 +543,18 @@ namespace SIFO.Utility.Implementations
             if (daysToSubtract < 0)
                 daysToSubtract += 7;
             return date.AddDays(-daysToSubtract).Date;
+        }
+        private static string GetFileTypeFromBase64Prefix(string base64String)
+        {
+            if (base64String.StartsWith("iVBOR"))
+                return "png";
+            if (base64String.StartsWith("/9j/4"))
+                return "jpeg";
+            if (base64String.StartsWith("JVBER"))
+                return "pdf";
+            if (base64String.StartsWith("UEsDB"))
+                return "docx";
+            return "Unknown";
         }
     }
 }

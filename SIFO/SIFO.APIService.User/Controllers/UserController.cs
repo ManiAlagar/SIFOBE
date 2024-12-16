@@ -26,7 +26,7 @@ namespace SIFO.APIService.User.Controllers
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllUsersAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false,  [FromHeader] long? RoleId = null)
+        public async Task<IActionResult> GetAllUsersAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false, [FromHeader] long? RoleId = null)
         {
             try
             {
@@ -39,17 +39,17 @@ namespace SIFO.APIService.User.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
-        
+
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetUserById(long id)
+        public async Task<IActionResult> GetUserById(long id,long roleId)
         {
             try
             {
-                var result = await _userService.GetUserById(id);
+                var result = await _userService.GetUserById(id, roleId);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace SIFO.APIService.User.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateUserAsync([FromRoute]long id,[FromBody] UserRequest request, [FromHeader] long UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
+        public async Task<IActionResult> UpdateUserAsync([FromRoute] long id, [FromBody] UserRequest request, [FromHeader] long UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
         {
             try
             {
@@ -99,8 +99,8 @@ namespace SIFO.APIService.User.Controllers
                 {
                     var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
-                } 
-                request.UserId= id;
+                }
+                request.UserId = id;
                 var result = await _userService.UpdateUserAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
@@ -116,35 +116,16 @@ namespace SIFO.APIService.User.Controllers
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteUserById(long id)
+        public async Task<IActionResult> DeleteUserById(long id,long roleId)
         {
             try
             {
-                var result = await _userService.DeleteUserById(id);
+                var result = await _userService.DeleteUserById(id, roleId);
                 return StatusCode(StatusCodes.Status200OK, result);
             }
             catch (Exception ex)
             {
                 var result = ApiResponse<PagedResponse<Users>>.InternalServerError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, result);
-            }
-        }
-
-        [HttpGet]
-        [Route("userByRoleId/{roleId}")]
-        [ProducesResponseType(typeof(ApiResponse<List<UserResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetUserByRoleIdAsync([FromRoute] long? roleId)
-        {
-            try
-            {
-                var result = await _userService.GetUserByRoleId(roleId);
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-            catch (Exception ex)
-            {
-                var result = ApiResponse<List<UserResponse>>.InternalServerError(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }

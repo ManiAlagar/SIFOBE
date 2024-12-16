@@ -70,8 +70,8 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             loginResponse.MenuAccess = await _authenticationRepository.GetPageByUserIdAsync(userData.Id);
             loginResponse.Id = userData.Id;
             loginResponse.IsTempPassword = userData.IsTempPassword == true;
-            loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId.Value);
-            loginResponse.ParentRoleId = userData.ParentRole;
+            loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId);
+            loginResponse.ParentRoleId = userData.ParentRole.ToList();
 
             var userSessionManagement = new UserSessionManagement
             {
@@ -126,49 +126,49 @@ namespace SIFO.APIService.Authentication.Service.Implementations
 
             if (userData == null)
                 return ApiResponse<string>.NotFound("user not found");
-            
-            if(request.OldPassword != userData.PasswordHash)
+
+            if (request.OldPassword != userData.PasswordHash)
                 return ApiResponse<string>.BadRequest("invalid old password");
 
-            bool isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id,request.Password ,false);
+            bool isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, request.Password, false);
             if (!isPasswordUpdated)
                 return ApiResponse<string>.InternalServerError();
             return ApiResponse<string>.Success();
         }
 
-        public async Task<ApiResponse<LoginResponse>> VerifyLoginAsync(long userId)
-        {
-            var userData = await _authenticationRepository.IsUserExists(userId);
+        //public async Task<ApiResponse<LoginResponse>> VerifyLoginAsync(long userId)
+        //{
+        //    var userData = await _authenticationRepository.IsUserExists(userId);
 
-            if (userData == null)
-                return ApiResponse<LoginResponse>.NotFound("user not found");
+        //    if (userData == null)
+        //        return ApiResponse<LoginResponse>.NotFound("user not found");
 
-            var accessToken = _tokenGenerator.GenerateToken(userData);
-            LoginResponse loginResponse = new LoginResponse();
-            loginResponse.Email = userData.Email;
-            loginResponse.UserName = $"{userData.FirstName} {userData.LastName}";
-            loginResponse.Token = accessToken;
-            loginResponse.RoleId = userData.RoleId;
-            loginResponse.RoleName = userData.RoleName ?? string.Empty;
-            loginResponse.MenuAccess = await _authenticationRepository.GetPageByUserIdAsync(userData.Id);
-            loginResponse.Id = userData.Id;
-            loginResponse.IsTempPassword = userData.IsTempPassword == true;
-            loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId.Value);
-            loginResponse.ParentRoleId = userData.ParentRole;
+        //    var accessToken = _tokenGenerator.GenerateToken(userData);
+        //    LoginResponse loginResponse = new LoginResponse();
+        //    loginResponse.Email = userData.Email;
+        //    loginResponse.UserName = $"{userData.FirstName} {userData.LastName}";
+        //    loginResponse.Token = accessToken;
+        //    loginResponse.RoleId = userData.RoleId;
+        //    loginResponse.RoleName = userData.RoleName ?? string.Empty;
+        //    loginResponse.MenuAccess = await _authenticationRepository.GetPageByUserIdAsync(userData.Id);
+        //    loginResponse.Id = userData.Id;
+        //    loginResponse.IsTempPassword = userData.IsTempPassword == true;
+        //    loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId.Value);
+        //    loginResponse.ParentRoleId = userData.ParentRole;
 
-            var userSessionManagement = new UserSessionManagement
-            {
-                UserId = userData.Id,
-                DtLogin = DateTime.UtcNow,
-                DtCreation = DateTime.UtcNow,
-                DtLogout = null,
-                IPAccess = await _commonService.GetIpAddress(),
-                TokenSession = accessToken
-            };
-            await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
+        //    var userSessionManagement = new UserSessionManagement
+        //    {
+        //        UserId = userData.Id,
+        //        DtLogin = DateTime.UtcNow,
+        //        DtCreation = DateTime.UtcNow,
+        //        DtLogout = null,
+        //        IPAccess = await _commonService.GetIpAddress(),
+        //        TokenSession = accessToken
+        //    };
+        //    await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
 
-            return ApiResponse<LoginResponse>.Success(Constants.SUCCESS, loginResponse);
-        }
+        //    return ApiResponse<LoginResponse>.Success(Constants.SUCCESS, loginResponse);
+        //}
 
         public async Task<ApiResponse<long>> LogoutAsync()
         {

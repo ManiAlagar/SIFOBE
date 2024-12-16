@@ -27,7 +27,6 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                     var authenticationType = await _context.AuthenticationType.Where(a => a.Id == userData.AuthenticationType).SingleOrDefaultAsync();
                     userData.AuthType = authenticationType.AuthType;
                     userData.RoleName = roles.Name;
-                    userData.ParentRole = await _context.Roles.Where(x => x.ParentRoleId == roles.Id).Select(a => a.Id).FirstOrDefaultAsync();
                 }
                 return userData;
             }
@@ -45,19 +44,27 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                 var userData = await (from user in _context.Users
                                       join role in _context.Roles on user.RoleId equals role.Id
                                       join authType in _context.AuthenticationType on user.AuthenticationType equals authType.Id
+                                      join rolePermission in _context.RolePermissions on user.RoleId equals rolePermission.RoleId
                                       where user.Email == request.Email && user.PasswordHash == request.Password
                                       select new Users
                                       {
-                                          Id = user.Id,
-                                          Email = user.Email,
+                                          Id=user.Id,
+                                          Email= user.Email,
                                           PasswordHash = user.PasswordHash,
-                                          RoleId = user.RoleId,
-                                          AuthenticationType = user.AuthenticationType,
+                                          RoleId=  user.RoleId,
+                                         AuthenticationType= user.AuthenticationType,
                                           AuthType = authType.AuthType,
                                           RoleName = role.Name,
-                                          ParentRole = _context.Roles.Where(a=>a.ParentRoleId == role.Id).Select(a=>a.Id).SingleOrDefault()
-                                      }).SingleOrDefaultAsync();
+                                          ParentRole = _context.RolePermissions
+                                                          .Where(rp => rp.RoleId == user.RoleId)
+                                                          .Select(rp => rp.AllowedRoleId)
+                                                          .ToList()
+                                      }).FirstOrDefaultAsync();
+
                 return userData;
+
+         
+
             }
             catch (Exception ex)
             {

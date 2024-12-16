@@ -30,7 +30,7 @@ namespace SIFO.APIService.Authentication
             Claim RoleId = new Claim("RoleId", user.RoleId.ToString());
             Claim UserName = new Claim("UserName",$"{user.FirstName} {user.LastName}");
             Claim Roles = new Claim(ClaimTypes.Role, user.RoleName);
-            Claim ParentRoleId = new Claim("ParentRoleId", user.ParentRole.ToString());
+            Claim ParentRoleId = new Claim("ParentRoleId", string.Join(",",user.ParentRole));
             claims.Add(Email);
             claims.Add(UserId);
             claims.Add(UserName);
