@@ -8,7 +8,8 @@
         public long? ParentPageId { get; set; }  
         public string MenuIcon { get; set; }  
         public string PageUrl { get; set; }  
-        public string EventName { get; set; }  
+        public string EventName { get; set; }
+        public long? userRoleId { get; set; }
     }
 }
 

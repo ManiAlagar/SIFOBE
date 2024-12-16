@@ -5,6 +5,7 @@ using SIFO.Model.Response;
 using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using SIFO.APIService.User.Repository.Contracts;
+using System.Security.Claims;
 
 
 namespace SIFO.APIService.User.Repository.Implementations
@@ -173,14 +174,14 @@ namespace SIFO.APIService.User.Repository.Implementations
             }
         }
 
-        public async Task<PagedResponse<UserResponse>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
+        public async Task<PagedResponse<UserResponse>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, long? RoleId)
         {
             var tokenData = _commonService.GetDataFromToken();
 
             var query = from user in _context.Users
                         join role in _context.Roles on user.RoleId equals role.Id
                         join authtype in _context.AuthenticationType on user.AuthenticationType equals authtype.Id
-                        where user.RoleId.ToString() == tokenData.Result.ParentRoleId 
+                        where role.ParentRoleId != null && user.RoleId != tokenData.Result.RoleId && user.RoleId == RoleId || RoleId == null
                         select new UserResponse
                         {
                             Id = user.Id,

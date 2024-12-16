@@ -149,7 +149,8 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                  IsActive = page.IsActive,
                                  ParentPageId = page.ParentPageId,
                                  MenuIcon = page.MenuIcon,
-                                 PageUrl = page.PageUrl, 
+                                 PageUrl = page.PageUrl,
+                                 userRoleId = page.userRoleId,
                                  EventName = page.EventName
                              };
 

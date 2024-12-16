@@ -52,14 +52,14 @@ namespace SIFO.APIService.User.Service.Implementations
   
         }
 
-       public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
+       public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, long? RoleId)
         {
             var isValid = await HelperService.ValidateGet(pageIndex, pageSize, filter, sortColumn, sortDirection);
 
             if (isValid.Any())
                 return ApiResponse<PagedResponse<UserResponse>>.BadRequest(isValid[0]);
 
-            var response = await _userRepository.GetAllUsersAsync(pageIndex, pageSize, filter, sortColumn, sortDirection, isAll);
+            var response = await _userRepository.GetAllUsersAsync(pageIndex, pageSize, filter, sortColumn, sortDirection, isAll, RoleId);
 
             return ApiResponse<PagedResponse<UserResponse>>.Success(Constants.SUCCESS, response); 
        }

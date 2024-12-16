@@ -26,11 +26,11 @@ namespace SIFO.APIService.User.Controllers
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllUsersAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false)
+        public async Task<IActionResult> GetAllUsersAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false,  [FromHeader] long? RoleId = null)
         {
             try
             {
-                var result = await _userService.GetAllUsersAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
+                var result = await _userService.GetAllUsersAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll, RoleId);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
