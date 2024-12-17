@@ -39,24 +39,24 @@ namespace SIFO.APIService.Authentication.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Route("Verify-Login")]
-        //[AllowAnonymous]
-        //[ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status404NotFound)]
-        //public async Task<IActionResult> VerifyLoginAsync([FromHeader] long UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor , [FromHeader] string? OtpCode)
-        //{
-        //    try
-        //    {
-        //        var result = await _authService.VerifyLoginAsync(UserId);
-        //        return StatusCode(result.StatusCode, result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var result = ApiResponse<string>.InternalServerError;
-        //        return StatusCode(StatusCodes.Status500InternalServerError, result);
-        //    }
-        //}
+        [HttpPost]
+        [Route("Verify-Login")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> VerifyLoginAsync([FromHeader] long UserId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
+        {
+            try
+            {
+                var result = await _authService.VerifyLoginAsync(UserId);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
 
         [HttpPut]
         [Route("ChangePassword")]

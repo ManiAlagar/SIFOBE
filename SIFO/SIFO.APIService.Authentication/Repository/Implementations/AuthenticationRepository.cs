@@ -27,6 +27,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                     var authenticationType = await _context.AuthenticationType.Where(a => a.Id == userData.AuthenticationType).SingleOrDefaultAsync();
                     userData.AuthType = authenticationType.AuthType;
                     userData.RoleName = roles.Name;
+                    userData.ParentRole = await _context.RolePermissions.Where(rp => rp.RoleId == userData.RoleId && rp.IsActive == true).Select(rp => rp.AllowedRoleId).ToListAsync();
                 }
                 return userData;
             }
@@ -45,7 +46,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                       join role in _context.Roles on user.RoleId equals role.Id
                                       join authType in _context.AuthenticationType on user.AuthenticationType equals authType.Id
                                       join rolePermission in _context.RolePermissions on user.RoleId equals rolePermission.RoleId
-                                      where user.Email == request.Email && user.PasswordHash == request.Password
+                                      where user.Email == request.Email && user.PasswordHash == request.Password && user.IsActive == true
                                       select new Users
                                       {
                                           Id=user.Id,
@@ -56,7 +57,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                           AuthType = authType.AuthType,
                                           RoleName = role.Name,
                                           ParentRole = _context.RolePermissions
-                                                          .Where(rp => rp.RoleId == user.RoleId)
+                                                          .Where(rp => rp.RoleId == user.RoleId && rp.IsActive == true)
                                                           .Select(rp => rp.AllowedRoleId)
                                                           .ToList()
                                       }).FirstOrDefaultAsync();
