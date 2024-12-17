@@ -129,8 +129,8 @@ namespace SIFO.APIService.User.Service.Implementations
         public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest request)
         {
             var tokenData = await _commonService.GetDataFromToken();
-            var users = await _userRepository.GetUserById(request.UserId,request.RoleId.Value,tokenData.ParentRoleId);
-            if (users == null)
+            var passwordData = await _userRepository.GetPasswordByUserId(request.UserId.Value);
+            if (passwordData == null)
                 return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
 
             if (!tokenData.ParentRoleId.Contains(request.RoleId.ToString()))
@@ -152,6 +152,7 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.Id = request.UserId.Value;
             mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
             mappedResult.UpdatedDate = DateTime.UtcNow;
+            mappedResult.PasswordHash = passwordData;
 
             var result = await _userRepository.UpdateUserAsync(mappedResult);
             if (result == Constants.SUCCESS)

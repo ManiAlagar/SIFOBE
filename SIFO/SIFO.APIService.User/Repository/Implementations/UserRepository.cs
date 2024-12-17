@@ -91,11 +91,33 @@ namespace SIFO.APIService.User.Repository.Implementations
             return Constants.SUCCESS;
         }
 
-        public IQueryable<Users> GetUsersQueryable()
+        public async Task<UserResponse> GetUserById(long? id, long roleId, string parentRoleId)
         {
             try
             {
-                return _context.Users.AsQueryable();
+                var tokenData = _commonService.GetDataFromToken();
+
+                var userData = from user in _context.Users
+                               join role in _context.Roles on user.RoleId equals role.Id
+                               where parentRoleId.Contains(user.RoleId.ToString()) && user.RoleId == roleId && user.Id == id
+                               select new UserResponse
+                               {
+                                   Id = user.Id,
+                                   FirstName = user.FirstName,
+                                   LastName = user.LastName,
+                                   Email = user.Email,
+                                   PhoneNumber = user.PhoneNumber,
+                                   RoleId = user.RoleId,
+                                   RoleName = role.Name,
+                                   FiscalCode = user.FiscalCode,
+                                   AuthenticationType = 1,
+                                   AuthenticationName = "Email",
+                                   ProfileImg = user.ProfileImg,
+                                   IsActive = user.IsActive,
+                                   
+                               };
+
+                return await userData.FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {
@@ -140,31 +162,10 @@ namespace SIFO.APIService.User.Repository.Implementations
         }
 
 
-        public async Task<UserResponse> GetUserById(long? id, long roleId, string parentRoleId)
+        public async Task<string> GetPasswordByUserId(long id)
         {
 
-            var tokenData = _commonService.GetDataFromToken();
-
-            var userData = from user in _context.Users
-                           join role in _context.Roles on user.RoleId equals role.Id
-                           where parentRoleId.Contains(user.RoleId.ToString()) && user.RoleId == roleId && user.Id == id
-                           select new UserResponse
-                           {
-                               Id = user.Id,
-                               FirstName = user.FirstName,
-                               LastName = user.LastName,
-                               Email = user.Email,
-                               PhoneNumber = user.PhoneNumber,
-                               RoleId = user.RoleId,
-                               RoleName = role.Name,
-                               FiscalCode = user.FiscalCode,
-                               AuthenticationType = 1,
-                               AuthenticationName = "Email",
-                               ProfileImg = user.ProfileImg,
-                               IsActive = user.IsActive
-                           };
-
-            return await userData.FirstOrDefaultAsync();
+           return  await _context.Users.Where(a => a.Id == id).Select(a => a.PasswordHash).FirstOrDefaultAsync();
         }
 
         //public async Task<string> UpdateUserAsync(Users user, long? existingUserParentId, string parentRoleId)

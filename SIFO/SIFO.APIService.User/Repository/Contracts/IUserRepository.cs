@@ -11,5 +11,6 @@ namespace SIFO.APIService.User.Repository.Contracts
         public Task<UserResponse> GetUserById(long? id, long roleId,string parentRoleId);
         public Task<string> UpdateUserAsync(Users user);
         public Task<PagedResponse<UserResponse>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, long? RoleId,string ParentRoleId);
+        public Task<string> GetPasswordByUserId(long id);
     }
 }

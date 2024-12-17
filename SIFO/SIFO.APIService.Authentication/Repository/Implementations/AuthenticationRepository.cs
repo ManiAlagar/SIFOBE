@@ -45,7 +45,6 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                 var userData = await (from user in _context.Users
                                       join role in _context.Roles on user.RoleId equals role.Id
                                       join authType in _context.AuthenticationType on user.AuthenticationType equals authType.Id
-                                      join rolePermission in _context.RolePermissions on user.RoleId equals rolePermission.RoleId
                                       where user.Email == request.Email && user.PasswordHash == request.Password && user.IsActive == true
                                       select new Users
                                       {
