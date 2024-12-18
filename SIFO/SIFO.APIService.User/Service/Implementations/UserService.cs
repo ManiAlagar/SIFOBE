@@ -133,7 +133,7 @@ namespace SIFO.APIService.User.Service.Implementations
             if (passwordData == null)
                 return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
 
-            if (!tokenData.ParentRoleId.Contains(request.RoleId.ToString()))
+            if (!tokenData.ParentRoleId.Contains(request.RoleId.ToString()) || tokenData.RoleId != request.RoleId)
                 return ApiResponse<string>.Forbidden(Constants.INVALID_ROLE);
             if (!string.IsNullOrEmpty(request.ProfileImg))
             {
