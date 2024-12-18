@@ -1,11 +1,10 @@
-﻿using SIFO.Common.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using SIFO.APIService.User.Repository.Contracts;
+using SIFO.Common.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Entity;
 using SIFO.Model.Response;
 using System.Linq.Dynamic.Core;
-using Microsoft.EntityFrameworkCore;
-using SIFO.APIService.User.Repository.Contracts;
-using System.Security.Claims;
 
 
 namespace SIFO.APIService.User.Repository.Implementations
@@ -95,11 +94,11 @@ namespace SIFO.APIService.User.Repository.Implementations
         {
             try
             {
-                var tokenData = _commonService.GetDataFromToken();
+        
 
                 var userData = from user in _context.Users
                                join role in _context.Roles on user.RoleId equals role.Id
-                               where parentRoleId.Contains(user.RoleId.ToString()) && user.RoleId == roleId && user.Id == id
+                               where user.RoleId == roleId && user.Id == id
                                select new UserResponse
                                {
                                    Id = user.Id,

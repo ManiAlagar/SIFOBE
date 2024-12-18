@@ -64,7 +64,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
 
             var password = await _commonService.GenerateRandomPassword(12);
-            var passwordHash = await _commonService.EncryptPassword(password);
+            var passwordHash = password;//await _commonService.EncryptPassword(password);
             
             var isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, passwordHash,true);
             if(!isPasswordUpdated) 

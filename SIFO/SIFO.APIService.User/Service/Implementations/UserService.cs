@@ -166,7 +166,7 @@ namespace SIFO.APIService.User.Service.Implementations
             var tokenData = await _commonService.GetDataFromToken();
 
 
-            if (tokenData.ParentRoleId.Contains(RoleId.ToString()))
+            if (tokenData.ParentRoleId.Contains(RoleId.ToString()) || tokenData.RoleId == RoleId)
             {
                 var user = await _userRepository.GetUserById(id, RoleId, tokenData.ParentRoleId);
                 if (user == null)
