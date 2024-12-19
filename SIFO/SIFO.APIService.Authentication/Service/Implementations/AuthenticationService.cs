@@ -118,7 +118,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             loginResponse.MenuAccess = await _authenticationRepository.GetPageByUserIdAsync(userData.Id);
             loginResponse.Id = userData.Id;
             loginResponse.IsTempPassword = userData.IsTempPassword == true;
-            loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId.Value);
+            loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId);
 
             var userSessionManagement = new UserSessionManagement
             {

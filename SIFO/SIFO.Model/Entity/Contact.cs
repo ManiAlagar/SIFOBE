@@ -11,7 +11,13 @@ namespace SIFO.Model.Entity
         public long Id { get; set; }
 
         [Column("HospitalStructureId")]
-        public long HospitalId { get; set; }
+        public long? HospitalId { get; set; }
+
+        [Column("PharmacyId")]
+        public long? PharmacyId { get; set; }
+
+        [Column("FacilityId")]
+        public long? FacilityId { get; set; }
 
         [Column("ContactName")]
         public string ContactName { get; set; }

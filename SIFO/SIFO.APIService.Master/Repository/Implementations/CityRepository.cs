@@ -39,8 +39,7 @@ namespace SIFO.APIService.Master.Repository.Implementations
                             };
 
 
-                var count = (from city in _context.Cities
-                             select city).Count();
+                var count = _context.Cities.Count();
 
                 PagedResponse<CityResponse> pagedResponse = new PagedResponse<CityResponse>();
 

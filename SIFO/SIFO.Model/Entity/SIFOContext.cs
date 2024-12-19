@@ -19,7 +19,10 @@ namespace SIFO.Model.Entity
         public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<Page> Pages { get; set; }
         public virtual DbSet<PageRoleMapping> PageRoleMapping { get; set; }
-        public virtual DbSet<Hospital> Hospitals { get; set; }
+        //public virtual DbSet<Hospital> Hospitals { get; set; }
+        public virtual DbSet<HospitalFacility> HospitalFacilities { get; set; }
+        public virtual DbSet<FacilityPharmacyMapping> FacilityPharmacyMappings { get; set; }
+        public virtual DbSet<UserPharmacyMapping> UserPharmacyMappings { get; set; }
         public virtual DbSet<Pharmacy> Pharmacies { get; set; }
         public virtual DbSet<Contact> Contacts { get; set; }
         public virtual DbSet<AddressDetail> AddressDetails { get; set; }

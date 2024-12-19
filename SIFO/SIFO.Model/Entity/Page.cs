@@ -14,20 +14,20 @@ namespace SIFO.Model.Entity
         public string PageName { get; set; }
 
         [Column("Description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Column("IsActive")]
-        public bool IsActive { get; set; }
+        public bool? IsActive { get; set; }
 
         [Column("ParentPageId")]
         public long? ParentPageId { get; set; }
 
         [Column("MenuIcon")]
-        public string MenuIcon { get; set; }
+        public string? MenuIcon { get; set; }
 
         [Column("PageUrl")]
-        public string PageUrl { get; set; }
+        public string? PageUrl { get; set; }
         [Column("EventName")] 
-        public string EventName { get; set; }
+        public string? EventName { get; set; }
     }
 }

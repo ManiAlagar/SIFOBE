@@ -370,8 +370,8 @@ namespace SIFO.Utility.Implementations
         public async Task<long> AddressDetailExistsAsync(string? address, long? cityId, long? region, long? countryId, long? zipcode)
         {
             return await _context.AddressDetails
-                .Where(c => c.Address.ToLower() == address.Trim().ToLower() || c.CityId == cityId
-                 || c.Region == region || c.CountryId == countryId || c.Zipcode == zipcode).Select(a => a.Id).FirstOrDefaultAsync();
+                .Where(c => c.Address.ToLower() == address.Trim().ToLower() && c.CityId == cityId
+                 && c.Region == region && c.CountryId == countryId && c.Zipcode == zipcode).Select(a => a.Id).FirstOrDefaultAsync();
         }
 
         public async Task<AddressDetail> CreateAddressDetailAsync(AddressDetail entity)

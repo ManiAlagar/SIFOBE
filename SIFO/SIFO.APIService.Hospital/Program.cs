@@ -1,10 +1,9 @@
-using Microsoft.EntityFrameworkCore;
 using Serilog;
-using SIFO.APIService.Hospital;
-using SIFO.Core;
-using SIFO.Core.MiddleWare;
 using SIFO.Model;
 using SIFO.Model.Entity;
+using SIFO.Core.MiddleWare;
+using SIFO.APIService.Hospital;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 

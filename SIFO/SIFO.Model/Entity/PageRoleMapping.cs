@@ -17,6 +17,12 @@ namespace SIFO.Model.Entity
         public long RoleId { get; set; }
         
         [Column("IsActive")]
-        public bool IsActive { get; set; }
+        public bool? IsActive { get; set; }
+
+        [Column("CanUpdate")]
+        public bool? CanUpdate { get; set; }
+
+        [Column("CanDelete")]
+        public bool? CanDelete { get; set; }
     }
 }

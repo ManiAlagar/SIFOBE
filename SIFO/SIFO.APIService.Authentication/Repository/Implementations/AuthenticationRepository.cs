@@ -145,7 +145,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                              {
                                  Id = page.Id,
                                  PageName = page.PageName,
-                                 IsActive = page.IsActive,
+                                 IsActive = page.IsActive.Value,
                                  ParentPageId = page.ParentPageId,
                                  MenuIcon = page.MenuIcon,
                                  PageUrl = page.PageUrl, 

@@ -35,8 +35,7 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 IsActive = country.IsActive,
                             };
 
-                var count = (from country in _context.Countries
-                             select country).Count();
+                var count = _context.Countries.Count();
 
                 PagedResponse<CountryResponse> pagedResponse = new PagedResponse<CountryResponse>();
 
