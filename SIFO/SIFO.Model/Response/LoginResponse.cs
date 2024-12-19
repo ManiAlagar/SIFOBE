@@ -14,5 +14,6 @@ namespace SIFO.Model.Response
         public bool isFirstAccess { get; set; }
         public bool IsTempPassword { get; set; }
         public List<RoleResponse?> hasCreatePermission { get;set;}
+        public List<long> ParentRoleId { get;set;}
     }
 }

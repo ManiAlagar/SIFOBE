@@ -27,6 +27,7 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                     var authenticationType = await _context.AuthenticationType.Where(a => a.Id == userData.AuthenticationType).SingleOrDefaultAsync();
                     userData.AuthType = authenticationType.AuthType;
                     userData.RoleName = roles.Name;
+                    userData.ParentRole = await _context.RolePermissions.Where(rp => rp.RoleId == userData.RoleId && rp.IsActive == true).Select(rp => rp.AllowedRoleId).ToListAsync();
                 }
                 return userData;
             }
@@ -44,19 +45,26 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                 var userData = await (from user in _context.Users
                                       join role in _context.Roles on user.RoleId equals role.Id
                                       join authType in _context.AuthenticationType on user.AuthenticationType equals authType.Id
-                                      where user.Email == request.Email && user.PasswordHash == request.Password
+                                      where user.Email == request.Email && user.PasswordHash == request.Password && user.IsActive == true
                                       select new Users
                                       {
-                                          Id = user.Id,
-                                          Email = user.Email,
+                                          Id=user.Id,
+                                          Email= user.Email,
                                           PasswordHash = user.PasswordHash,
-                                          RoleId = user.RoleId,
-                                          AuthenticationType = user.AuthenticationType,
+                                          RoleId=  user.RoleId,
+                                         AuthenticationType= user.AuthenticationType,
                                           AuthType = authType.AuthType,
                                           RoleName = role.Name,
-                                          ParentRole = _context.Roles.Where(r => r.ParentRoleId == user.RoleId).ToList()
-                                      }).SingleOrDefaultAsync();
+                                          ParentRole = _context.RolePermissions
+                                                          .Where(rp => rp.RoleId == user.RoleId && rp.IsActive == true)
+                                                          .Select(rp => rp.AllowedRoleId)
+                                                          .ToList()
+                                      }).FirstOrDefaultAsync();
+
                 return userData;
+
+         
+
             }
             catch (Exception ex)
             {
@@ -148,7 +156,8 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                  IsActive = page.IsActive.Value,
                                  ParentPageId = page.ParentPageId,
                                  MenuIcon = page.MenuIcon,
-                                 PageUrl = page.PageUrl, 
+                                 PageUrl = page.PageUrl,
+                                 userRoleId = page.userRoleId,
                                  EventName = page.EventName
                              };
 

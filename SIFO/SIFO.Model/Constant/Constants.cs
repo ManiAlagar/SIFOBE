@@ -3,14 +3,14 @@
     public static class Constants
     {
         public const string ROLE_SUPER_ADMIN = "Super Admin";
-        public const string ROLE_PP_ADMINISTRATOR = "PP Administrator"; 
+        public const string ROLE_QC_ADMINISTRATOR = "QC Administrator"; 
         public const string ROLE_HOSPITAL_PHARMACY_SUPERVISOR = "Hospital Pharmacy Supervisor"; 
         public const string ROLE_HOSPITAL_PHARMACY_OPERATOR = "Hospital Pharmacy Operator"; 
         //public const string ROLE_SUPER_ADMINISTRATOR = "Administrator / Hospital Referent"; 
         public const string ROLE_ADMINISTRATOR = "Administrator"; 
         public const string ROLE_HOSPITAL_REFERENT = "Hospital Referent"; 
         public const string ROLE_DOCTOR = "Doctor"; 
-        public const string ROLE_PP_OPERATOR = "PP Operator"; 
+        public const string ROLE_QC_OPERATOR = "QC Operator"; 
         public const string ROLE_RETAIL_PHARMACY_SUPERVISOR = "Retail Pharmacy Supervisor"; 
         public const string ROLE_RETAIL_PHARMACY_OPERATOR = "Retail Pharmacy Operator"; 
 
@@ -46,6 +46,7 @@
         public static string ADDRESSDETAIL_NOT_FOUND = "address detail not found";
         public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists"; 
         public static string USER_NOT_AUTHENTICATED = "user not authenticated"; 
+        public static string INVALID_ROLE = "you are restricted to do any operations for this role"; 
 
     }
 }

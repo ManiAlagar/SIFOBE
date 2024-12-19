@@ -7,6 +7,7 @@ using SIFO.Model.Request;
 using SIFO.Model.Response;
 using SIFO.APIService.Authentication.Repository.Contracts;
 using SIFO.APIService.Authentication.Service.Contracts;
+using Twilio.Http;
 
 namespace SIFO.APIService.Authentication.Service.Implementations
 {
@@ -46,12 +47,13 @@ namespace SIFO.APIService.Authentication.Service.Implementations
 
             var response = new
             {
-                UserId = userData.Id,
+                UserId = userData.Id, 
+                AuthenticationType = userData.AuthenticationType,
                 Sid = await _twilioRepository.GetServiceIdbyUserIDAsync(userData.Id),
             };
             return ApiResponse<object>.Success(otpResponse, response);
         }
-
+        
         public async Task<ApiResponse<string>> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.Email))
@@ -62,7 +64,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
 
             var password = await _commonService.GenerateRandomPassword(12);
-            var passwordHash = await _commonService.EncryptPassword(password);
+            var passwordHash = password;//await _commonService.EncryptPassword(password);
             
             var isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, passwordHash,true);
             if(!isPasswordUpdated) 
@@ -91,11 +93,11 @@ namespace SIFO.APIService.Authentication.Service.Implementations
 
             if (userData == null)
                 return ApiResponse<string>.NotFound("user not found");
-            
-            if(request.OldPassword != userData.PasswordHash)
+
+            if (request.OldPassword != userData.PasswordHash)
                 return ApiResponse<string>.BadRequest("invalid old password");
 
-            bool isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id,request.Password ,false);
+            bool isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, request.Password, false);
             if (!isPasswordUpdated)
                 return ApiResponse<string>.InternalServerError();
             return ApiResponse<string>.Success();
@@ -104,9 +106,8 @@ namespace SIFO.APIService.Authentication.Service.Implementations
         public async Task<ApiResponse<LoginResponse>> VerifyLoginAsync(long userId)
         {
             var userData = await _authenticationRepository.IsUserExists(userId);
-
             if (userData == null)
-                return ApiResponse<LoginResponse>.NotFound("user not found");
+                return ApiResponse<LoginResponse>.NotFound();
 
             var accessToken = _tokenGenerator.GenerateToken(userData);
             LoginResponse loginResponse = new LoginResponse();
@@ -119,6 +120,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             loginResponse.Id = userData.Id;
             loginResponse.IsTempPassword = userData.IsTempPassword == true;
             loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId);
+            loginResponse.ParentRoleId = userData.ParentRole.ToList();
 
             var userSessionManagement = new UserSessionManagement
             {
@@ -129,11 +131,10 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 IPAccess = await _commonService.GetIpAddress(),
                 TokenSession = accessToken
             };
-            await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
+            //await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
 
             return ApiResponse<LoginResponse>.Success(Constants.SUCCESS, loginResponse);
-        }
-
+        } 
         public async Task<ApiResponse<long>> LogoutAsync()
         {
             var userData = await _commonService.GetDataFromToken();

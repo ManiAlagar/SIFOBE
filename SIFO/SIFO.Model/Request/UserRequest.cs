@@ -11,5 +11,7 @@
         public string PhoneNumber { get; set; }
         public string? PasswordHash { get; set; }
         public long? RoleId { get; set; }
+        public string? ProfileImg { get; set; }
+        public long? AuthenticationType { get; set; }
     }
 }
