@@ -16,6 +16,9 @@
         public bool? IsActive { get; set; } = true;
         public long? AuthenticationType { get; set; }
         public string AuthenticationName { get; set; }
+        public long CountryId { get; set; }
+        public string CountryCode { get; set; }
+        public string CountryFlag { get; set; }
     }
 
 }

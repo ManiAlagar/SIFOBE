@@ -27,5 +27,6 @@ namespace SIFO.Model.Entity
         public virtual DbSet<Calendar> Calendar{ get; set; }
         public virtual DbSet<UserSessionManagement> UserSessionManagements{ get; set; }
         public virtual DbSet<RolePermission> RolePermissions { get; set; }
+        public virtual DbSet<UserPharmacyMapping> UserPharmacyMappings { get; set; }
     }
 }

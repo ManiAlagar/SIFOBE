@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to SIFO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .welcome-message {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2a9d8f;
+            margin-top: 10px;
+        }
+        .message {
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .user-info {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1d72b8;
+            padding: 10px;
+            background-color: #f1f8fd;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Welcome to SIFO!</h2>
+        </div>
+        <p class="message">
+            Dear [UserName],
+        </p>
+        <p class="message">
+            Welcome to SIFO! We're excited to have you on board. Below are your account details:
+        </p>
+        <div class="user-info">
+            <p>Email: [UserEmail]</p>
+            <p>Password: [UserPassword]</p>
+        </div>
+        <p class="message">
+            Please log in to your account and explore the features we offer. If you have any questions or need assistance, feel free to contact our support team.
+        </p>
+        <p class="message">
+            We are here to help you make the most out of SIFO!
+        </p>
+        <p class="footer">
+            Best regards,<br>
+            The SIFO Team
+        </p>
+    </div>
+</body>
+</html>

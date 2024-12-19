@@ -22,9 +22,12 @@ namespace SIFO.Model.Entity
         public bool? IsTempPassword { get; set; } = false;
         public DateTime? PswdUpdatedAt { get; set; }
         public long? AuthenticationType { get; set; }
+        public long CountryId { get; set; }
 
         [NotMapped]
         public string? RoleName { get; set; }
+        [NotMapped]
+        public List<long>? PharmacyIds { get; set; }    
 
         [NotMapped]
         public string? AuthType { get; set; }

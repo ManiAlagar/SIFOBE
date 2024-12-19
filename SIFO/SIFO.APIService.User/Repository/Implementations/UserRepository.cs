@@ -65,28 +65,82 @@ namespace SIFO.APIService.User.Repository.Implementations
         //}
         public async Task<string> CreateUserAsync(Users user)
         {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var roleName = await GetRoleById(user.RoleId);
+                    var result = await _context.Users.AddAsync(user);
+                    await _context.SaveChangesAsync();
+                    if(roleName.Name == Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR || roleName.Name == Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR)
+                    {
+                        if (user.PharmacyIds != null && user.PharmacyIds.Any())
+                        {
+                           //_context
+                            foreach (var pharmacyId in user.PharmacyIds)
+                            {
+                                var isInsertSuccess = await InsertUserPharmacyMapping(result.Entity.Id, pharmacyId);
+                                if (isInsertSuccess != Constants.SUCCESS)
+                                {
+                                    await transaction.RollbackAsync();
+                                    return isInsertSuccess;
+                                }
+                            }
+                        }
+
+                    }
+                    await transaction.CommitAsync();
+                    return Constants.SUCCESS;
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    // Return error message instead of throwing an exception
+                    return $"An error occurred while creating the user: {ex.Message}";
+                }
+            }
+        }
+
+        public async Task<string> InsertUserPharmacyMapping(long userId, long pharmacyId)
+        {
             try
             {
-                var result = await _context.Users.AddAsync(user);
+                var mappingData = new UserPharmacyMapping
+                {
+                    userId = userId,
+                    PharmacyId = pharmacyId
+                };
+                await _context.UserPharmacyMappings.AddAsync(mappingData);
                 await _context.SaveChangesAsync();
                 return Constants.SUCCESS;
             }
             catch (Exception ex)
             {
-                throw;
+                return $"An error occurred while inserting the user-pharmacy mapping: {ex.Message}";
             }
-
         }
+
+
         public async Task<string> CheckIfEmailOrPhoneExists(string email, string phoneNumber, long? userId)
         {
-            if (await _context.Users.AsNoTracking().AnyAsync(u => u.Email == email && u.Id != userId && u.IsActive == true))
+            var userExists = await _context.Users.AsNoTracking()
+                .Where(u => (u.Email == email || u.PhoneNumber == phoneNumber) && u.Id != userId)
+                .Select(u => new { u.Email, u.PhoneNumber })
+                .FirstOrDefaultAsync();
+
+            if (userExists != null)
             {
-                return Constants.EMAIL_ALREADY_EXISTS;
+                if (userExists.Email == email)
+                {
+                    return Constants.EMAIL_ALREADY_EXISTS;
+                }
+
+                if (userExists.PhoneNumber == phoneNumber)
+                {
+                    return Constants.PHONE_ALREADY_EXISTS;
+                }
             }
-            if (await _context.Users.AsNoTracking().AnyAsync(u => u.PhoneNumber == phoneNumber && u.Id != userId && u.IsActive == true))
-            {
-                return Constants.PHONE_ALREADY_EXISTS;
-            }
+
             return Constants.SUCCESS;
         }
 
@@ -94,10 +148,11 @@ namespace SIFO.APIService.User.Repository.Implementations
         {
             try
             {
-        
+
 
                 var userData = from user in _context.Users
                                join role in _context.Roles on user.RoleId equals role.Id
+                               join countries in _context.Countries on user.CountryId equals countries.Id
                                where user.RoleId == roleId && user.Id == id
                                select new UserResponse
                                {
@@ -113,7 +168,9 @@ namespace SIFO.APIService.User.Repository.Implementations
                                    AuthenticationName = "Email",
                                    ProfileImg = user.ProfileImg,
                                    IsActive = user.IsActive,
-                                   
+                                   CountryId = user.CountryId,
+                                   CountryCode = countries.PhoneCode,
+                                   CountryFlag = countries.EmojiU
                                };
 
                 return await userData.FirstOrDefaultAsync();
@@ -161,11 +218,16 @@ namespace SIFO.APIService.User.Repository.Implementations
         }
 
 
-        public async Task<string> GetPasswordByUserId(long id)
+        public async Task<(string, bool)> GetPasswordByUserId(long id)
         {
+            var user = await _context.Users
+                .Where(a => a.Id == id)
+                .Select(a => new { a.PasswordHash, a.IsActive })
+                .FirstOrDefaultAsync();
 
-           return  await _context.Users.Where(a => a.Id == id).Select(a => a.PasswordHash).FirstOrDefaultAsync();
+            return (user.PasswordHash, user.IsActive.Value);
         }
+
 
         //public async Task<string> UpdateUserAsync(Users user, long? existingUserParentId, string parentRoleId)
         //{
@@ -184,19 +246,22 @@ namespace SIFO.APIService.User.Repository.Implementations
         //        throw;
         //    }
         //}
-        public async Task<string> UpdateUserAsync(Users user)
+        public async Task<(string, Users?)> UpdateUserAsync(Users user)
         {
             try
             {
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
-                return Constants.SUCCESS;
+                var updatedUser = await _context.Users.FindAsync(user.Id);
+                return (Constants.SUCCESS, updatedUser);
             }
             catch (Exception ex)
             {
+                // Handle the exception as needed
                 throw;
             }
         }
+
         public async Task<PagedResponse<UserResponse>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, long? roleId, string parentRoleId)
         {
 
@@ -204,6 +269,7 @@ namespace SIFO.APIService.User.Repository.Implementations
             var query = from user in _context.Users
                         join role in _context.Roles on user.RoleId equals role.Id
                         join authtype in _context.AuthenticationType on user.AuthenticationType equals authtype.Id
+                        join countries in _context.Countries on user.CountryId equals countries.Id
                         where parentRoleId.Contains(user.RoleId.ToString()) && (user.RoleId == roleId || roleId == null)
                         select new UserResponse
                         {
@@ -218,7 +284,10 @@ namespace SIFO.APIService.User.Repository.Implementations
                             AuthenticationType = user.AuthenticationType,
                             AuthenticationName = authtype.AuthType,
                             ProfileImg = user.ProfileImg,
-                            IsActive = user.IsActive
+                            IsActive = user.IsActive,
+                            CountryId = user.CountryId,
+                            CountryCode = countries.PhoneCode,
+                            CountryFlag = countries.EmojiU
                         };
             var sqlQuery = query.ToQueryString();
 
