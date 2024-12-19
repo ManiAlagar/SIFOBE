@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 
 namespace SIFO.Model.Entity
 {
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SIFO.Model.Entity
+{
+    [Table("m2m_user_pharmacy")]
     public class UserPharmacyMapping
     {
         [Column("Id")]
