@@ -41,6 +41,8 @@
         public static string STATE_NOT_FOUND = "state not found";
         public static string COUNTRY_NOT_FOUND = "country not found";
         public static string HOSPITAL_NOT_FOUND = "hospital not found";
+        public static string PHARMACY_NOT_FOUND = "pharmacy not found";
+        public static string HOSPITAL_FACILITY_NOT_FOUND = "hospital facility not found";
         public static string ADDRESSDETAIL_NOT_FOUND = "address detail not found";
         public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists"; 
         public static string USER_NOT_AUTHENTICATED = "user not authenticated"; 

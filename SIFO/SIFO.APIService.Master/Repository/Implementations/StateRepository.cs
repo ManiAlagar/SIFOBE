@@ -35,8 +35,7 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 IsActive = state.IsActive,
                             };
 
-                var count = (from state in _context.States
-                             select state).Count();
+                var count = _context.States.Count();
 
                 PagedResponse<StateResponse> pagedResponse = new PagedResponse<StateResponse>();
 
