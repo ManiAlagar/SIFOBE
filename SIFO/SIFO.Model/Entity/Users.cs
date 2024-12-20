@@ -27,7 +27,9 @@ namespace SIFO.Model.Entity
         [NotMapped]
         public string? RoleName { get; set; }
         [NotMapped]
-        public List<long>? PharmacyIds { get; set; }    
+        public List<long>? PharmacyIds { get; set; }
+        [NotMapped]
+        public List<long>? HospitalIds { get; set; }
 
         [NotMapped]
         public string? AuthType { get; set; }

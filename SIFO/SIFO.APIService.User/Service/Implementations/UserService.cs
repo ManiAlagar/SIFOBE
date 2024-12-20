@@ -51,8 +51,9 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.IsTempPassword = true;
             mappedResult.AuthenticationType = request.AuthenticationType;
             mappedResult.PharmacyIds = request.PharmacyIds;
+            mappedResult.HospitalIds = request.HospitalIds;
         
-            var message = await _userRepository.CreateUserAsync(mappedResult);
+            var message = await _userRepository.CreateUserAsync(mappedResult, tokenData.UserId);
             //if (request.PharmacyIds != null && request.PharmacyIds.Any())
             //{
             //    foreach (var items in request.PharmacyIds)
@@ -178,7 +179,7 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
             mappedResult.UpdatedDate = DateTime.UtcNow;
             mappedResult.PasswordHash = passwordData;
-            var (status, user) =  await _userRepository.UpdateUserAsync(mappedResult);
+            var (status, user) =  await _userRepository.UpdateUserAsync(mappedResult, tokenData.UserId);
             if (status == Constants.SUCCESS)
             {
                 if(isActive != request.IsActive)

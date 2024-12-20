@@ -1,4 +1,6 @@
-﻿namespace SIFO.Model.Response
+﻿using SIFO.Model.Entity;
+
+namespace SIFO.Model.Response
 {
 
     public class UserResponse
@@ -19,6 +21,8 @@
         public long CountryId { get; set; }
         public string CountryCode { get; set; }
         public string CountryFlag { get; set; }
+        public List<HospitalFacility> Hospital { get; set; }
+        public List<Pharmacy> Pharmacy { get; set; }
     }
 
 }

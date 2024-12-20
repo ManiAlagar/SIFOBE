@@ -16,5 +16,6 @@
         public bool IsActive { get; set; } = true;
         public long CountryId { get; set; }    
         public List<long>? PharmacyIds { get; set; }
+        public List<long>? HospitalIds { get; set; }
     }
 }
