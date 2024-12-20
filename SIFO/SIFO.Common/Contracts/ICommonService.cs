@@ -31,5 +31,6 @@ namespace SIFO.Common.Contracts
         public Task<bool> AddressDetailExistsByIdAsync(long? id);
         public Task<string> GetIpAddress();
         public Task<DateTime> GetStartOfWeek(DateTime date);
+        public Task<string> HashPassword(string password);
     }
 }

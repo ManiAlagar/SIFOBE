@@ -52,7 +52,8 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.AuthenticationType = request.AuthenticationType;
             mappedResult.PharmacyIds = request.PharmacyIds;
             mappedResult.HospitalIds = request.HospitalIds;
-        
+            mappedResult.PasswordHash = await _commonService.HashPassword(request.PasswordHash);
+            
             var message = await _userRepository.CreateUserAsync(mappedResult, tokenData.UserId);
             //if (request.PharmacyIds != null && request.PharmacyIds.Any())
             //{
@@ -117,8 +118,6 @@ namespace SIFO.APIService.User.Service.Implementations
                     return ApiResponse<string>.Success(Constants.SUCCESS);
                 }
             }
-           
-
             return ApiResponse<string>.Forbidden();
         }
 
@@ -209,20 +208,16 @@ namespace SIFO.APIService.User.Service.Implementations
         public async Task<ApiResponse<UserResponse>> GetUserById(long? id, long RoleId)
         {
             var tokenData = await _commonService.GetDataFromToken();
-
-
             if (tokenData.ParentRoleId.Contains(RoleId.ToString()) || tokenData.RoleId == RoleId)
             {
                 var user = await _userRepository.GetUserById(id, RoleId, tokenData.ParentRoleId);
                 if (user == null)
                     return ApiResponse<UserResponse>.NotFound();
-                else return ApiResponse<UserResponse>.Success(Constants.SUCCESS, user);
+                else 
+                    return ApiResponse<UserResponse>.Success(Constants.SUCCESS, user);
             }
-
             else
-            {
                 return ApiResponse<UserResponse>.Forbidden();
-            }
         }
     }
 }
