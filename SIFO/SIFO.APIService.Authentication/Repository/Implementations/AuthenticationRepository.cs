@@ -41,7 +41,6 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
         {
             try
             {
-
                 var userData = await (from user in _context.Users
                                       join role in _context.Roles on user.RoleId equals role.Id
                                       join authType in _context.AuthenticationType on user.AuthenticationType equals authType.Id
@@ -62,9 +61,6 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                       }).FirstOrDefaultAsync();
 
                 return userData;
-
-         
-
             }
             catch (Exception ex)
             {

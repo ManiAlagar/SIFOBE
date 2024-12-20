@@ -7,7 +7,6 @@ using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
 using SIFO.Utility.Implementations;
-using System.Diagnostics.Eventing.Reader;
 
 namespace SIFO.APIService.User.Service.Implementations
 {
@@ -29,7 +28,6 @@ namespace SIFO.APIService.User.Service.Implementations
         public async Task<ApiResponse<string>> CreateUserAsync(UserRequest request)
         {
             var tokenData = await _commonService.GetDataFromToken();
-          
             if (!tokenData.ParentRoleId.Contains(request.RoleId.ToString()))
                 return ApiResponse<string>.Forbidden(Constants.INVALID_ROLE);
 
@@ -51,7 +49,7 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.CreatedDate = DateTime.UtcNow;
             mappedResult.IsTempPassword = true;
             mappedResult.AuthenticationType = request.AuthenticationType;
-
+            mappedResult.PasswordHash = await _commonService.HashPassword(request.PasswordHash);
             var userData = await _userRepository.CreateUserAsync(mappedResult);
 
             if (userData == Constants.SUCCESS)
@@ -91,8 +89,6 @@ namespace SIFO.APIService.User.Service.Implementations
                     return ApiResponse<string>.Success(Constants.SUCCESS);
                 }
             }
-           
-
             return ApiResponse<string>.Forbidden();
         }
 
@@ -164,20 +160,16 @@ namespace SIFO.APIService.User.Service.Implementations
         public async Task<ApiResponse<UserResponse>> GetUserById(long? id, long RoleId)
         {
             var tokenData = await _commonService.GetDataFromToken();
-
-
             if (tokenData.ParentRoleId.Contains(RoleId.ToString()) || tokenData.RoleId == RoleId)
             {
                 var user = await _userRepository.GetUserById(id, RoleId, tokenData.ParentRoleId);
                 if (user == null)
                     return ApiResponse<UserResponse>.NotFound();
-                else return ApiResponse<UserResponse>.Success(Constants.SUCCESS, user);
+                else 
+                    return ApiResponse<UserResponse>.Success(Constants.SUCCESS, user);
             }
-
             else
-            {
                 return ApiResponse<UserResponse>.Forbidden();
-            }
         }
     }
 }

@@ -93,58 +93,76 @@ namespace SIFO.Utility.Implementations
         {
             if (string.IsNullOrEmpty(password))
                 return string.Empty;
-            using (var aes = Aes.Create())
+            string pass = _configuration["PasswordEncryption:Key"];
+            var keyBytes = Encoding.UTF8.GetBytes(pass);
+            var iv = Encoding.UTF8.GetBytes(pass);
+            byte[] encryptedBytes;
+            using (var rijAlg = new RijndaelManaged())
             {
-                string SecretKey = _configuration["PasswordEncryption:Key"];
-                aes.Key = Encoding.UTF8.GetBytes(SecretKey);
-                aes.GenerateIV();
-                var iv = aes.IV;
-
-                using (var ms = new MemoryStream())
+                rijAlg.Mode = CipherMode.CBC;
+                rijAlg.Padding = PaddingMode.PKCS7;
+                rijAlg.FeedbackSize = 128;
+                rijAlg.Key = keyBytes;
+                rijAlg.IV = iv;
+                var encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
+                using (var msEncrypt = new MemoryStream())
                 {
-                    ms.Write(iv, 0, iv.Length);
-                    using (var encryptor = aes.CreateEncryptor(aes.Key, iv))
+                    using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                     {
-                        using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                        using (var swEncrypt = new StreamWriter(csEncrypt))
                         {
-                            using (var sw = new StreamWriter(cs))
-                            {
-                                sw.Write(password);
-                            }
+                            swEncrypt.Write(password);
                         }
+                        encryptedBytes = msEncrypt.ToArray();
                     }
-                    return Convert.ToBase64String(ms.ToArray());
                 }
             }
+            return Convert.ToBase64String(encryptedBytes);
         }
 
         public async Task<string> DecryptPassword(string encryptedText)
         {
-            var fullCipher = Convert.FromBase64String(encryptedText);
-            var iv = new byte[16];
-            Array.Copy(fullCipher, iv, iv.Length);
+            if (string.IsNullOrEmpty(encryptedText))
+                return string.Empty;
+            string pass = _configuration["PasswordEncryption:Key"];
+            var keyBytes = Encoding.UTF8.GetBytes(pass);
+            var iv = Encoding.UTF8.GetBytes(pass);
 
-            var cipher = new byte[fullCipher.Length - iv.Length];
-            Array.Copy(fullCipher, iv.Length, cipher, 0, cipher.Length);
+            var encryptedBytes = Convert.FromBase64String(encryptedText);
+            if (string.IsNullOrEmpty(encryptedText))
+                throw new ArgumentNullException("encryptedText");
+            if (keyBytes == null || keyBytes.Length <= 0 || iv == null || iv.Length <= 0)
+                throw new ArgumentNullException("key");
 
-            using (var aes = Aes.Create())
+            string plaintext = null;
+            using (var rijAlg = new RijndaelManaged())
             {
-                string SecretKey = _configuration["PasswordEncryption:Key"];
-                aes.Key = Encoding.UTF8.GetBytes(SecretKey);
-                using (var decryptor = aes.CreateDecryptor(aes.Key, iv))
+                rijAlg.Mode = CipherMode.CBC;
+                rijAlg.Padding = PaddingMode.PKCS7;
+                rijAlg.FeedbackSize = 128;
+                rijAlg.Key = keyBytes;
+                rijAlg.IV = iv;
+                var decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
+                try
                 {
-                    using (var ms = new MemoryStream(cipher))
+                    using (var msDecrypt = new MemoryStream(encryptedBytes))
                     {
-                        using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                        using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                         {
-                            using (var sr = new StreamReader(cs))
+                            using (var srDecrypt = new StreamReader(csDecrypt))
                             {
-                                return sr.ReadToEnd();
+                                plaintext = srDecrypt.ReadToEnd();
+
                             }
                         }
                     }
                 }
+                catch
+                {
+                    plaintext = "keyError";
+                }
             }
+            return plaintext;
         }
 
         public async Task<bool> SendMail(List<string> to, List<string>? cc, string subject, string body) // need to use send grid mail here 
@@ -555,6 +573,17 @@ namespace SIFO.Utility.Implementations
             if (base64String.StartsWith("UEsDB"))
                 return "docx";
             return "Unknown";
+        }
+
+        public Task<string> HashPassword(string password)
+        {
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] hashedBytes = sha256.ComputeHash(passwordBytes);
+                string hashedPassword = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+                return Task.FromResult(hashedPassword);
+            }
         }
     }
 }
