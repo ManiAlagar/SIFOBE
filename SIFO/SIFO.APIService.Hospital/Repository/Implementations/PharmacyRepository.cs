@@ -144,65 +144,6 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
             }
         }
 
-        public async Task<PagedResponse<PharmaciesResponse>> GetAllHospitalPharmacyAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
-        {
-            try
-            {
-                var query = from pharmacy in _context.Pharmacies
-                            join address in _context.AddressDetails on pharmacy.AddressId equals address.Id
-                            join cities in _context.Cities on address.CityId equals cities.Id
-                            join states in _context.States on address.Region equals states.Id
-                            where pharmacy.IsActive == true && pharmacy.PharmacyTypeId != GetRetailPharmacyAsync().Result
-                            select new PharmaciesResponse
-                            {
-                                Id = pharmacy.Id,
-                                Name = pharmacy.PharmacyName,
-                                MinisterialId = pharmacy.MinisterialID,
-                                AddressId = address.Id,
-                                ASL = pharmacy.ASL,
-                                City = address.CityId,
-                                Region = address.Region.Value,
-                                CityName = cities.Name,
-                                RegionName = states.Name,
-                                IsActive = pharmacy.IsActive
-                            };
-
-                var count = _context.Pharmacies.Where(pharmacy => pharmacy.IsActive == true && pharmacy.PharmacyTypeId != GetRetailPharmacyAsync().Result).Count();
-
-                PagedResponse<PharmaciesResponse> pagedResponse = new PagedResponse<PharmaciesResponse>();
-
-                if (isAll)
-                {
-                    var result = await query.Where(a => a.IsActive == true).ToListAsync();
-                    pagedResponse.Result = result;
-                    pagedResponse.TotalCount = result.Count;
-                    pagedResponse.TotalPages = 0;
-                    pagedResponse.CurrentPage = 0;
-                    return pagedResponse;
-                }
-
-                string orderByExpression = $"{sortColumn} {sortDirection}";
-
-                if (filter != null && filter.Length > 0)
-                {
-                    filter = filter.ToLower();
-                    query = query.Where(x => x.Name.ToLower().Contains(filter) || x.CityName.ToLower().Contains(filter) || x.RegionName.ToLower().Contains(filter));
-                    count = query.Count();
-                }
-                query = query.OrderBy(orderByExpression).Skip((pageNo - 1) * pageSize).Take(pageSize).AsQueryable();
-
-                pagedResponse.Result = query;
-                pagedResponse.TotalCount = count;
-                pagedResponse.TotalPages = (int)Math.Ceiling((pagedResponse.TotalCount ?? 0) / (double)pageSize);
-                pagedResponse.CurrentPage = pageNo;
-                return pagedResponse;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
         public async Task<PharmacyDetailResponse> GetPharmacyByIdAsync(long pharmacyId)
         {
             try
@@ -344,7 +285,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
             }
         }
 
-        public async Task<PagedResponse<PharmaciesResponse>> GetAllRetailPharmacyAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
+        public async Task<PagedResponse<PharmaciesResponse>> GetPharmacyAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, string pharmacyType)
         {
             try
             {
@@ -352,7 +293,8 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                join address in _context.AddressDetails on pharmacy.AddressId equals address.Id
                                join cities in _context.Cities on address.CityId equals cities.Id
                                join states in _context.States on address.Region equals states.Id
-                               where pharmacy.IsActive == true && pharmacy.PharmacyTypeId == GetRetailPharmacyAsync().Result
+                               where pharmacy.IsActive == true && (string.IsNullOrEmpty(pharmacyType) || (pharmacyType.ToLower().Trim() == "retail" && pharmacy.PharmacyTypeId == GetRetailPharmacyAsync().Result) 
+                               || (pharmacyType.ToLower().Trim() == "hospital" && pharmacy.PharmacyTypeId != GetRetailPharmacyAsync().Result))
                                select new PharmaciesResponse
                                {
                                    Id = pharmacy.Id,
@@ -367,7 +309,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                    IsActive = pharmacy.IsActive
                                };
 
-                var count = _context.Pharmacies.Where(pharmacy => pharmacy.IsActive == true && pharmacy.PharmacyTypeId == GetRetailPharmacyAsync().Result).Count();
+                var count = query.Count();
 
                 PagedResponse<PharmaciesResponse> pagedResponse = new PagedResponse<PharmaciesResponse>();
 
@@ -403,7 +345,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
             }
         }
 
-        public async Task<List<PharmaciesResponse>> GetAllHospitalPharmacyByUserIdAsync(long userId)
+        public async Task<List<PharmaciesResponse>> GetMyPharmacyAsync(long userId, string pharmacyType)
         {
             try
             {
@@ -412,7 +354,8 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                       join address in _context.AddressDetails on pharmacy.AddressId equals address.Id
                                       join cities in _context.Cities on address.CityId equals cities.Id
                                       join states in _context.States on address.Region equals states.Id
-                                      where userId.ToString().Contains(userPharmacy.userId.ToString()) && pharmacy.PharmacyTypeId != GetRetailPharmacyAsync().Result
+                                      where userId.ToString().Contains(userPharmacy.userId.ToString()) && (string.IsNullOrEmpty(pharmacyType) || (pharmacyType.ToLower().Trim() == "retail" && pharmacy.PharmacyTypeId == GetRetailPharmacyAsync().Result)
+                                      || (pharmacyType.ToLower().Trim() == "hospital" && pharmacy.PharmacyTypeId != GetRetailPharmacyAsync().Result))
                                       select new PharmaciesResponse
                                       {
                                           Id = pharmacy.Id,
@@ -426,38 +369,6 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                           RegionName = states.Name,
                                           IsActive = pharmacy.IsActive
                                       }).ToListAsync();
-                return response;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<PharmaciesResponse>> GetAllRetailPharmacyByUserIdAsync(long userId)
-        {
-            try
-            {
-                var response = await (from pharmacy in _context.Pharmacies
-                                      join userPharmacy in _context.UserPharmacyMappings on pharmacy.Id equals userPharmacy.PharmacyId
-                                      join address in _context.AddressDetails on pharmacy.AddressId equals address.Id
-                                      join cities in _context.Cities on address.CityId equals cities.Id
-                                      join states in _context.States on address.Region equals states.Id
-                                      where userId.ToString().Contains(userPharmacy.userId.ToString()) && pharmacy.PharmacyTypeId == GetRetailPharmacyAsync().Result
-                                      select new PharmaciesResponse
-                                      {
-                                          Id = pharmacy.Id,
-                                          Name = pharmacy.PharmacyName,
-                                          MinisterialId = pharmacy.MinisterialID,
-                                          AddressId = address.Id,
-                                          ASL = pharmacy.ASL,
-                                          City = address.CityId,
-                                          Region = address.Region.Value,
-                                          CityName = cities.Name,
-                                          RegionName = states.Name,
-                                          IsActive = pharmacy.IsActive
-                                      }).ToListAsync();
-
                 return response;
             }
             catch (Exception)

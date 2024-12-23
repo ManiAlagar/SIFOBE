@@ -2,12 +2,14 @@
 using SIFO.Model.Request;
 using SIFO.Model.Response;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SIFO.APIService.Hospital.Service.Contracts;
 
 namespace SIFO.APIService.Hospital.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PharmacyController : ControllerBase
     {
         private readonly IPharmacyService _pharmacyService;
@@ -110,16 +112,15 @@ namespace SIFO.APIService.Hospital.Controllers
         }
 
         [HttpGet]
-        [Route("all/retail")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<PharmaciesResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllRetailPharmacyAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false)
+        public async Task<IActionResult> GetPharmacyAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false, [FromHeader] string? pharmacyType = null)
         {
             try
             {
-                var result = await _pharmacyService.GetAllRetailPharmacyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
+                var result = await _pharmacyService.GetPharmacyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll,pharmacyType);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -130,54 +131,15 @@ namespace SIFO.APIService.Hospital.Controllers
         }
 
         [HttpGet]
-        [Route("all/hospital")]
-        [ProducesResponseType(typeof(ApiResponse<PagedResponse<PharmaciesResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllHospitalPharmacyAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false)
-        {
-            try
-            {
-                var result = await _pharmacyService.GetAllHospitalPharmacyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
-                return StatusCode(result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var result = ApiResponse<string>.InternalServerError;
-                return StatusCode(StatusCodes.Status500InternalServerError, result);
-            }
-        }
-
-        [HttpGet]
-        [Route("all/hospitalpharmacybyuserid")]
+        [Route("userPharmacy")]
         [ProducesResponseType(typeof(ApiResponse<List<PharmaciesResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllHospitalPharmacyByUserIdAsync()
+        public async Task<IActionResult> GetMyPharmacyAsync([FromHeader]string? pharmacyType)
         {
             try
             {
-                var result = await _pharmacyService.GetAllHospitalPharmacyByUserIdAsync();
-                return StatusCode(result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var result = ApiResponse<string>.InternalServerError;
-                return StatusCode(StatusCodes.Status500InternalServerError, result);
-            }
-        }
-
-        [HttpGet]
-        [Route("all/retailpharmacybyuserid")]
-        [ProducesResponseType(typeof(ApiResponse<List<PharmaciesResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllRetailPharmacyByUserIdAsync()
-        {
-            try
-            {
-                var result = await _pharmacyService.GetAllRetailPharmacyByUserIdAsync();
+                var result = await _pharmacyService.GetMyPharmacyAsync(pharmacyType);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)

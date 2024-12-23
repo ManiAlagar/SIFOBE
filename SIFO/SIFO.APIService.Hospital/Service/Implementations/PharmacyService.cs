@@ -20,17 +20,6 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             _commonService = commonService;
             _hospitalRepository = hospitalRepository;
         }
-
-        public async Task<ApiResponse<PagedResponse<PharmaciesResponse>>> GetAllHospitalPharmacyAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
-        {
-            var isValid = await HelperService.ValidateGet(pageNo, pageSize, filter, sortColumn, sortDirection);
-            if (isValid.Any())
-                return ApiResponse<PagedResponse<PharmaciesResponse>>.BadRequest(isValid[0]);
-
-            var response = await _pharmacyRepository.GetAllHospitalPharmacyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
-            return ApiResponse<PagedResponse<PharmaciesResponse>>.Success(Constants.SUCCESS, response);
-        }
-
         public async Task<ApiResponse<PharmacyDetailResponse>> GetPharmacyByIdAsync(long pharmacyId)
         {
             if (pharmacyId <= 0)
@@ -53,11 +42,6 @@ namespace SIFO.APIService.Hospital.Service.Implementations
                 var pharmacyType = await _pharmacyRepository.GetPharmacyTypeByIdAsync(request.PharmacyTypeId);
                 if (pharmacyType is null) 
                     return ApiResponse<string>.NotFound("pharmacy id does not exists.");
-
-                //string pharmacyType = (await _pharmacyRepository.GetPharmacyTypeByIdAsync(request.PharmacyTypeId)).Name;
-                //bool isHospitalPharmacy = !string.IsNullOrEmpty(pharmacyType) ? pharmacyType.ToLower().Contains("hospital") : false;
-                //if ((isHospitalPharmacy && request.HospitalStructureId.Value == 0) || (!isHospitalPharmacy && request.HospitalStructureId.Value > 0))
-                //    return ApiResponse<string>.BadRequest();
 
                 bool isSuccess = await _pharmacyRepository.CreatePharmacyAsync(request);
                 if (isSuccess)
@@ -83,12 +67,6 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             if (pharmacyType is null)
                 return ApiResponse<string>.NotFound("pharmacy id does not exists.");
 
-            //string pharmacyType = (await _pharmacyRepository.GetPharmacyTypeByIdAsync(request.PharmacyTypeId)).Name;
-            //bool isHospitalPharmacy = !string.IsNullOrEmpty(pharmacyType) ? pharmacyType.ToLower().Contains("hospital") : false;
-
-            //if ((isHospitalPharmacy && request.HospitalStructureId.Value == 0) || (!isHospitalPharmacy && request.HospitalStructureId.Value > 0))
-            //    return ApiResponse<string>.BadRequest();
-
             var isSuccess = await _pharmacyRepository.UpdatePharmacyAsync(request, pharmacyId);
             if (isSuccess)
                 return ApiResponse<string>.Success(Constants.SUCCESS);
@@ -108,33 +86,22 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             return ApiResponse<string>.Success(Constants.SUCCESS, response);
         }
 
-        public async Task<ApiResponse<PagedResponse<PharmaciesResponse>>> GetAllRetailPharmacyAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
+        public async Task<ApiResponse<PagedResponse<PharmaciesResponse>>> GetPharmacyAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, string pharmacyType)
         {
             var isValid = await HelperService.ValidateGet(pageNo, pageSize, filter, sortColumn, sortDirection);
             if (isValid.Any())
                 return ApiResponse<PagedResponse<PharmaciesResponse>>.BadRequest(isValid[0]);
 
-            var response = await _pharmacyRepository.GetAllRetailPharmacyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll);
+            var response = await _pharmacyRepository.GetPharmacyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll, pharmacyType);
             return ApiResponse<PagedResponse<PharmaciesResponse>>.Success(Constants.SUCCESS, response);
         }
 
-        public async Task<ApiResponse<List<PharmaciesResponse>>> GetAllHospitalPharmacyByUserIdAsync()
+        public async Task<ApiResponse<List<PharmaciesResponse>>> GetMyPharmacyAsync(string pharmacyType)
         {
             var tokenData = await _commonService.GetDataFromToken();
             if (tokenData.Role.ToLower() == "qc administrator" || tokenData.Role.ToLower() == "super admin")
             {
-                var response = await _pharmacyRepository.GetAllHospitalPharmacyByUserIdAsync(Convert.ToInt64(tokenData.UserId));
-                return ApiResponse<List<PharmaciesResponse>>.Success(Constants.SUCCESS, response);
-            }
-            return ApiResponse<List<PharmaciesResponse>>.Forbidden("access denied");
-        }
-
-        public async Task<ApiResponse<List<PharmaciesResponse>>> GetAllRetailPharmacyByUserIdAsync()
-        {
-            var tokenData = await _commonService.GetDataFromToken();
-            if (tokenData.Role.ToLower() == "qc administrator" || tokenData.Role.ToLower() == "super admin")
-            {
-                var response = await _pharmacyRepository.GetAllRetailPharmacyByUserIdAsync(Convert.ToInt64(tokenData.UserId));
+                var response = await _pharmacyRepository.GetMyPharmacyAsync(Convert.ToInt64(tokenData.UserId), pharmacyType);
                 return ApiResponse<List<PharmaciesResponse>>.Success(Constants.SUCCESS, response);
             }
             return ApiResponse<List<PharmaciesResponse>>.Forbidden("access denied");

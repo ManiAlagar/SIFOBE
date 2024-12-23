@@ -98,11 +98,15 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             if (hospitalFacilityId <= 0)
                 return ApiResponse<string>.BadRequest();
 
-            var response = await _hospitalFacilityRepository.DeleteHospitalFacilityAsync(hospitalFacilityId);
-            if (response == Constants.NOT_FOUND)
-                return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.HOSPITAL_FACILITY_NOT_FOUND);
+            var result = await _hospitalFacilityRepository.GetHospitalFacilityByIdAsync(hospitalFacilityId);
+            if (result is null)
+                return ApiResponse<string>.NotFound(Constants.HOSPITAL_FACILITY_NOT_FOUND);
 
-            return ApiResponse<string>.Success(Constants.SUCCESS, response);
+            var response = await _hospitalFacilityRepository.DeleteHospitalFacilityAsync(hospitalFacilityId);
+            if (response == Constants.SUCCESS)
+                return ApiResponse<string>.Success(Constants.SUCCESS, response);
+
+            return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
         }
     }
 }

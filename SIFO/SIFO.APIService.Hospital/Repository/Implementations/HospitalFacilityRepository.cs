@@ -5,8 +5,9 @@ using SIFO.Model.Constant;
 using SIFO.Common.Contracts;
 using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
+using SIFO.APIService.Hospital.Repository.Contracts;
 
-namespace SIFO.APIService.Hospital.Repository.Contracts
+namespace SIFO.APIService.Hospital.Repository.Implementations
 {
     public class HospitalFacilityRepository : IHospitalFacilityRepository
     {
@@ -75,14 +76,6 @@ namespace SIFO.APIService.Hospital.Repository.Contracts
                         }
                     }
 
-                    //var pharmacyResponse = await _context.Pharmacies.Where(x => request.PharmacyIds.Contains(x.Id)).ToListAsync();
-                    //if (pharmacyResponse.Count != request.PharmacyIds.Count)
-                    //    return false;
-                    //var retailPharmacyId = await _pharmacyRepository.GetRetailPharmacyAsync();
-                    //var result = pharmacyResponse.Where(a => a.PharmacyTypeId == retailPharmacyId).ToList();
-                    //if (result.Count > 0)
-                    //    return false;
-
                     foreach (var pharmacyId in request.PharmacyIds)
                     {
                         FacilityPharmacyMapping facilityPharmacyMapping = new();
@@ -96,7 +89,7 @@ namespace SIFO.APIService.Hospital.Repository.Contracts
                         }
                     }
 
-                    await _context.SaveChangesAsync();  
+                    await _context.SaveChangesAsync();
                     await _context.Database.CommitTransactionAsync();
                     return true;
                 }
@@ -168,19 +161,19 @@ namespace SIFO.APIService.Hospital.Repository.Contracts
             try
             {
                 var query = from hospitalFacilities in _context.HospitalFacilities
-                                join addressDetail in _context.AddressDetails on hospitalFacilities.AddressId equals addressDetail.Id
-                                join cities in _context.Cities on addressDetail.CityId equals cities.Id
-                                join states in _context.States on addressDetail.Region equals states.Id
-                                select new HospitalFacilityResponse
-                                {
-                                    Id = hospitalFacilities.Id,
-                                    Name = hospitalFacilities.Name,
-                                    ASL = hospitalFacilities.ASL,
-                                    AddressId = hospitalFacilities.AddressId,
-                                    CityName = cities.Name,
-                                    RegionName = states.Name,
-                                    IsActive = hospitalFacilities.IsActive
-                                };
+                            join addressDetail in _context.AddressDetails on hospitalFacilities.AddressId equals addressDetail.Id
+                            join cities in _context.Cities on addressDetail.CityId equals cities.Id
+                            join states in _context.States on addressDetail.Region equals states.Id
+                            select new HospitalFacilityResponse
+                            {
+                                Id = hospitalFacilities.Id,
+                                Name = hospitalFacilities.Name,
+                                ASL = hospitalFacilities.ASL,
+                                AddressId = hospitalFacilities.AddressId,
+                                CityName = cities.Name,
+                                RegionName = states.Name,
+                                IsActive = hospitalFacilities.IsActive
+                            };
 
                 var count = _context.HospitalFacilities.Count();
 
@@ -235,26 +228,26 @@ namespace SIFO.APIService.Hospital.Repository.Contracts
                                             IsActive = contact.IsActive,
                                         }).ToListAsync();
 
-               var pharmacyIdResponse = await _context.FacilityPharmacyMappings.Where(a => a.FacilityId == hospitalFacilityId).Select(pharmacy =>
-                                        pharmacy.PharmacyId).ToListAsync();
+                var pharmacyIdResponse = await _context.FacilityPharmacyMappings.Where(a => a.FacilityId == hospitalFacilityId).Select(pharmacy =>
+                                         pharmacy.PharmacyId).ToListAsync();
 
-               var response = await (from hospitalFacilities in _context.HospitalFacilities
-                                join addressDetail in _context.AddressDetails on hospitalFacilities.AddressId equals addressDetail.Id
-                                join cities in _context.Cities on addressDetail.CityId equals cities.Id
-                                join states in _context.States on addressDetail.Region equals states.Id
-                                where hospitalFacilities.Id == hospitalFacilityId
-                                select new HospitalFacilityDetailResponse
-                                {
-                                    Id = hospitalFacilities.Id,
-                                    Name = hospitalFacilities.Name,
-                                    ASL = hospitalFacilities.ASL,
-                                    AddressId = hospitalFacilities.AddressId,
-                                    CityName = cities.Name,
-                                    RegionName = states.Name,
-                                    IsActive = hospitalFacilities.IsActive,
-                                    Contacts = contactsResponse,
-                                    PharmacyIds = pharmacyIdResponse,
-                                }).FirstOrDefaultAsync(); ;
+                var response = await (from hospitalFacilities in _context.HospitalFacilities
+                                      join addressDetail in _context.AddressDetails on hospitalFacilities.AddressId equals addressDetail.Id
+                                      join cities in _context.Cities on addressDetail.CityId equals cities.Id
+                                      join states in _context.States on addressDetail.Region equals states.Id
+                                      where hospitalFacilities.Id == hospitalFacilityId
+                                      select new HospitalFacilityDetailResponse
+                                      {
+                                          Id = hospitalFacilities.Id,
+                                          Name = hospitalFacilities.Name,
+                                          ASL = hospitalFacilities.ASL,
+                                          AddressId = hospitalFacilities.AddressId,
+                                          CityName = cities.Name,
+                                          RegionName = states.Name,
+                                          IsActive = hospitalFacilities.IsActive,
+                                          Contacts = contactsResponse,
+                                          PharmacyIds = pharmacyIdResponse,
+                                      }).FirstOrDefaultAsync(); ;
                 return response;
             }
             catch (Exception ex)
@@ -282,7 +275,7 @@ namespace SIFO.APIService.Hospital.Repository.Contracts
                     var addressData = await _commonService.CreateAddressDetailAsync(addressDetail);
 
                     var hospitalFacilityData = await _context.HospitalFacilities.Where(a => a.Id == hospitalFacilityId).FirstOrDefaultAsync();
-                    if (hospitalFacilityData != null)
+                    if (hospitalFacilityData is not null)
                     {
                         hospitalFacilityData.Name = request.HospitalFacilityName;
                         hospitalFacilityData.AddressId = addressData.Id;
@@ -346,7 +339,7 @@ namespace SIFO.APIService.Hospital.Repository.Contracts
 
         public async Task<List<Pharmacy>> GetPharmaciesByIdsAsync(List<long> request)
         {
-           return await _context.Pharmacies.Where(x => request.Contains(x.Id)).ToListAsync();
+            return await _context.Pharmacies.Where(x => request.Contains(x.Id)).ToListAsync();
         }
     }
 }
