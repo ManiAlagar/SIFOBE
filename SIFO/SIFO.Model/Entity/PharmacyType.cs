@@ -11,7 +11,7 @@ namespace SIFO.Model.Entity
         public long Id { get; set; }
 
         [Column("Name")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         [Column("Description")]
         public string? Description { get; set; }
