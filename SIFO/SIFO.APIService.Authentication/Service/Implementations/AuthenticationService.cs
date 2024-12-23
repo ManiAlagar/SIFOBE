@@ -7,7 +7,6 @@ using SIFO.Model.Request;
 using SIFO.Model.Response;
 using SIFO.APIService.Authentication.Repository.Contracts;
 using SIFO.APIService.Authentication.Service.Contracts;
-using Twilio.Http;
 
 namespace SIFO.APIService.Authentication.Service.Implementations
 {
@@ -41,18 +40,32 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             if (userData == null || userData.PswdUpdatedAt < DateTime.UtcNow.AddMonths(-6))
                 return ApiResponse<object>.UnAuthorized("invalid email and/or password");
 
-            var otpResponse = await _commonService.SendOtpRequestAsync(userData.Id, "Login", userData.AuthenticationType.Value);
-
-            if (otpResponse != Constants.SUCCESS)
-                return ApiResponse<object>.InternalServerError();
-
-            var response = new
+            var userSession = await _authenticationRepository.GetUserSessionByUserId(userData.Id);
+            if (userData.IsTempPassword == true && !userSession.Any())
             {
-                UserId = userData.Id, 
-                AuthenticationType = userData.AuthenticationType,
-                Sid = await _twilioRepository.GetServiceIdbyUserIDAsync(userData.Id),
-            };
-            return ApiResponse<object>.Success(otpResponse, response);
+                var loginData = await VerifyLoginAsync(userData.Id); 
+                loginData.Data.isFirstAccess = true;
+                return ApiResponse<object>.Success("Success", loginData.Data);
+            }
+            else if (userData.IsTempPassword == true && userSession.Any())
+            {
+                var loginData = await VerifyLoginAsync(userData.Id);
+                loginData.Data.isFirstAccess = false;
+                return ApiResponse<object>.Success("Success", loginData.Data);
+            }
+            else
+            {
+                var otpResponse = await _commonService.SendOtpRequestAsync(userData.Id, "Login", userData.AuthenticationType.Value);
+                if (otpResponse != Constants.SUCCESS)
+                    return ApiResponse<object>.InternalServerError();
+                var response = new
+                {
+                    UserId = userData.Id,
+                    AuthenticationType = userData.AuthenticationType,
+                    Sid = await _twilioRepository.GetServiceIdbyUserIDAsync(userData.Id)
+                };
+                return ApiResponse<object>.Success(otpResponse, response);
+            }
         }
         
         public async Task<ApiResponse<string>> ForgotPasswordAsync(ForgotPasswordRequest request)
@@ -135,7 +148,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 IPAccess = await _commonService.GetIpAddress(),
                 TokenSession = accessToken
             };
-            //await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
+            await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
 
             return ApiResponse<LoginResponse>.Success(Constants.SUCCESS, loginResponse);
         } 

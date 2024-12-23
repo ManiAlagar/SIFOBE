@@ -1,4 +1,5 @@
-﻿using SIFO.APIService.Master.Repository.Contracts;
+﻿using OfficeOpenXml;
+using SIFO.APIService.Master.Repository.Contracts;
 using SIFO.APIService.Master.Service.Contracts;
 using SIFO.Common.Contracts;
 using SIFO.Model.Constant;
@@ -51,5 +52,54 @@ namespace SIFO.APIService.Master.Service.Implementations
             }
             return ApiResponse<string>.InternalServerError();
         }
+
+        public async Task<ApiResponse<LabelResponse>> GetLabelsAsync()
+        {
+            var result = await _masterRepository.GetLabelsAsync();
+            return ApiResponse<LabelResponse>.Success("", result);
+        }
+
+        public async Task<ApiResponse<string>> ImportLableAsync(LabelRequest request)
+        {
+            if (string.IsNullOrEmpty(request.FilePath))
+                return ApiResponse<string>.BadRequest("File path is null or empty.");
+            if (!System.IO.File.Exists(request.FilePath))
+                return ApiResponse<string>.BadRequest($"File does not exist at the path: {request.FilePath}");
+
+            ExcelPackage.LicenseContext = LicenseContext.Commercial;
+            List<Labels> lables = new List<Labels>();
+            using (var package = new ExcelPackage(new FileInfo(request.FilePath)))
+            {
+                var worksheet = package.Workbook.Worksheets[0];
+                var rowCount = worksheet.Dimension.Rows;
+                for (int row = 2; row <= rowCount; row++)
+                {
+                    var variable = worksheet.Cells[row, 1].Text;
+                    var textEn = worksheet.Cells[row, 2].Text;
+                    var textIt = worksheet.Cells[row, 3].Text;
+
+                    var englishData = new Labels
+                    {
+                        FkVar = variable,
+                        Language = "EN",
+                        Label = textEn
+                    };
+
+                    var italyData = new Labels
+                    {
+                        FkVar = variable,
+                        Language = "IT",
+                        Label = textIt
+                    };
+                    lables.Add(englishData);
+                    lables.Add(italyData);
+                }
+            }
+            var result = await _masterRepository.ImportLableAsync(lables);
+            if (result == Constants.SUCCESS)
+                return ApiResponse<string>.Success();
+            return ApiResponse<string>.InternalServerError();
+        }
+
     }
 }
