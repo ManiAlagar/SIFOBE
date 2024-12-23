@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SIFO.APIService.Master.Repository.Contracts;
 using SIFO.APIService.User.Repository.Contracts;
 using SIFO.APIService.User.Service.Contracts;
 using SIFO.Common.Contracts;
@@ -35,7 +36,7 @@ namespace SIFO.APIService.User.Service.Implementations
             {
                 var writtenPath = await _commonService.SaveFileAsync(request.ProfileImg, null, Path.Join(_configuration["FileUploadPath:Path"], $"Users/{request.UserId}"));
                 if (writtenPath is null)
-                    return ApiResponse<string>.InternalServerError();
+                    return ApiResponse<string>.BadRequest("ProfileImg is invalid");
                 else
                     request.ProfileImg = writtenPath;
             }
@@ -43,19 +44,47 @@ namespace SIFO.APIService.User.Service.Implementations
             var checkResult = await _userRepository.CheckIfEmailOrPhoneExists(request.Email, request.PhoneNumber);
             if (checkResult != Constants.SUCCESS)
                 return ApiResponse<string>.Conflict(checkResult);
-
+       
             var mappedResult = _mapper.Map<Users>(request);
             mappedResult.CreatedBy = Convert.ToInt64(tokenData.UserId);
             mappedResult.CreatedDate = DateTime.UtcNow;
             mappedResult.IsTempPassword = true;
             mappedResult.AuthenticationType = request.AuthenticationType;
+            mappedResult.PharmacyIds = request.PharmacyIds;
+            mappedResult.HospitalIds = request.HospitalIds;
             mappedResult.PasswordHash = await _commonService.HashPassword(request.PasswordHash);
-            var userData = await _userRepository.CreateUserAsync(mappedResult);
+            
+            var message = await _userRepository.CreateUserAsync(mappedResult, tokenData.UserId);
+            //if (request.PharmacyIds != null && request.PharmacyIds.Any())
+            //{
+            //    foreach (var items in request.PharmacyIds)
+            //    {
+            //        _userRepository.InsertUserPharmacyMapping(userId, items);
+            //    }
+            //}
+            if (message == Constants.SUCCESS)
+            {
+              
+                    var filePath = _configuration["Templates:WelcomeEmail"];
+                string subject = $"Welcome User";
+                string body = File.ReadAllText(filePath)
+              .Replace("[UserName]", $"{request.FirstName} {request.LastName}")
+              .Replace("[UserEmail]", $"{request.Email}")
+              .Replace("[UserPassword]", request.PasswordHash);
 
-            if (userData == Constants.SUCCESS)
+     
+
+
+                //var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");  
+                var toUser = new string[] { request.Email };
+                var mailResponse = await _commonService.SendMail(toUser.ToList(), null, subject, body);
+                if (!mailResponse)
+                    //if (!mailResponse.IsSuccess)
+                    return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
                 return ApiResponse<string>.Created(Constants.SUCCESS);
-
-            return ApiResponse<string>.InternalServerError("Something went wrong while creating the user.");
+           
+            }
+            return ApiResponse<string>.InternalServerError(message);
         }
         public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, long? roleId)
         {
@@ -125,17 +154,17 @@ namespace SIFO.APIService.User.Service.Implementations
         public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest request)
         {
             var tokenData = await _commonService.GetDataFromToken();
-            var passwordData = await _userRepository.GetPasswordByUserId(request.UserId.Value);
+            var (passwordData,isActive) = await _userRepository.GetPasswordByUserId(request.UserId.Value);
             if (passwordData == null)
                 return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
 
-            if (!tokenData.ParentRoleId.Contains(request.RoleId.ToString()) || tokenData.RoleId != request.RoleId)
+            if (!tokenData.ParentRoleId.Contains(request.RoleId.ToString()) && tokenData.RoleId != request.RoleId)
                 return ApiResponse<string>.Forbidden(Constants.INVALID_ROLE);
             if (!string.IsNullOrEmpty(request.ProfileImg))
             {
                 var writtenPath = await _commonService.SaveFileAsync(request.ProfileImg, null, Path.Join(_configuration["FileUploadPath:Path"], $"Users/{request.UserId}"));
                 if (writtenPath is null)
-                    return ApiResponse<string>.InternalServerError();
+                    return ApiResponse<string>.BadRequest("ProfileImg is invalid");
                 else
                     request.ProfileImg = writtenPath;
             }
@@ -149,10 +178,29 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
             mappedResult.UpdatedDate = DateTime.UtcNow;
             mappedResult.PasswordHash = passwordData;
-
-            var result = await _userRepository.UpdateUserAsync(mappedResult);
-            if (result == Constants.SUCCESS)
+            var (status, user) =  await _userRepository.UpdateUserAsync(mappedResult, tokenData.UserId);
+            if (status == Constants.SUCCESS)
+            {
+                if(isActive != request.IsActive)
+                {
+                    string statusMessage = user.IsActive.Value ? "activated" : "deactivated";
+                    string emailSubject = user.IsActive.Value ? "Account Activation" : "Account Deactivation";
+                    var filePath = _configuration["Templates:StatusTemplate"];
+                    string subject = emailSubject;
+                    string body = File.ReadAllText(filePath)
+                  .Replace("[UserName]", $"{user.FirstName} {user.LastName}")
+                  .Replace("[Status]", $"{statusMessage}")
+                  .Replace("[status]", statusMessage.ToLower());
+                    //var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");  
+                    var toUser = new string[] { request.Email };
+                    var mailResponse = await _commonService.SendMail(toUser.ToList(), null, subject, body);
+                    if (!mailResponse)
+                        //if (!mailResponse.IsSuccess)
+                        return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
+                }
                 return ApiResponse<string>.Success(Constants.SUCCESS);
+            }
+          
 
             return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
         }

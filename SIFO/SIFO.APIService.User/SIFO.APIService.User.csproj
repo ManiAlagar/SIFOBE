@@ -25,6 +25,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\SIFO.APIService.Hospital\SIFO.APIService.Hospital.csproj" />
+		<ProjectReference Include="..\SIFO.APIService.Master\SIFO.APIService.Master.csproj" />
 		<ProjectReference Include="..\SIFO.Common\SIFO.Common.csproj" />
 		<ProjectReference Include="..\SIFO.Core\SIFO.Core.csproj" />
 		<ProjectReference Include="..\SIFO.Model\SIFO.Model.csproj" />

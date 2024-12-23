@@ -44,7 +44,7 @@ namespace SIFO.Model.Entity
         public string? MinisterialID { get; set; }
 
         [Column("CAP")]
-        public string CAP { get; set; }
+        public string? CAP { get; set; }
 
         [Column("Province")]
         public string? Province { get; set; }

@@ -8,7 +8,7 @@
         public const string ROLE_HOSPITAL_PHARMACY_OPERATOR = "Hospital Pharmacy Operator"; 
         //public const string ROLE_SUPER_ADMINISTRATOR = "Administrator / Hospital Referent"; 
         public const string ROLE_ADMINISTRATOR = "Administrator"; 
-        public const string ROLE_HOSPITAL_REFERENT = "Hospital Referent"; 
+        public const string ROLE_HOSPITAL_REFERENT = "Administrator / Hospital Referent"; 
         public const string ROLE_DOCTOR = "Doctor"; 
         public const string ROLE_QC_OPERATOR = "QC Operator"; 
         public const string ROLE_RETAIL_PHARMACY_SUPERVISOR = "Retail Pharmacy Supervisor"; 

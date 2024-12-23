@@ -19,6 +19,11 @@ using SIFO.Core.Service.Contracts;
 using SIFO.Core.Repository.Contracts;
 using SIFO.Core.Service.Implementations;
 using SIFO.Core.Repository.Implementations;
+using SIFO.APIService.Master.Repository.Contracts;
+using SIFO.APIService.Master.Service.Implementations;
+using SIFO.APIService.Master.Repository.Implementations;
+using SIFO.APIService.Hospital.Repository.Contracts;
+using SIFO.APIService.Hospital.Repository.Implementations;
 
 namespace SIFO.APIService.User
 {
@@ -43,6 +48,8 @@ namespace SIFO.APIService.User
             services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
             services.AddTransient<ITwilioService, TwilioService>();
             services.AddTransient<ITwilioRepository, TwilioRepository>();
+            services.AddTransient<ICountryRepository, CountryRepository>();
+            services.AddTransient<IPharmacyRepository, PharmacyRepository>();
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
             services.AddSwaggerGen(c =>

@@ -12,6 +12,10 @@
         public string? PasswordHash { get; set; }
         public long? RoleId { get; set; }
         public string? ProfileImg { get; set; }
-        public long? AuthenticationType { get; set; }
+        public long AuthenticationType { get; set; }
+        public bool IsActive { get; set; } = true;
+        public long CountryId { get; set; }    
+        public List<long>? PharmacyIds { get; set; }
+        public List<long>? HospitalIds { get; set; }
     }
 }
