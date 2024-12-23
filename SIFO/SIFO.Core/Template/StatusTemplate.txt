@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Account Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .status-message {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2a9d8f;
+            margin-top: 10px;
+        }
+        .message {
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>User Account [Status] for [UserName]</h2>
+        </div>
+        <p class="message">
+            Dear [UserName],
+        </p>
+        <p class="message">
+            Your user account has been [status] in our system. 
+        </p>
+        <p class="message">
+            If you have any questions or need assistance, please contact our support team.
+        </p>
+        <p class="footer">
+            Best regards,<br>
+            The SIFO Team
+        </p>
+    </div>
+</body>
+</html>

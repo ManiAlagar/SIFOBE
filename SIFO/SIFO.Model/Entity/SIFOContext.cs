@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SIFO.Model.Entity.SIFO.Model.Entity;
 
 namespace SIFO.Model.Entity
 {
@@ -30,5 +31,7 @@ namespace SIFO.Model.Entity
         public virtual DbSet<Calendar> Calendar{ get; set; }
         public virtual DbSet<UserSessionManagement> UserSessionManagements{ get; set; }
         public virtual DbSet<RolePermission> RolePermissions { get; set; }
+        public virtual DbSet<UserHospitalMapping> UserHospitalMappings { get; set; }
+     
     }
 }

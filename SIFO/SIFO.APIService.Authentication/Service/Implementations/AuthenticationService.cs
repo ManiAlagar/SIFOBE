@@ -35,6 +35,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
                 return ApiResponse<object>.BadRequest("mail or password cannot be empty");
 
+            request.Password = await _commonService.HashPassword(request.Password);
             var userData = await _authenticationRepository.LoginAsync(request);
 
             if (userData == null || userData.PswdUpdatedAt < DateTime.UtcNow.AddMonths(-6))
@@ -64,9 +65,10 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
 
             var password = await _commonService.GenerateRandomPassword(12);
-            var passwordHash = password;//await _commonService.EncryptPassword(password);
-            
-            var isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, passwordHash,true);
+            string encryptPassword = await _commonService.EncryptPassword(password);
+            string hashedPassword = await _commonService.HashPassword(encryptPassword);
+
+            var isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, hashedPassword, true);
             if(!isPasswordUpdated) 
                 return ApiResponse<string>.InternalServerError();
 
@@ -94,9 +96,11 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             if (userData == null)
                 return ApiResponse<string>.NotFound("user not found");
 
+            request.OldPassword = await _commonService.HashPassword(request.OldPassword);
             if (request.OldPassword != userData.PasswordHash)
                 return ApiResponse<string>.BadRequest("invalid old password");
 
+            request.Password = await _commonService.HashPassword(request.Password);
             bool isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, request.Password, false);
             if (!isPasswordUpdated)
                 return ApiResponse<string>.InternalServerError();
