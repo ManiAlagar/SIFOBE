@@ -416,6 +416,38 @@ namespace SIFO.APIService.Master.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
+
+        [HttpPost]
+        [Route("import-lable")]
+        public async Task<IActionResult> ImportLableAsync(LabelRequest request)
+        {
+            try
+            {
+                var result = await _masterService.ImportLableAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError($"An error occurred: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpGet]
+        [Route("Labels")]
+        public async Task<IActionResult> GetLabelsAsync()
+        {
+            try
+            {
+                var result = await _masterService.GetLabelsAsync();
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError($"An error occurred: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
     }
 }
 

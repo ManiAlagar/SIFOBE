@@ -51,9 +51,11 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                           Email= user.Email,
                                           PasswordHash = user.PasswordHash,
                                           RoleId=  user.RoleId,
-                                         AuthenticationType= user.AuthenticationType,
+                                          AuthenticationType= user.AuthenticationType,
                                           AuthType = authType.AuthType,
-                                          RoleName = role.Name,
+                                          RoleName = role.Name, 
+                                          IsTempPassword = user.IsTempPassword, 
+                                          IsActive = user.IsActive,
                                           ParentRole = _context.RolePermissions
                                                           .Where(rp => rp.RoleId == user.RoleId && rp.IsActive == true)
                                                           .Select(rp => rp.AllowedRoleId)
@@ -227,6 +229,19 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public async Task<List<UserSessionManagement>> GetUserSessionByUserId(long userId)
+        {
+            try
+            {
+                var result = await _context.UserSessionManagements.Where(a=>a.UserId == userId).ToListAsync(); 
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }
