@@ -44,13 +44,13 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             if (userData.IsTempPassword == true && !userSession.Any())
             {
                 var loginData = await VerifyLoginAsync(userData.Id); 
-                loginData.Data.isFirstAccess = true;
+                loginData.Data.IsFirstAccess = true;
                 return ApiResponse<object>.Success("Success", loginData.Data);
             }
             else if (userData.IsTempPassword == true && userSession.Any())
             {
                 var loginData = await VerifyLoginAsync(userData.Id);
-                loginData.Data.isFirstAccess = false;
+                loginData.Data.IsFirstAccess = false;
                 return ApiResponse<object>.Success("Success", loginData.Data);
             }
             else
@@ -62,6 +62,8 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 {
                     UserId = userData.Id,
                     AuthenticationType = userData.AuthenticationType,
+                    IsFirstAccess = !userSession.Any(),
+                    IsTempPassword = userData.IsTempPassword == true,
                     Sid = await _twilioRepository.GetServiceIdbyUserIDAsync(userData.Id)
                 };
                 return ApiResponse<object>.Success(otpResponse, response);
@@ -134,7 +136,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             loginResponse.RoleId = userData.RoleId;
             loginResponse.RoleName = userData.RoleName ?? string.Empty;
             loginResponse.MenuAccess = await _authenticationRepository.GetPageByUserIdAsync(userData.Id);
-            loginResponse.Id = userData.Id;
+            loginResponse.UserId = userData.Id;
             loginResponse.IsTempPassword = userData.IsTempPassword == true;
             loginResponse.hasCreatePermission = await _authenticationRepository.CreatePermission(userData.RoleId);
             loginResponse.ParentRoleId = userData.ParentRole.ToList();
