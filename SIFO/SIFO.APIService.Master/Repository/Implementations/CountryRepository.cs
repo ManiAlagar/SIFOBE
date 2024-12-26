@@ -4,6 +4,7 @@ using SIFO.Model.Constant;
 using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using SIFO.APIService.Master.Repository.Contracts;
+using MySqlConnector;
 
 namespace SIFO.APIService.Master.Repository.Implementations
 {
@@ -160,6 +161,10 @@ namespace SIFO.APIService.Master.Repository.Implementations
                     return Constants.SUCCESS;
                 }
                 return Constants.NOT_FOUND;
+            }
+            catch (DbUpdateException dbEx) when (dbEx.InnerException is MySqlException mysqlEx && mysqlEx.Number == 1451)
+            {
+                return Constants.DATA_DEPENDENCY_ERROR_MESSAGE;
             }
             catch (Exception ex)
             {

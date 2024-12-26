@@ -233,7 +233,8 @@ namespace SIFO.APIService.User.Repository.Implementations
                                    ProfileImg = user.ProfileImg,
                                    IsActive = user.IsActive,
                                    CountryId = user.CountryId,
-                                   CountryCode = countries.PhoneCode,
+                                   PhoneCode = countries.PhoneCode,
+                                   CountryCode = countries.Iso2,
                                    CountryFlag = countries.EmojiU,
                                    Pharmacy = (from pharmacy in _context.UserPharmacyMappings
                                                join pharm in _context.Pharmacies on pharmacy.PharmacyId equals pharm.Id
@@ -381,7 +382,8 @@ namespace SIFO.APIService.User.Repository.Implementations
                             ProfileImg = user.ProfileImg,
                             IsActive = user.IsActive,
                             CountryId = user.CountryId,
-                            CountryCode = countries.PhoneCode,
+                            PhoneCode = countries.PhoneCode, 
+                            CountryCode = countries.Iso2,
                             CountryFlag = countries.EmojiU,
                             Pharmacy = (from pharmacy in _context.UserPharmacyMappings
                                         join pharm in _context.Pharmacies on pharmacy.PharmacyId equals pharm.Id
