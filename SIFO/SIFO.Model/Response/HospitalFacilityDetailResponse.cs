@@ -9,6 +9,10 @@
         public string? CityName { get; set; }
         public string? RegionName { get; set; }
         public bool IsActive { get; set; }
+        public long RegionId { get; set; }
+        public long CityId { get; set; }
+        public string Province { get; set; }
+        public string? Address { get; set; }
         public List<ContactResponse>? Contacts { get; set; }
         public List<long> PharmacyIds { get; set; }
     }

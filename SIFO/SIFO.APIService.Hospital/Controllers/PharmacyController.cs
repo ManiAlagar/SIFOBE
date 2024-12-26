@@ -4,12 +4,12 @@ using SIFO.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SIFO.APIService.Hospital.Service.Contracts;
+using SIFO.Model.Constant;
 
 namespace SIFO.APIService.Hospital.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class PharmacyController : ControllerBase
     {
         private readonly IPharmacyService _pharmacyService;
@@ -23,6 +23,7 @@ namespace SIFO.APIService.Hospital.Controllers
 
         [HttpGet]
         [Route("{pharmacyId}")]
+        [Authorize(Roles =$"{Constants.ROLE_QC_ADMINISTRATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR}, {Constants.ROLE_RETAIL_PHARMACY_OPERATOR},{Constants.ROLE_RETAIL_PHARMACY_SUPERVISOR}")]
         [ProducesResponseType(typeof(ApiResponse<PharmacyDetailResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
@@ -42,6 +43,7 @@ namespace SIFO.APIService.Hospital.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Constants.ROLE_QC_ADMINISTRATOR)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
@@ -67,6 +69,7 @@ namespace SIFO.APIService.Hospital.Controllers
 
         [HttpPut]
         [Route("{pharmacyId}")]
+        [Authorize(Roles = $"{Constants.ROLE_QC_ADMINISTRATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR}, {Constants.ROLE_RETAIL_PHARMACY_OPERATOR},{Constants.ROLE_RETAIL_PHARMACY_SUPERVISOR}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
@@ -93,6 +96,7 @@ namespace SIFO.APIService.Hospital.Controllers
 
         [HttpDelete]
         [Route("{pharmacyId}")]
+        [Authorize(Roles = Constants.ROLE_QC_ADMINISTRATOR)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
@@ -112,34 +116,17 @@ namespace SIFO.APIService.Hospital.Controllers
         }
 
         [HttpGet]
+        [Route("/api/pharmacies")]
+        [Authorize(Roles = $"{Constants.ROLE_QC_ADMINISTRATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR}, {Constants.ROLE_RETAIL_PHARMACY_OPERATOR},{Constants.ROLE_RETAIL_PHARMACY_SUPERVISOR}")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<PharmaciesResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetPharmacyAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false, [FromHeader] string? pharmacyType = null)
+        public async Task<IActionResult> GetPharmacyAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false, [FromHeader] string? pharmacyType = null, [FromHeader] bool isCurrentUser = true)
         {
             try
             {
-                var result = await _pharmacyService.GetPharmacyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll,pharmacyType);
-                return StatusCode(result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var result = ApiResponse<string>.InternalServerError;
-                return StatusCode(StatusCodes.Status500InternalServerError, result);
-            }
-        }
-
-        [HttpGet]
-        [Route("userPharmacy")]
-        [ProducesResponseType(typeof(ApiResponse<List<PharmaciesResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetMyPharmacyAsync([FromHeader]string? pharmacyType)
-        {
-            try
-            {
-                var result = await _pharmacyService.GetMyPharmacyAsync(pharmacyType);
+                var result = await _pharmacyService.GetPharmacyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll, pharmacyType, isCurrentUser);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
