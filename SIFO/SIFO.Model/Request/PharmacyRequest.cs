@@ -14,7 +14,7 @@
         public string Province { get; set; }
         public string PhoneNumber { get; set; }
         public string? MinisterialId { get; set; }
-        public long? CountryId { get; set; }
+        public string? CountryCode { get; set; }
         public long? ZipCode { get; set; }
         public long PharmacyTypeId { get; set; }
         public bool IsActive { get; set; }

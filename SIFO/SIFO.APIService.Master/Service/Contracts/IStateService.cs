@@ -11,6 +11,6 @@ namespace SIFO.APIService.Master.Service.Contracts
         public Task<ApiResponse<State>> CreateStateAsync(StateRequest request);
         public Task<ApiResponse<State>> UpdateStateAsync(StateRequest request);
         public Task<ApiResponse<string>> DeleteStateAsync(long stateId);
-        public Task<ApiResponse<List<StateResponse>>> GetStateByCountryIdAsync(long countryId);
+        public Task<ApiResponse<List<StateResponse>>> GetStateByCountryIdAsync(string countryCode);
     }
 }

@@ -101,13 +101,13 @@ namespace SIFO.APIService.Master.Repository.Implementations
             }
         }
 
-        public async Task<List<StateResponse>> GetStateByCountryIdAsync(long countryId)
+        public async Task<List<StateResponse>> GetStateByCountryIdAsync(string countryCode)
         {
             try
             {
                 var query = from state in _context.States
                             join country in _context.Countries on state.CountryId equals country.Id
-                            where country.Id == countryId
+                            where country.Iso2 == countryCode
                             select new StateResponse
                             {
                                 Id = state.Id,

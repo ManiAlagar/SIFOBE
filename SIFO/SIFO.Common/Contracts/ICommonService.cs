@@ -32,5 +32,6 @@ namespace SIFO.Common.Contracts
         public Task<string> GetIpAddress();
         public Task<DateTime> GetStartOfWeek(DateTime date);
         public Task<string> HashPassword(string password);
+        public Task<long> GetCountryIdByCountryCodeAsync(string countryCode);
     }
 }

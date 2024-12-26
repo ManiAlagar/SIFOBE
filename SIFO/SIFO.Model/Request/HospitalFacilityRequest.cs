@@ -5,7 +5,7 @@
         public string HospitalFacilityName { get; set; }
         public long Region { get; set; }
         public long AddressId { get; set; }
-        public long? CountryId { get; set; }
+        public string? CountryCode { get; set; }
         public string Address { get; set; }
         public long? ZipCode { get; set; }
         public bool IsActive { get; set; }

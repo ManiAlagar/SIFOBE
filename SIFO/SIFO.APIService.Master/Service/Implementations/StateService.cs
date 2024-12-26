@@ -91,12 +91,12 @@ namespace SIFO.APIService.Master.Service.Implementations
             return ApiResponse<string>.Success(Constants.SUCCESS, response);
         }
 
-        public async Task<ApiResponse<List<StateResponse>>> GetStateByCountryIdAsync(long countryId)
+        public async Task<ApiResponse<List<StateResponse>>> GetStateByCountryIdAsync(string countryCode)
         {
-            if (countryId <= 0)
+            if (string.IsNullOrEmpty(countryCode))
                 return ApiResponse<List<StateResponse>>.BadRequest();
 
-            var response = await _stateRepository.GetStateByCountryIdAsync(countryId);
+            var response = await _stateRepository.GetStateByCountryIdAsync(countryCode);
 
             if (response != null)
                 return ApiResponse<List<StateResponse>>.Success(Constants.SUCCESS, response);
