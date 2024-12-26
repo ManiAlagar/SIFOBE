@@ -6,6 +6,7 @@ using SIFO.Model.Constant;
 using SIFO.Utility.Implementations;
 using SIFO.APIService.Master.Service.Contracts;
 using SIFO.APIService.Master.Repository.Contracts;
+using SIFO.Common.Contracts;
 
 namespace SIFO.APIService.Master.Service.Implementations
 {
@@ -13,11 +14,13 @@ namespace SIFO.APIService.Master.Service.Implementations
     {
         private readonly ICityRepository _cityRepository;
         private readonly IMapper _mapper;
+        private readonly ICommonService _commonService;
 
-        public CityService(ICityRepository cityRepository, IMapper mapper)
+        public CityService(ICityRepository cityRepository, IMapper mapper,ICommonService commonService)
         {
             _cityRepository = cityRepository;
-            _mapper = mapper;
+            _mapper = mapper; 
+            _commonService = commonService;
         }
 
         public async Task<ApiResponse<PagedResponse<CityResponse>>> GetAllCityAsync(int pageNo = 1, int pageSize = 10, string filter = "", string sortColumn = "Id", string sortDirection = "DESC", bool isAll = false)
@@ -66,7 +69,7 @@ namespace SIFO.APIService.Master.Service.Implementations
                 return new ApiResponse<City>(StatusCodes.Status409Conflict, Constants.CITY_ALREADY_EXISTS);
 
             var mappedResult = _mapper.Map<City>(entity);
-
+            mappedResult.CountryId = await _commonService.GetCountryIdByCountryCodeAsync(entity.CountryCode);
             var response = await _cityRepository.CreateCityAsync(mappedResult);
 
             if (response.Id > 0)
@@ -83,7 +86,7 @@ namespace SIFO.APIService.Master.Service.Implementations
                 return new ApiResponse<City>(StatusCodes.Status404NotFound, Constants.CITY_NOT_FOUND);
 
             var mappedResult = _mapper.Map<City>(entity);
-
+            mappedResult.CountryId = await _commonService.GetCountryIdByCountryCodeAsync(entity.CountryCode);
             var response = await _cityRepository.UpdateCityAsync(mappedResult);
 
             if (response != null)
