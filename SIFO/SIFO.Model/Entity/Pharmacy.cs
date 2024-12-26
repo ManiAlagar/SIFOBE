@@ -38,7 +38,7 @@ namespace SIFO.Model.Entity
         public DateTime? ValidTo { get; set; }
 
         [Column("ASL")]
-        public string? ASL { get; set; }
+        public string ASL { get; set; }
 
         [Column("MinisterialID")]
         public string? MinisterialID { get; set; }
@@ -54,5 +54,11 @@ namespace SIFO.Model.Entity
 
         [Column("AddressId")]
         public long AddressId { get; set; }
+
+        [Column("VAT")]
+        public long? VAT { get; set; }
+
+        [Column("PhoneNumber")]
+        public string PhoneNumber { get; set; }
     }
 }
