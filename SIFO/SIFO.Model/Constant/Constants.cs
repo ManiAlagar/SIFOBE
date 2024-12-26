@@ -46,7 +46,19 @@
         public static string ADDRESSDETAIL_NOT_FOUND = "address detail not found";
         public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists"; 
         public static string USER_NOT_AUTHENTICATED = "user not authenticated"; 
-        public static string INVALID_ROLE = "you are restricted to do any operations for this role"; 
+        public static string INVALID_ROLE = "you are restricted to do any operations for this role";
+        public static string MINISTERIAL_ID_EXISTS = "ministerial id already exists";
+        public static string PHARMACY_ID_NOT_EXISTS = "pharmacy id does not exists.";
+
+        public static string ALLERGY_ALREADY_EXISTS = "allergy already exists";
+        public static string ALLERGY_NOT_FOUND = "allergy not found";
+        public static string INTOLERANCE_MANAGEMENT_ALREADY_EXISTS = "intolerance management already exists";
+        public static string INTOLERANCE_MANAGEMENT_NOT_FOUND = "intolerance management not found";
+        public enum PharmacyTypes
+        {
+            retail,
+            hospital
+        }
 
     }
 }

@@ -10,8 +10,12 @@ namespace SIFO.Model.Validator
             RuleFor(x => x.HospitalFacilityName)
                 .NotEmpty().WithMessage("hospital facility name is required.");
             RuleFor(x => x.Province)
-               .NotEmpty().WithMessage("province is required.")
+               .NotEmpty().WithMessage("province is required.") 
                .MaximumLength(2).WithMessage("province cannot exceed more than 2 characters.");
+            RuleFor(x => x.Address)
+               .NotEmpty().WithMessage("address is required.");
+            RuleFor(x => x.City)
+               .NotEmpty().WithMessage("city is required.");
             RuleFor(x => x.CAP)
                 .NotEmpty().WithMessage("cap code is required.");
             RuleFor(x => x.PhoneNumber)

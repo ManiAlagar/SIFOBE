@@ -12,5 +12,9 @@
         public long Region { get; set; }
         public string RegionName { get; set; }
         public bool? IsActive { get; set; }
+        public string? Address { get; set; }
+        public long? PharmacyTypeId { get; set; }
+        public string? PharmacyTypeName { get; set; }
+        public long? VAT { get; set; }
     }
 }
