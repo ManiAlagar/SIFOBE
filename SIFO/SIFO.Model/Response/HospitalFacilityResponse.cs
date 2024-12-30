@@ -8,6 +8,10 @@
         public long AddressId { get; set; }
         public string? CityName { get; set; }
         public string? RegionName { get; set; }
+        public string? Address {  get; set; }
+        public long CityId { get; set; }
+        public long RegionId { get; set; }
         public bool IsActive { get; set; }
+        public string Province { get; set; }
     }
 }

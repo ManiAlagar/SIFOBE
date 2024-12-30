@@ -585,5 +585,18 @@ namespace SIFO.Utility.Implementations
                 return Task.FromResult(hashedPassword);
             }
         }
+
+        public async Task<long> GetCountryIdByCountryCodeAsync(string countryCode)
+        {
+            try
+            {
+                var result = await _context.Countries.Where(a => a.Iso2 == countryCode).Select(a => a.Id).SingleOrDefaultAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

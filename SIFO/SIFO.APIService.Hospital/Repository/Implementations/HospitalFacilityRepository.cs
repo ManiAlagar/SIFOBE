@@ -28,7 +28,8 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                 {
                     var data = await _commonService.GetDataFromToken();
                     long? addressId = 0;
-                    long? addressDetailResult = await _commonService.AddressDetailExistsAsync(request.Address, request.City, request.Region, request.CountryId, request.ZipCode);
+                    long countryId = await _commonService.GetCountryIdByCountryCodeAsync(request.CountryCode);
+                    long? addressDetailResult = await _commonService.AddressDetailExistsAsync(request.Address, request.City, request.Region, countryId, request.ZipCode);
 
                     if (addressDetailResult > 0 && addressDetailResult is not null)
                     {
@@ -41,7 +42,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                             Address = request.Address,
                             CityId = request.City,
                             Region = request.Region,
-                            CountryId = request.CountryId,
+                            CountryId = await _commonService.GetCountryIdByCountryCodeAsync(request.CountryCode),
                             Zipcode = request.ZipCode
                         };
 
@@ -169,9 +170,13 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                 Id = hospitalFacilities.Id,
                                 Name = hospitalFacilities.Name,
                                 ASL = hospitalFacilities.ASL,
-                                AddressId = hospitalFacilities.AddressId,
+                                AddressId = hospitalFacilities.AddressId, 
+                                Address = addressDetail.Address,  
+                                CityId = cities.Id,
                                 CityName = cities.Name,
-                                RegionName = states.Name,
+                                RegionName = states.Name, 
+                                RegionId = states.Id,
+                                Province = hospitalFacilities.Province,
                                 IsActive = hospitalFacilities.IsActive
                             };
 
@@ -241,9 +246,13 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                                           Id = hospitalFacilities.Id,
                                           Name = hospitalFacilities.Name,
                                           ASL = hospitalFacilities.ASL,
+                                          Province = hospitalFacilities.Province,
                                           AddressId = hospitalFacilities.AddressId,
+                                          Address = addressDetail.Address,
+                                          CityId = cities.Id,
                                           CityName = cities.Name,
                                           RegionName = states.Name,
+                                          RegionId = states.Id,
                                           IsActive = hospitalFacilities.IsActive,
                                           Contacts = contactsResponse,
                                           PharmacyIds = pharmacyIdResponse,
@@ -267,7 +276,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                         Address = request.Address,
                         CityId = request.City,
                         Region = request.Region,
-                        CountryId = request.CountryId,
+                        CountryId = await _commonService.GetCountryIdByCountryCodeAsync(request.CountryCode),
                         Zipcode = request.ZipCode
                     };
 

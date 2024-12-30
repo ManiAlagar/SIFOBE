@@ -32,12 +32,12 @@ namespace SIFO.APIService.Master.Service.Implementations
             return ApiResponse<PagedResponse<CountryResponse>>.Success(Constants.SUCCESS, response);
         }
 
-        public async Task<ApiResponse<CountryResponse>> GetCountryByIdAsync(long id)
+        public async Task<ApiResponse<CountryResponse>> GetCountryByIdAsync(string countryCode)
         {
-            if (id <= 0)
+            if (string.IsNullOrEmpty(countryCode))
                 return ApiResponse<CountryResponse>.BadRequest();
 
-            var response = await _countryRepository.GetCountryByIdAsync(id);
+            var response = await _countryRepository.GetCountryByIdAsync(countryCode);
 
             if (response != null)
                 return ApiResponse<CountryResponse>.Success(Constants.SUCCESS, response);
@@ -52,7 +52,7 @@ namespace SIFO.APIService.Master.Service.Implementations
             if (isNameExists)
                 return new ApiResponse<Country>(StatusCodes.Status409Conflict, Constants.COUNTRY_ALREADY_EXISTS);
 
-            entity.Iso2 = entity.Name.Substring(0, 2);
+            //entity.Iso2 = entity.Name.Substring(0, 2);
             entity.Iso3 = entity.Name.Substring(0,3);
 
             var mappedResult = _mapper.Map<Country>(entity);
@@ -67,7 +67,7 @@ namespace SIFO.APIService.Master.Service.Implementations
 
         public async Task<ApiResponse<Country>> UpdateCountryAsync(CountryRequest entity)
         {
-            bool isCountryExists = await _countryRepository.CountryExistsByIdAsync(entity.Id);
+            bool isCountryExists = await _countryRepository.CountryExistsByIdAsync(entity.Iso2);
 
             if (!isCountryExists)
                 return new ApiResponse<Country>(StatusCodes.Status404NotFound, Constants.COUNTRY_NOT_FOUND);
@@ -77,19 +77,19 @@ namespace SIFO.APIService.Master.Service.Implementations
             var response = await _countryRepository.UpdateCountryAsync(mappedResult);
 
             if (response != null)   
-            {
                 return ApiResponse<Country>.Success(Constants.SUCCESS, response);
-            }
+
             return new ApiResponse<Country>(StatusCodes.Status500InternalServerError);
         }
 
-        public async Task<ApiResponse<string>> DeleteCountryAsync(long id)
+        public async Task<ApiResponse<string>> DeleteCountryAsync(string countryCode)
         {
-            var response = await _countryRepository.DeleteCountryAsync(id);
+            var response = await _countryRepository.DeleteCountryAsync(countryCode);
             if (response == Constants.NOT_FOUND)
                 return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.COUNTRY_NOT_FOUND);
-            return ApiResponse<string>.Success(Constants.SUCCESS, response);
+            if (response == Constants.SUCCESS)
+                return ApiResponse<string>.Success(Constants.SUCCESS, response); 
+            return ApiResponse<string>.BadRequest(response);
         }
-
     }
 }

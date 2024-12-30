@@ -156,7 +156,20 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                                  MenuIcon = page.MenuIcon,
                                  PageUrl = page.PageUrl,
                                  userRoleId = page.userRoleId,
-                                 EventName = page.EventName
+                                 EventName = page.EventName,
+                                 SubPages = (from subsubpage in _context.Pages
+                                             where subsubpage.ParentPageId == page.Id
+                                             select new PageResponse
+                                             {
+                                                 Id = subsubpage.Id,
+                                                 PageName = subsubpage.PageName,
+                                                 IsActive = subsubpage.IsActive.Value,
+                                                 ParentPageId = subsubpage.ParentPageId,
+                                                 MenuIcon = subsubpage.MenuIcon,
+                                                 PageUrl = subsubpage.PageUrl,
+                                                 userRoleId = subsubpage.userRoleId,
+                                                 EventName = subsubpage.EventName
+                                             }).ToList()
                              };
 
                 return result.ToList();

@@ -51,16 +51,16 @@ namespace SIFO.APIService.Master.Controllers
         }
 
         [HttpGet]
-        [Route("Country/{id}")]
+        [Route("Country/{countryCode}")]
         [ProducesResponseType(typeof(ApiResponse<CountryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetCountryByIdAsync([FromRoute] long id)
+        public async Task<IActionResult> GetCountryByIdAsync([FromRoute] string countryCode)
         {
             try
             {
-                var result = await _countryService.GetCountryByIdAsync(id);
+                var result = await _countryService.GetCountryByIdAsync(countryCode);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -96,11 +96,11 @@ namespace SIFO.APIService.Master.Controllers
         }
 
         [HttpPut]
-        [Route("Countries/{id}")]
+        [Route("Countries/{countryCode}")]
         [ProducesResponseType(typeof(ApiResponse<Country>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateCountryAsync([FromRoute] long id, CountryRequest request)
+        public async Task<IActionResult> UpdateCountryAsync([FromRoute] string countryCode, CountryRequest request)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace SIFO.APIService.Master.Controllers
                     var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
                 }
-                request.Id = id;
+                request.Iso2 = countryCode;
                 var result = await _countryService.UpdateCountryAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
@@ -122,15 +122,15 @@ namespace SIFO.APIService.Master.Controllers
         }
 
         [HttpDelete]
-        [Route("Country/{id}")]
+        [Route("Country/{countryCode}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteCountryAsync([FromRoute] long id)
+        public async Task<IActionResult> DeleteCountryAsync([FromRoute] string countryCode)
         {
             try
             {
-                var result = await _countryService.DeleteCountryAsync(id);
+                var result = await _countryService.DeleteCountryAsync(countryCode);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -359,16 +359,16 @@ namespace SIFO.APIService.Master.Controllers
         }
 
         [HttpGet]
-        [Route("StateByCountry/{id}")]
+        [Route("StateByCountry/{countryCode}")]
         [ProducesResponseType(typeof(ApiResponse<List<StateResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetStateByCountryIdAsync([FromRoute] long id)
+        public async Task<IActionResult> GetStateByCountryIdAsync([FromRoute] string countryCode)
         {
             try
             {
-                var result = await _stateService.GetStateByCountryIdAsync(id);
+                var result = await _stateService.GetStateByCountryIdAsync(countryCode);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)

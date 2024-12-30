@@ -12,6 +12,7 @@
         public long Region { get; set; }
         public string RegionName { get; set; }
         public bool? IsActive { get; set; }
+        public long? VAT { get; set; }
         public List<ContactResponse>? Contacts { get; set; }
         public Dictionary<string, List<CalendarResponse>>? Calendar { get; set; }
     }

@@ -4,12 +4,13 @@ using SIFO.Model.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SIFO.APIService.Hospital.Service.Contracts;
+using SIFO.Model.Constant;
 
 namespace SIFO.APIService.Hospital.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles =Constants.ROLE_QC_ADMINISTRATOR)]
     public class HospitalFacilityController : ControllerBase
     {
         private readonly IHospitalFacilityService _hospitalFacilityService;

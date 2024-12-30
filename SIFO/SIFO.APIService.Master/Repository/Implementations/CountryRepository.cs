@@ -4,6 +4,7 @@ using SIFO.Model.Constant;
 using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using SIFO.APIService.Master.Repository.Contracts;
+using MySqlConnector;
 
 namespace SIFO.APIService.Master.Repository.Implementations
 {
@@ -72,12 +73,12 @@ namespace SIFO.APIService.Master.Repository.Implementations
             }
         }
 
-        public async Task<CountryResponse> GetCountryByIdAsync(long id)
+        public async Task<CountryResponse> GetCountryByIdAsync(string countryCode)
         {
             try
             {
                 var query = from country in _context.Countries
-                            where country.Id == id
+                            where country.Iso2 == countryCode
                             select new CountryResponse
                             {
                                 Id = country.Id,
@@ -92,7 +93,7 @@ namespace SIFO.APIService.Master.Repository.Implementations
                                 IsActive = country.IsActive
                             };
 
-                var result = await query.FirstOrDefaultAsync();
+                var result = await query.SingleOrDefaultAsync();
                 return result;
             }
             catch (Exception ex)
@@ -135,11 +136,11 @@ namespace SIFO.APIService.Master.Repository.Implementations
                 .Where(c => c.Name.ToLower() == countryName.Trim().ToLower())
                 .AnyAsync();
         }
-        public async Task<bool> CountryExistsByIdAsync(long? countryId)
+        public async Task<bool> CountryExistsByIdAsync(string? countryCode)
         {
             try
             {
-                var res = await _context.Countries.AsNoTracking().FirstOrDefaultAsync(c => c.Id == countryId);
+                var res = await _context.Countries.AsNoTracking().FirstOrDefaultAsync(c => c.Iso2 == countryCode);
                 return res != null;
             }
             catch (Exception ex)
@@ -148,11 +149,11 @@ namespace SIFO.APIService.Master.Repository.Implementations
             }
         }
 
-        public async Task<string> DeleteCountryAsync(long id)
+        public async Task<string> DeleteCountryAsync(string countryCode)
         {
             try
             {
-                var entity = await _context.Countries.Where(x => x.Id == id).SingleOrDefaultAsync();
+                var entity = await _context.Countries.Where(x => x.Iso2 == countryCode).SingleOrDefaultAsync();
                 if (entity != null)
                 {
                     _context.Countries.Remove(entity);
@@ -160,6 +161,10 @@ namespace SIFO.APIService.Master.Repository.Implementations
                     return Constants.SUCCESS;
                 }
                 return Constants.NOT_FOUND;
+            }
+            catch (DbUpdateException dbEx) when (dbEx.InnerException is MySqlException mysqlEx && mysqlEx.Number == 1451)
+            {
+                return Constants.DATA_DEPENDENCY_ERROR_MESSAGE;
             }
             catch (Exception ex)
             {
