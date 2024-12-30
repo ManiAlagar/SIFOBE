@@ -1,4 +1,6 @@
-﻿namespace SIFO.Model.Response
+﻿using SIFO.Model.Entity;
+
+namespace SIFO.Model.Response
 {
     public class PageResponse
     {
@@ -10,6 +12,7 @@
         public string PageUrl { get; set; }  
         public string EventName { get; set; }
         public long? userRoleId { get; set; }
+        public List<PageResponse> SubPages { get; set; }
     }
 }
 
