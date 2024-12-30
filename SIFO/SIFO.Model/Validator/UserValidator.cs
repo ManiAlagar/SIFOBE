@@ -28,7 +28,7 @@ namespace SIFO.Model.Validator
             });
             When(x => x.HospitalIds != null, () =>
             {
-                RuleFor(x => x.PharmacyIds).NotEmpty().WithMessage("Hospital Id list is required.")
+                RuleFor(x => x.HospitalIds).NotEmpty().WithMessage("Hospital Id list is required.")
                 .ForEach(id => id.NotNull().WithMessage("Each Hospital Id  is  required."));
 
             });

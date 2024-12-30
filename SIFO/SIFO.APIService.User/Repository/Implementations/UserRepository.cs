@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SIFO.APIService.Hospital.Repository.Contracts;
+using SIFO.APIService.User.Protos;
 using SIFO.APIService.User.Repository.Contracts;
-using SIFO.Common.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Entity;
 using SIFO.Model.Entity.SIFO.Model.Entity;
@@ -14,131 +13,87 @@ namespace SIFO.APIService.User.Repository.Implementations
     public class UserRepository : IUserRepository
     {
         private readonly SIFOContext _context;
-        private readonly ICommonService _commonService;
-        private readonly IPharmacyRepository _pharmacyRepository;
+      
+        private readonly IConfiguration _configuration;
 
-        public UserRepository(SIFOContext context, ICommonService commonService,IPharmacyRepository pharmacyRepository)
+        public UserRepository(SIFOContext context, IConfiguration configuration)
         {
             _context = context;
-            _commonService = commonService;
-            _pharmacyRepository = pharmacyRepository;
+            _configuration = configuration;
         }
-
-        //public async Task<string> CreateUserAsync(Users user)
-        //{
-        //    using (var context = await _context.Database.BeginTransactionAsync()) 
-        //    {
-        //        try
-        //        {
-
-        //            var tokenData = _commonService.GetDataFromToken();
-        //            if(user.RoleId.ToString() == tokenData.Result.ParentRoleId)
-        //            {
-        //                var encryptedPassword = await _commonService.EncryptPassword(user.PasswordHash);
-        //                var userData = new Users()
-        //                {
-        //                    FirstName = user.FirstName,
-        //                    LastName = user.LastName,
-        //                    Email = user.Email,
-        //                    PasswordHash = encryptedPassword,
-        //                    PhoneNumber = user.PhoneNumber,
-        //                    RoleId = user.RoleId,
-        //                    FiscalCode = user.FiscalCode,
-        //                    CreatedDate = DateTime.UtcNow,
-        //                    CreatedBy = tokenData.Id,
-        //                    IsTempPassword = true,
-        //                    AuthenticationType = 1
-        //                };
-        //                var result = await _context.Users.AddAsync(userData);
-        //                await _context.SaveChangesAsync();
-        //                await _context.Database.CommitTransactionAsync();
-        //                return Constants.SUCCESS;
-        //            }
-        //            else
-        //            {
-        //                return Constants.INVALID_ROLE;
-        //            }
-
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            await _context.Database.RollbackTransactionAsync();
-        //            throw;
-        //        } 
-        //    }
-        //}
 
         public async Task<bool> CreateUserPharmacyMapping(Users user, string userId)
         {
-                try
+            try
+            {
+                if (user.PharmacyIds != null && user.PharmacyIds.Any())
                 {
-                    if (user.PharmacyIds != null && user.PharmacyIds.Any())
-                    {
-                        var retailPharmacyTypeId = await _pharmacyRepository.GetRetailPharmacyAsync();
-                        // Check if all pharmacy IDs exist
-                        bool allPharmaciesExist = await _context.Pharmacies
-                            .Where(p => user.PharmacyIds.Contains(p.Id) && p.IsActive && p.PharmacyTypeId != retailPharmacyTypeId && p.CreatedBy == Convert.ToInt64(userId))
-                            .CountAsync() == user.PharmacyIds.Count;
+                    GrpcClient grpcClient = new(_configuration);
+                    var retailPharmacyTypeId = await grpcClient.GetRetailPharmacy();
+                    // Check if all pharmacy IDs exist
+                    bool allPharmaciesExist = await _context.Pharmacies
+                        .Where(p => user.PharmacyIds.Contains(p.Id) && p.IsActive && p.PharmacyTypeId != retailPharmacyTypeId && p.CreatedBy == Convert.ToInt64(userId))
+                        .CountAsync() == user.PharmacyIds.Count;
 
-                        if (!allPharmaciesExist)
-                        {
-                            return false;
-                        }
-
-                        var userPharmacyMappings = user.PharmacyIds.Select(pharmacyId => new UserPharmacyMapping
-                        {
-                            userId = user.Id,
-                            PharmacyId = pharmacyId
-                        }).ToList();
-
-                        await _context.UserPharmacyMappings.AddRangeAsync(userPharmacyMappings);
-                        await _context.SaveChangesAsync();
-                        return true;
-                    }
-                    else
+                    if (!allPharmaciesExist)
                     {
                         return false;
                     }
+
+                    var userPharmacyMappings = user.PharmacyIds.Select(pharmacyId => new UserPharmacyMapping
+                    {
+                        userId = user.Id,
+                        PharmacyId = pharmacyId
+                    }).ToList();
+
+                    await _context.UserPharmacyMappings.AddRangeAsync(userPharmacyMappings);
+                    await _context.SaveChangesAsync();
+                    return true;
                 }
-                catch (Exception ex)
+                else
                 {
                     return false;
                 }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public async Task<bool> CreateUserHospitalMapping(Users user, string userId)
         {
-                try
-                {
+            try
+            {
                     if(user.HospitalIds != null && user.HospitalIds.Any() && !user.HospitalIds.Contains(0))
-                        {
-                        bool allHospitals = await _context.HospitalFacilities
-                            .Where(a => user.HospitalIds.Contains(a.Id) && a.IsActive && a.CreatedBy == Convert.ToInt64(userId))
-                            .CountAsync() == user.HospitalIds.Count();
-                        if (!allHospitals)
-                        {
-                            return false;
-                        }
-
-                        var addedData = user.HospitalIds.Select(a => new UserHospitalMapping
-                        {
-                            UserId = user.Id,
-                            HospitalId = a
-
-                        }).ToList();
-                        await _context.UserHospitalMappings.AddRangeAsync(addedData);
-                        await _context.SaveChangesAsync();
-                        return true;
-                    }
-                        else
+                {
+                    bool allHospitals = await _context.HospitalFacilities
+                        .Where(a => user.HospitalIds.Contains(a.Id) && a.IsActive && a.CreatedBy == Convert.ToInt64(userId))
+                        .CountAsync() == user.HospitalIds.Count();
+                    if (!allHospitals)
                     {
-                        return false; 
+                        return false;
                     }
+
+                    var addedData = user.HospitalIds.Select(a => new UserHospitalMapping
+                    {
+                        UserId = user.Id,
+                        HospitalId = a
+
+                    }).ToList();
+                    await _context.UserHospitalMappings.AddRangeAsync(addedData);
+                    await _context.SaveChangesAsync();
+                    return true;
                 }
-                catch (Exception ex)
+                else
                 {
                     return false;
                 }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
 
@@ -320,7 +275,7 @@ namespace SIFO.APIService.User.Repository.Implementations
                     {
                         var deletedData = await _context.UserPharmacyMappings.Where(x => x.userId == user.Id).ToListAsync();
                         _context.UserPharmacyMappings.RemoveRange(deletedData);
-    
+
                         await _context.SaveChangesAsync();
 
                         bool resultMsg = await CreateUserPharmacyMapping(user, userId);
@@ -334,7 +289,7 @@ namespace SIFO.APIService.User.Repository.Implementations
                     {
                         var deletedData = await _context.UserHospitalMappings.Where(x => x.UserId == user.Id).ToListAsync();
                         _context.UserHospitalMappings.RemoveRange(deletedData);
-                
+
                         await _context.SaveChangesAsync();
 
                         bool resultMsg = await CreateUserHospitalMapping(user, userId);
