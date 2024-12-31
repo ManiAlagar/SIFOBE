@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SIFO.Model.Entity;
-using SIFO.Model.Request;
 
 namespace SIFO.APIService.ThirdPartyAlert.Repository.Implementations
 {

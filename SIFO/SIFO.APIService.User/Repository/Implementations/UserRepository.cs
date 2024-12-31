@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SIFO.APIService.User.Protos;
 using SIFO.APIService.User.Repository.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Entity;

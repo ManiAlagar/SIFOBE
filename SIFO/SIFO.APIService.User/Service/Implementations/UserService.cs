@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using SIFO.APIService.Master.Repository.Contracts;
 using SIFO.APIService.User.Repository.Contracts;
 using SIFO.APIService.User.Service.Contracts;
 using SIFO.Common.Contracts;
