@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "SIFO.APIService.Hospital";
+
+package pharmacy;
+
+service PharmacyGrpcService {
+  rpc GetRetailPharmacy (GetRetailPharmacyRequest) returns (GetRetailPharmacyResponse);
+}
+
+message GetRetailPharmacyRequest {
+
+}
+
+message GetRetailPharmacyResponse {
+  int64 pharmacyId = 1;
+}

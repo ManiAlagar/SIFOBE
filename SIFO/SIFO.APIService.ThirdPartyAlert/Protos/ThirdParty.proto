@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option csharp_namespace = "SIFO.APIService.ThirdParty";
+
+package ThirdParty;
+
+
+service ThirdPartyGrpcService {
+  rpc SendMail (SendMailRequest) returns (SendMailResponse);
+  rpc Verify2Fa (Verify2FaRequest) returns (Verify2FaResponse);
+  rpc IsValidAuth (IsValidAuthRequest) returns (IsValidAuthResponse);
+ // rpc SendOtpRequest (SendOtpRequest) returns (SendOtpResponse);
+}
+
+
+message SendMailRequest {
+  repeated string to = 1;
+  repeated string cc = 2;
+  string subject = 3;
+  string body = 4;
+}
+
+message SendMailResponse {
+  bool success = 1;
+}
+
+message Verify2FaRequest {
+	string userId = 1;
+	string otpCode = 2;
+	string serviceId = 3;
+} 
+message Verify2FaResponse
+{
+	bool success = 1; 
+	string message = 2;
+}
+message IsValidAuthRequest 
+{
+	int64 userId = 1; 
+	string otpCode = 2; 
+}
+
+message IsValidAuthResponse
+{ 
+	bool isValid = 1;
+	string message = 2;
+}
+message SendOtpRequest
+{ 
+	int64 userId = 1; 
+	string authenticationFor = 2; 
+	int64 authenticationType = 3;
+} 
+message SendOtpResponse
+{ 
+	bool success = 1; 
+	string message = 2;
+}

@@ -440,9 +440,11 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                     PharmacyId = a.PharmacyId,
                 }).FirstOrDefaultAsync();
 
-                var dateRange = Enumerable.Range(0, (endDate.Day - startDate.Day) + 1)
-                                      .Select(i => startDate.AddDays(i).ToString("MM-dd-yyyy"))
-                                      .ToList();
+
+                var dateRange = Enumerable.Range(0, (endDate - startDate).Days + 1)
+                          .Select(i => startDate.AddDays(i).ToString("MM-dd-yyyy"))
+                          .ToList();
+
 
                 Dictionary<string, List<CalendarResponse>> response = new();
 
