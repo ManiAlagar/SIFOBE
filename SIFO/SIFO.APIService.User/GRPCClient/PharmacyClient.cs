@@ -5,17 +5,19 @@ namespace SIFO.APIService.User
 {
     public class GrpcClient
     {
-        private IConfiguration configuration;
+        private IConfiguration _configuration;
 
         public GrpcClient(IConfiguration configuration)
         {
-            this.configuration = configuration;
+            _configuration = configuration;
         }
 
         public async Task<long> GetRetailPharmacy()
         {
+            var baseUrl = _configuration["hospitalCluster:Destinations:destination1:Address"];
+
             // Connect to the gRPC server
-            var channel = GrpcChannel.ForAddress("https://localhost:7044");
+            var channel = GrpcChannel.ForAddress(baseUrl);
 
             // Create the gRPC client
             var client = new PharmacyGrpcService.PharmacyGrpcServiceClient(channel); // or PharmacyGrpcServiceClient
