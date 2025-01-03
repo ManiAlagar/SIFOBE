@@ -12,9 +12,9 @@ namespace SIFO.APIService.User.Repository.Implementations
     public class UserRepository : IUserRepository
     {
         private readonly SIFOContext _context;
-      
-        private readonly IConfiguration _configuration;
 
+        private readonly IConfiguration _configuration;
+     
         public UserRepository(SIFOContext context, IConfiguration configuration)
         {
             _context = context;
@@ -27,9 +27,7 @@ namespace SIFO.APIService.User.Repository.Implementations
             {
                 if (user.PharmacyIds != null && user.PharmacyIds.Any())
                 {
-                    GrpcClient grpcClient = new(_configuration);
-                    var retailPharmacyTypeId = await grpcClient.GetRetailPharmacy();
-                    // Check if all pharmacy IDs exist
+                    var retailPharmacyTypeId = await _context.PharmacyTypes.Where(x => x.Name.ToLower().Contains("retail")).Select(x => x.Id).FirstOrDefaultAsync();
                     bool allPharmaciesExist = await _context.Pharmacies
                         .Where(p => user.PharmacyIds.Contains(p.Id) && p.IsActive && p.PharmacyTypeId != retailPharmacyTypeId && p.CreatedBy == Convert.ToInt64(userId))
                         .CountAsync() == user.PharmacyIds.Count;
@@ -64,7 +62,7 @@ namespace SIFO.APIService.User.Repository.Implementations
         {
             try
             {
-                    if(user.HospitalIds != null && user.HospitalIds.Any() && !user.HospitalIds.Contains(0))
+                if(user.HospitalIds != null && user.HospitalIds.Any() && !user.HospitalIds.Contains(0))
                 {
                     bool allHospitals = await _context.HospitalFacilities
                         .Where(a => user.HospitalIds.Contains(a.Id) && a.IsActive && a.CreatedBy == Convert.ToInt64(userId))
@@ -267,7 +265,7 @@ namespace SIFO.APIService.User.Repository.Implementations
                 try
                 {
                     var roleName = await GetRoleById(user.RoleId);
-                    var result =  _context.Users.Update(user);
+                    var result =_context.Users.Update(user);
                     await _context.SaveChangesAsync();
                     var updatedUser = await _context.Users.FindAsync(user.Id);
 
@@ -336,7 +334,7 @@ namespace SIFO.APIService.User.Repository.Implementations
                             ProfileImg = user.ProfileImg,
                             IsActive = user.IsActive,
                             CountryId = user.CountryId,
-                            PhoneCode = countries.PhoneCode, 
+                            PhoneCode = countries.PhoneCode,
                             CountryCode = countries.Iso2,
                             CountryFlag = countries.EmojiU,
                             Pharmacy = (from pharmacy in _context.UserPharmacyMappings

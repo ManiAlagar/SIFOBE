@@ -38,9 +38,5 @@
 		<ProjectReference Include="..\SIFO.Model\SIFO.Model.csproj" />
 		<ProjectReference Include="..\SIFO.Utility\SIFO.Utility.csproj" />
 	</ItemGroup>
-	
-	<ItemGroup>
-		<Protobuf Include="Protos\pharmacy.proto" GrpcServices="Client" />
-	</ItemGroup>
 
 </Project>

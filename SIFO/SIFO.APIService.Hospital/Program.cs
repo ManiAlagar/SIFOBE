@@ -54,11 +54,6 @@ app.UseAuthentication();
 // Routing must be before endpoints
 app.UseRouting();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapGrpcService<PharmacyServiceImpl>();
-});
-
 // Map controllers for API endpoints
 app.MapControllers();
 
