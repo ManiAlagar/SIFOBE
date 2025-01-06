@@ -38,6 +38,8 @@ namespace SIFO.APIService.Hospital
             services.AddTransient<IAllergyService, AllergyService>();
             services.AddTransient<ISendGridService, SendGridService>();
             services.AddTransient<ITwilioService, TwilioService>(); 
+            //services.AddTransient<IAdverseEventService, AdverseEventService>(); 
+            services.AddTransient<IPatientService, PatientService>(); 
             #endregion
 
             #region Repositories
@@ -45,6 +47,8 @@ namespace SIFO.APIService.Hospital
             services.AddTransient<IAllergyRepository, AllergyRepository>();
             services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
             services.AddTransient<ITwilioRepository, TwilioRepository>(); 
+            //services.AddTransient<IAdverEventRepository, AdverseEventRepository>(); 
+            services.AddTransient<IPatientRepository,PatientRepository>(); 
             #endregion
 
             //DbContext

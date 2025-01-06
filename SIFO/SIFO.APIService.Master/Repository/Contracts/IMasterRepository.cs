@@ -8,5 +8,7 @@ namespace SIFO.APIService.Master.Repository.Contracts
         public Task<Users> IsUserExists(long userId);
         public Task<string> ImportLableAsync(List<Labels> labels);
         public Task<LabelResponse> GetLabelsAsync();
+        public Task<List<PharmacyTypeResponse>> GetAllPharmacyTypesAsync();
+        public Task<List<AuthenticationTypeResponse>> GetAllAuthenticationTypesAsync();
     }
 }

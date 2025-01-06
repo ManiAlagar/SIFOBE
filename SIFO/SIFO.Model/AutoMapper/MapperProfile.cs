@@ -17,6 +17,7 @@ namespace SIFO.Model.AutoMapper
             CreateMap<CalendarRequest, Calendar>();
             CreateMap<IntoleranceManagementRequest, IntoleranceManagement>();
             CreateMap<AllergyRequest, Allergy>();
+            CreateMap<PatientRequest, Patients>();
         }
     }
 }

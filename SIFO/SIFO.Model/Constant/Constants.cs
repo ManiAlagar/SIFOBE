@@ -47,6 +47,7 @@
         public static string ADDRESSDETAIL_ALREADY_EXISTS = "address detail already exists"; 
         public static string USER_NOT_AUTHENTICATED = "user not authenticated"; 
         public static string INVALID_ROLE = "you are restricted to do any operations for this role";
+        public static string INVALID_OTP = "invalid OTP";
         public static string MINISTERIAL_ID_EXISTS = "ministerial id already exists";
         public static string PHARMACY_ID_NOT_EXISTS = "pharmacy id does not exists.";
 
@@ -54,6 +55,7 @@
         public static string ALLERGY_NOT_FOUND = "allergy not found";
         public static string INTOLERANCE_MANAGEMENT_ALREADY_EXISTS = "intolerance management already exists";
         public static string INTOLERANCE_MANAGEMENT_NOT_FOUND = "intolerance management not found";
+        public static string UPDATED_SUCCESSFULLY = "updated successfully";
         public enum PharmacyTypes
         {
             retail,

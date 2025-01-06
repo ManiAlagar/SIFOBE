@@ -1,6 +1,6 @@
 ﻿namespace SIFO.Model.Request
 {
-    public class InviteUserRequest
+    public class RegisterPatientRequest
     { 
         public string PhoneNumber { get; set; }
     }

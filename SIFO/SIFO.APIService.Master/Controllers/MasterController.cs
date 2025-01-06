@@ -448,6 +448,38 @@ namespace SIFO.APIService.Master.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
+
+        [HttpGet]
+        [Route("PharmacyTypes")]
+        public async Task<IActionResult> GetAllPharmacyTypesAsync()
+        {
+            try
+            {
+                var result = await _masterService.GetAllPharmacyTypesAsync();
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError($"An error occurred: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpGet]
+        [Route("AuthenticationTypes")]
+        public async Task<IActionResult> GetAllAuthenticationTypesAsync()
+        {
+            try
+            {
+                var result = await _masterService.GetAllAuthenticationTypesAsync();
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError($"An error occurred: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
     }
 }
 

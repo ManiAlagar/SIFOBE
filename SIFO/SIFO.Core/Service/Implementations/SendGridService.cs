@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using SendGrid;
-using SendGrid.Helpers.Mail;
 using SIFO.Core.Service.Contracts;
-using SIFO.Model.Constant;
 using SIFO.Model.Response;
+using System.Net.Mail;
 
 namespace SIFO.Core.Service.Implementations
 {
@@ -18,17 +17,35 @@ namespace SIFO.Core.Service.Implementations
         }
         public async Task<ApiResponse<string>> SendMailAsync(string toMail, string subject, string body, string name)
         {
-            var fromEmail = new EmailAddress(_configuration["SendGridSettings:From"], "SIFO");
-            var toEmail = new EmailAddress(toMail, name);
-            var htmlContent = body;
-            var mailMsg = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, htmlContent);
+            //var fromEmail = new EmailAddress(_configuration["SendGridSettings:From"], "SIFO");
+            //var toEmail = new EmailAddress(toMail, name);
+            //var htmlContent = body;
+            //var mailMsg = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, htmlContent);
+            //try
+            //{
+            //    var response = await _sendGridClient.SendEmailAsync(mailMsg);
+            //    if (response.IsSuccessStatusCode)
+            //        return ApiResponse<string>.Success(Constants.SUCCESS);
+
+            //    return ApiResponse<string>.InternalServerError();
+            //}
+            //catch (Exception ex)
+            //{
+            //    return ApiResponse<string>.InternalServerError(ex.Message);
+            //} 
+            MailMessage mail = new MailMessage();
+            mail.From = new MailAddress(_configuration["MailCredentials:Mail"]);
+            mail.To.Add(new MailAddress(toMail));
+            mail.Body = body;
+            mail.Subject = subject;
+            mail.IsBodyHtml = true;
+            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
+            smtpClient.Credentials = new System.Net.NetworkCredential(_configuration["MailCredentials:Mail"], _configuration["MailCredentials:Password"]);
+            smtpClient.EnableSsl = true;
             try
             {
-                var response = await _sendGridClient.SendEmailAsync(mailMsg);
-                if (response.IsSuccessStatusCode)
-                    return ApiResponse<string>.Success(Constants.SUCCESS);
-
-                return ApiResponse<string>.InternalServerError();
+                smtpClient.Send(mail);
+                return ApiResponse<string>.Success();
             }
             catch (Exception ex)
             {
