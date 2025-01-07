@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
+using SIFO.APIService.Hospital.Repository.Contracts;
+using SIFO.APIService.Hospital.Service.Contracts;
+using SIFO.Common.Contracts;
+using SIFO.Model.Constant;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
-using SIFO.Common.Contracts;
 using SIFO.Model.Response;
-using SIFO.Model.Constant;
-using SIFO.Utility.Implementations;
-using SIFO.APIService.Hospital.Service.Contracts;
-using SIFO.APIService.Hospital.Repository.Contracts;
 
 namespace SIFO.APIService.Hospital.Service.Implementations
 {

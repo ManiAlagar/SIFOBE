@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using SIFO.APIService.Master.Repository.Contracts;
 using SIFO.APIService.User.Repository.Contracts;
 using SIFO.APIService.User.Service.Contracts;
 using SIFO.Common.Contracts;
@@ -52,6 +51,7 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.AuthenticationType = request.AuthenticationType;
             mappedResult.PharmacyIds = request.PharmacyIds;
             mappedResult.HospitalIds = request.HospitalIds;
+            mappedResult.CountryId = await _commonService.GetCountryIdByCountryCodeAsync(request.CountryCode);
             mappedResult.PasswordHash = await _commonService.HashPassword(request.PasswordHash);
             
             var message = await _userRepository.CreateUserAsync(mappedResult, tokenData.UserId);
@@ -178,6 +178,7 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
             mappedResult.UpdatedDate = DateTime.UtcNow;
             mappedResult.PasswordHash = passwordData;
+            mappedResult.CountryId = await _commonService.GetCountryIdByCountryCodeAsync(request.CountryCode);
             var (status, user) =  await _userRepository.UpdateUserAsync(mappedResult, tokenData.UserId);
             if (status == Constants.SUCCESS)
             {

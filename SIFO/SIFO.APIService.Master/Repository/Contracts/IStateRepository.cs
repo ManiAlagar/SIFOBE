@@ -12,6 +12,6 @@ namespace SIFO.APIService.Master.Repository.Contracts
         public Task<State> UpdateStateAsync(State entity);
         public Task<bool> StateExistsByIdAsync(long? stateId);
         public Task<string> DeleteStateAsync(long stateId);
-        public Task<List<StateResponse>> GetStateByCountryIdAsync(long countryId);
+        public Task<List<StateResponse>> GetStateByCountryIdAsync(string countryCode);
     }
 }

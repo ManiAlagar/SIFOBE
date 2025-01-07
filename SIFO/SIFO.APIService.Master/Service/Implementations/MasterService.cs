@@ -100,6 +100,16 @@ namespace SIFO.APIService.Master.Service.Implementations
                 return ApiResponse<string>.Success();
             return ApiResponse<string>.InternalServerError();
         }
+        public async Task<ApiResponse<List<PharmacyTypeResponse>>> GetAllPharmacyTypesAsync()
+        {
+            var result = await _masterRepository.GetAllPharmacyTypesAsync();
+            return ApiResponse<List<PharmacyTypeResponse>>.Success("", result);
+        }
 
+        public async Task<ApiResponse<List<AuthenticationTypeResponse>>> GetAllAuthenticationTypesAsync()
+        {
+            var result = await _masterRepository.GetAllAuthenticationTypesAsync();
+            return ApiResponse<List<AuthenticationTypeResponse>>.Success("", result);
+        }
     }
 }

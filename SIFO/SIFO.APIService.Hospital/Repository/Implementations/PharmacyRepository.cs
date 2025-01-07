@@ -28,7 +28,8 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                 {
                     var data = await _commonService.GetDataFromToken();
                     long addressId = 0;
-                    long addressDetailResult = await _commonService.AddressDetailExistsAsync(request.Address, request.City, request.Region, request.CountryId, request.ZipCode);
+                    long countryId = await _commonService.GetCountryIdByCountryCodeAsync(request.CountryCode);
+                    long addressDetailResult = await _commonService.AddressDetailExistsAsync(request.Address, request.City, request.Region, countryId, request.ZipCode);
 
                     if (addressDetailResult > 0)
                     {
@@ -41,7 +42,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                             Address = request.Address,
                             CityId = request.City,
                             Region = request.Region,
-                            CountryId = request.CountryId,
+                            CountryId = await _commonService.GetCountryIdByCountryCodeAsync(request.CountryCode),
                             Zipcode = request.ZipCode,
                         };
 
@@ -126,16 +127,20 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                 {
                     var contactResponse = await _context.Contacts.Where(x => x.PharmacyId == pharmacyId).ToListAsync();
 
-                    if (contactResponse != null)
+                    if (contactResponse is not null)
                         _context.Contacts.RemoveRange(contactResponse);
 
                     var pharmacyResponse = await _context.Pharmacies.Where(x => x.Id == pharmacyId).SingleOrDefaultAsync();
-                    if (pharmacyResponse != null)
+                    if (pharmacyResponse is not null)
                         _context.Pharmacies.Remove(pharmacyResponse);
 
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    return Constants.SUCCESS;
+                    if (pharmacyResponse is not null && contactResponse is not null)
+                    {
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return Constants.SUCCESS;
+                    }
+                    return Constants.NOT_FOUND;
                 }
                 catch (Exception ex)
                 {
@@ -216,7 +221,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                         Address = request.Address,
                         CityId = request.City,
                         Region = request.Region,
-                        CountryId = request.CountryId,
+                        CountryId = await _commonService.GetCountryIdByCountryCodeAsync(request.CountryCode),
                         Zipcode = request.ZipCode
                     };
 

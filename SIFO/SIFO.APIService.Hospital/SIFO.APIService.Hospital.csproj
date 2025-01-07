@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -13,12 +13,22 @@
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
 		<PackageReference Include="FluentValidation" Version="11.11.0" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+		<PackageReference Include="Google.Protobuf" Version="3.29.2" />
+		<PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
+		<PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.68.1">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="JWT" Version="11.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
 		<PackageReference Include="Serilog" Version="4.2.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.9" />
 	</ItemGroup>
 
@@ -27,6 +37,11 @@
 		<ProjectReference Include="..\SIFO.Core\SIFO.Core.csproj" />
 		<ProjectReference Include="..\SIFO.Model\SIFO.Model.csproj" />
 		<ProjectReference Include="..\SIFO.Utility\SIFO.Utility.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="GRPCService\" />
+	  <Folder Include="Protos\" />
 	</ItemGroup>
 
 </Project>

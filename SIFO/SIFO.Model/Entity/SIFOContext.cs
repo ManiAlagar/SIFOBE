@@ -41,5 +41,7 @@ namespace SIFO.Model.Entity
         public virtual DbSet<WeeklyMoodEntry> WeeklyMoodEntries { get; set; }
         public virtual DbSet<AdverseEvent> AdverseEvent { get; set; }
         public virtual DbSet<PatientAnalysisReport> PatientAnalysisReports { get; set; }
+
+
     }
 }

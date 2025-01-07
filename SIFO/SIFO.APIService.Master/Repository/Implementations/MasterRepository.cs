@@ -71,5 +71,40 @@ namespace SIFO.APIService.Master.Repository.Implementations
                 throw;
             }
         }
+
+        public async Task<List<PharmacyTypeResponse>> GetAllPharmacyTypesAsync()
+        {
+            try
+            {
+                var response = await _context.PharmacyTypes.Select(pt => new PharmacyTypeResponse
+                {
+                    Id = pt.Id,
+                    Name = pt.Name,
+                    Description = pt.Description,
+                }).ToListAsync();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<AuthenticationTypeResponse>> GetAllAuthenticationTypesAsync()
+        {
+            try
+            {
+                var response = await _context.AuthenticationType.Select(pt => new AuthenticationTypeResponse
+                {
+                    Id = pt.Id,
+                    AuthenticationType = pt.AuthType
+                }).ToListAsync();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -17,6 +17,9 @@ using System.Security.Cryptography;
 using Twilio.Rest.Api.V2010.Account;
 using SIFO.Model.Request;
 using SIFO.Core.Service.Contracts;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 
 
 namespace SIFO.Utility.Implementations
@@ -209,9 +212,9 @@ namespace SIFO.Utility.Implementations
         {
             try
             {
-                string accountSid = _configuration["Twilio:AccountSid"];
-                string authToken = _configuration["Twilio:AuthToken"];
-                string fromPhoneNumber = _configuration["Twilio:PhoneNumber"];
+                string accountSid = _configuration["TwilioSettings:AccountSid"];
+                string authToken = _configuration["TwilioSettings:AuthToken"];
+                string fromPhoneNumber = _configuration["TwilioSettings:from"];
                 TwilioClient.Init(accountSid, authToken);
                 foreach (var phoneNumber in phoneNumbers)
                 {
@@ -613,6 +616,32 @@ namespace SIFO.Utility.Implementations
             }
         }
 
+        public async Task<long> GetCountryIdByCountryCodeAsync(string countryCode)
+        {
+            try
+            {
+                var result = await _context.Countries.Where(a => a.Iso2 == countryCode).Select(a => a.Id).SingleOrDefaultAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> GenerateAssitedCode(long length = 10)
+        {
+            if (length < 1)
+                length = 10;
+            Random random = new Random();
+            const string characters = "0123456789abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var assistedCodeBuilder = new StringBuilder();
+            for (int i = 0; i < length; i++)
+            {
+                assistedCodeBuilder.Append(characters[random.Next(characters.Length)]);
+            }
+            return assistedCodeBuilder.ToString();
+        }
         public async Task<string> DeleteFileAsync(string path)
         {
             if (File.Exists(path))
@@ -633,7 +662,7 @@ namespace SIFO.Utility.Implementations
 
             while (currentWeekStart <= endDate)
             {
-                var currentWeekEnd = currentWeekStart.AddDays(6); 
+                var currentWeekEnd = currentWeekStart.AddDays(6);
                 if (currentWeekEnd > endDate)
                     currentWeekEnd = endDate;
                 weeks.Add((currentWeekStart, currentWeekEnd));

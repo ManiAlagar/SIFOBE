@@ -2,6 +2,7 @@
 
 namespace SIFO.Model.Entity
 {
+    [Table("users")]
     public class Users
     {
         public long Id { get; set; }

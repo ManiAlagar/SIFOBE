@@ -20,6 +20,7 @@ namespace SIFO.Model.AutoMapper
             CreateMap<WeeklyMoodEntryRequest, WeeklyMoodEntry>();
             CreateMap<PatientAnalysisReportRequest, PatientAnalysisReport>();
             CreateMap<AdverseEventRequest, AdverseEvent>();
+            CreateMap<PatientRequest, Patients>();
         }
     }
 }

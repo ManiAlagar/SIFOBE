@@ -102,7 +102,7 @@ namespace SIFO.APIService.Hospital.Service.Implementations
 
             var response = await _pharmacyRepository.DeletePharmacyAsync(pharmacyId);
             if (response == Constants.NOT_FOUND)
-                return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.PHARMACY_NOT_FOUND);
+                return ApiResponse<string>.NotFound(Constants.PHARMACY_NOT_FOUND);
 
             return ApiResponse<string>.Success(Constants.SUCCESS, response);
         }

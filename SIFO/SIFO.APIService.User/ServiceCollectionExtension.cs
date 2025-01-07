@@ -1,29 +1,24 @@
-﻿using Microsoft.Extensions.Options;
-using SIFO.APIService.User.Service.Contracts;
-using SIFO.APIService.User.Service.Implementations;
-using SIFO.Model.Entity;
-using SIFO.Model.Response;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Text;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using SendGrid;
 using SIFO.APIService.User.Repository.Contracts;
 using SIFO.APIService.User.Repository.Implementations;
+using SIFO.APIService.User.Service.Contracts;
+using SIFO.APIService.User.Service.Implementations;
 using SIFO.Common.Contracts;
-using SIFO.Utility.Implementations;
-using Microsoft.OpenApi.Models;
-using FluentValidation;
-using System.Reflection;
-using SIFO.Model.AutoMapper; 
-using SendGrid;
-using SIFO.Core.Service.Contracts;
 using SIFO.Core.Repository.Contracts;
-using SIFO.Core.Service.Implementations;
 using SIFO.Core.Repository.Implementations;
-using SIFO.APIService.Master.Repository.Contracts;
-using SIFO.APIService.Master.Service.Implementations;
-using SIFO.APIService.Master.Repository.Implementations;
-using SIFO.APIService.Hospital.Repository.Contracts;
-using SIFO.APIService.Hospital.Repository.Implementations;
+using SIFO.Core.Service.Contracts;
+using SIFO.Core.Service.Implementations;
+using SIFO.Model.AutoMapper;
+using SIFO.Model.Entity;
+using SIFO.Model.Response;
+using SIFO.Utility.Implementations;
+using System.Reflection;
+using System.Text;
 
 namespace SIFO.APIService.User
 {
@@ -48,8 +43,8 @@ namespace SIFO.APIService.User
             services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
             services.AddTransient<ITwilioService, TwilioService>();
             services.AddTransient<ITwilioRepository, TwilioRepository>();
-            services.AddTransient<ICountryRepository, CountryRepository>();
-            services.AddTransient<IPharmacyRepository, PharmacyRepository>();
+          //  services.AddTransient<ICountryRepository, CountryRepository>();
+          //  services.AddTransient<IPharmacyRepository, PharmacyRepository>();
             services.AddHttpContextAccessor();
             services.AddMemoryCache();
             services.AddSwaggerGen(c =>
