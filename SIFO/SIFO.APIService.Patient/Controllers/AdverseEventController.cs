@@ -1,37 +1,36 @@
 ﻿using FluentValidation;
-using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using SIFO.Model.Constant;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SIFO.APIService.Patient.Service.Contracts;
-using SIFO.Model.Constant;
 
 namespace SIFO.APIService.Patient.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = $"{Constants.ROLE_QC_ADMINISTRATOR},{Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR},{Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR},{Constants.ROLE_HOSPITAL_REFERENT},{Constants.ROLE_DOCTOR}")]
-    public class AllergyController : ControllerBase
+    public class AdverseEventController : ControllerBase
     {
-        private readonly IAllergyService _allergyService;
-        private readonly IValidator<AllergyRequest> _allergyValidator;
+        private readonly IAdverseEventService _adverseEventService;
+        private readonly IValidator<AdverseEventRequest> _adverseEventValidator;
 
-        public AllergyController(IAllergyService allergyService, IValidator<AllergyRequest> allergyValidator)
+        public AdverseEventController(IAdverseEventService adverseEventService, IValidator<AdverseEventRequest> adverseEventValidator)
         {
-            _allergyService = allergyService;
-            _allergyValidator = allergyValidator;
+            _adverseEventService = adverseEventService;
+            _adverseEventValidator = adverseEventValidator;
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AllergyResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdverseEventResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllAllergyAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false , [FromHeader] long patientId=0)
+        public async Task<IActionResult> GetAdverseEventAsync([FromHeader] int pageNo = 1, [FromHeader] int pageSize = 10, [FromHeader] string filter = "", [FromHeader] string sortColumn = "Id", [FromHeader] string sortDirection = "DESC", [FromHeader] bool isAll = false , [FromHeader] long patientId = 0)
         {
             try
             {
-                var result = await _allergyService.GetAllAllergyAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll,patientId);
+                var result = await _adverseEventService.GetAllAdverseEventAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll , patientId);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -42,16 +41,16 @@ namespace SIFO.APIService.Patient.Controllers
         }
 
         [HttpGet]
-        [Route("{allergyId}")]
-        [ProducesResponseType(typeof(ApiResponse<AllergyResponse>), StatusCodes.Status200OK)]
+        [Route("{adverseEventId}")]
+        [ProducesResponseType(typeof(ApiResponse<AdverseEventResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllergyByIdAsync([FromRoute] long allergyId)
+        public async Task<IActionResult> GetAdverseEventByIdAsync([FromRoute] long adverseEventId)
         {
             try
             {
-                var result = await _allergyService.GetAllergyByIdAsync(allergyId);
+                var result = await _adverseEventService.GetAdverseEventByIdAsync(adverseEventId);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -62,20 +61,20 @@ namespace SIFO.APIService.Patient.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(ApiResponse<Allergy>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateAllergyAsync(AllergyRequest request)
+        public async Task<IActionResult> CreateAdverseEventAsync(AdverseEventRequest request)
         {
             try
             {
-                var validationResult = await _allergyValidator.ValidateAsync(request);
+                var validationResult = await _adverseEventValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
                     var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
                 }
-                var result = await _allergyService.CreateAllergyAsync(request);
+                var result = await _adverseEventService.CreateAdverseEventAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)
@@ -86,24 +85,24 @@ namespace SIFO.APIService.Patient.Controllers
         }
 
         [HttpPut]
-        [Route("{allergyId}")]
+        [Route("{adverseEventId}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateAllergyAsync(AllergyRequest request, [FromRoute] long allergyId, [FromHeader] long PatientId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
+        public async Task<IActionResult> UpdateAdverseEventAsync(AdverseEventRequest request, [FromRoute] long adverseEventId, [FromHeader] long PatientId, [FromHeader] long? AuthenticationType, [FromHeader] string? AuthenticationFor, [FromHeader] string? OtpCode)
         {
             try
             {
-                var validationResult = await _allergyValidator.ValidateAsync(request);
+                var validationResult = await _adverseEventValidator.ValidateAsync(request);
                 if (!validationResult.IsValid)
                 {
                     var errors = ApiResponse<List<string>>.BadRequest("Validation Error", validationResult.Errors.Select(e => e.ErrorMessage).ToList());
                     return BadRequest(errors);
                 }
-                request.Id = allergyId;
-                request.patientId = PatientId;
-                var result = await _allergyService.UpdateAllergyAsync(request, allergyId);
+                request.Id = adverseEventId; 
+                request.PatientId = PatientId;
+                var result = await _adverseEventService.UpdateAdverseEventAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch
@@ -114,16 +113,16 @@ namespace SIFO.APIService.Patient.Controllers
         }
 
         [HttpDelete]
-        [Route("{allergyId}")]
+        [Route("{adverseEventId}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteAllergyAsync([FromRoute] long allergyId)
+        public async Task<IActionResult> DeleteAdverseEventAsync([FromRoute] long adverseEventId)
         {
             try
             {
-                var result = await _allergyService.DeleteAllergyAsync(allergyId);
+                var result = await _adverseEventService.DeleteAdverseEventAsync(adverseEventId);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception ex)

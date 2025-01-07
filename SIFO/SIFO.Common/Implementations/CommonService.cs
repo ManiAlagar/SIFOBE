@@ -277,23 +277,50 @@ namespace SIFO.Utility.Implementations
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<string> SaveFileAsync(string base64File, string? fileType, string destinationFolder)
+        public async Task<string> SaveFileAsync(string base64File, string?fileName, string destinationFolder)
         {
             try
             {
+                //if (!Directory.Exists(destinationFolder))
+                //    Directory.CreateDirectory(destinationFolder);
+
+                //string fileName = Guid.NewGuid().ToString() + "." + fileType;
+                //byte[] fileBytes = Convert.FromBase64String(base64File);
+                //string filePath = Path.Combine(destinationFolder, fileName);
+
+                //await File.WriteAllBytesAsync(filePath, fileBytes);
+                //return filePath;   
+
                 if (!Directory.Exists(destinationFolder))
+                {
                     Directory.CreateDirectory(destinationFolder);
+                    DirectoryInfo directoryInfo = new DirectoryInfo(destinationFolder);
+                    directoryInfo.Attributes |= FileAttributes.Normal;
+                }
+                string formFileType = base64File.Substring(0, 5).ToUpper();
+                if (formFileType == Constants.FILE_FORMAT_PNG || formFileType == Constants.FILE_FORMAT_PDF || formFileType == Constants.FILE_FORMAT_TXT || formFileType == Constants.FILE_FORMAT_JPG || formFileType == Constants.FILE_FORMAT_JPEG)
+                {
+                    if (base64File == null || base64File.Length == 0)
+                        return Constants.FILE_NOT_FOUND;
+                    if (formFileType == Constants.FILE_FORMAT_PNG)
+                        fileName += Constants.FILE_TYPE_PNG;
+                    else if (formFileType == Constants.FILE_FORMAT_JPG || formFileType == Constants.FILE_FORMAT_JPEG)
+                        fileName += Constants.FILE_TYPE_JPG;
+                    else if (formFileType == Constants.FILE_FORMAT_TXT)
+                        fileName += Constants.FILE_TYPE_TXT;
+                    else
+                        fileName += Constants.FILE_TYPE_PDF;
 
-                string fileName = Guid.NewGuid().ToString() + "." + fileType;
-                byte[] fileBytes = Convert.FromBase64String(base64File);
-                string filePath = Path.Combine(destinationFolder, fileName);
-
-                await File.WriteAllBytesAsync(filePath, fileBytes);
-                return filePath;
+                    byte[] fileBytes = Convert.FromBase64String(base64File);
+                    string newFilePath = Path.Combine(destinationFolder, fileName);
+                    File.WriteAllBytes(newFilePath, fileBytes);
+                    return newFilePath;
+                }
+                return Constants.FILE_NOT_VALID;
             }
             catch (Exception ex)
             {
-                return null;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -584,6 +611,35 @@ namespace SIFO.Utility.Implementations
                 string hashedPassword = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
                 return Task.FromResult(hashedPassword);
             }
+        }
+
+        public async Task<string> DeleteFileAsync(string path)
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+                return Constants.SUCCESS;
+            }
+            return Constants.NOT_FOUND;
+        }
+
+        public async Task<List<(DateTime WeekStart, DateTime WeekEnd)>> GetWeeksBetweenDates(DateTime startDate, DateTime endDate)
+        {
+            var weeks = new List<(DateTime WeekStart, DateTime WeekEnd)>();
+            var currentWeekStart = startDate.Date;
+
+            if (currentWeekStart.DayOfWeek + 1 != DayOfWeek.Monday)
+                currentWeekStart = currentWeekStart.AddDays(-(int)currentWeekStart.DayOfWeek + 1);
+
+            while (currentWeekStart <= endDate)
+            {
+                var currentWeekEnd = currentWeekStart.AddDays(6); 
+                if (currentWeekEnd > endDate)
+                    currentWeekEnd = endDate;
+                weeks.Add((currentWeekStart, currentWeekEnd));
+                currentWeekStart = currentWeekStart.AddDays(7);
+            }
+            return weeks;
         }
     }
 }

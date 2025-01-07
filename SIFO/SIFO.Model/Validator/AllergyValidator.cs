@@ -7,8 +7,8 @@ namespace SIFO.Model.Validator
     {
         public AllergyValidator()
         {
-            RuleFor(x => x.Name)
-               .NotEmpty().WithMessage("name is required.");
+            RuleFor(x => x.Description)
+               .NotEmpty().WithMessage("description is required.");
             RuleFor(x => x.IsActive.ToString())
                .NotEmpty().WithMessage("is active is required.");
         }
