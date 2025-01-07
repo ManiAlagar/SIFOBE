@@ -33,9 +33,15 @@ namespace SIFO.Model.Entity
         public virtual DbSet<RolePermission> RolePermissions { get; set; }
         public virtual DbSet<UserHospitalMapping> UserHospitalMappings { get; set; }
         public virtual DbSet<Labels> Label { get; set; }
-       // public virtual DbSet<AdverseEvent> AdverseEvent { get; set; }
+        //public virtual DbSet<AdverseEvent> AdverseEvent { get; set; }
         public virtual DbSet<IntoleranceManagement> IntoleranceManagements { get; set; }
-        public virtual DbSet<Allergy> Allergys { get; set; } 
-        public virtual DbSet<Patients> Patients { get; set; } 
+        public virtual DbSet<Allergy> Allergys { get; set; }
+        public virtual DbSet<TherapeuticPlan> TherapeuticPlans { get; set; }
+        public virtual DbSet<TherapeuticPlanDetails> TherapeuticPlanDetails { get; set; }
+        public virtual DbSet<WeeklyMoodEntry> WeeklyMoodEntries { get; set; }
+        public virtual DbSet<AdverseEvent> AdverseEvent { get; set; }
+        public virtual DbSet<PatientAnalysisReport> PatientAnalysisReports { get; set; }
+
+
     }
 }

@@ -50,11 +50,29 @@
         public static string INVALID_OTP = "invalid OTP";
         public static string MINISTERIAL_ID_EXISTS = "ministerial id already exists";
         public static string PHARMACY_ID_NOT_EXISTS = "pharmacy id does not exists.";
+        public static string RECORD_EXISTS = "record already exists for this week.";
 
         public static string ALLERGY_ALREADY_EXISTS = "allergy already exists";
         public static string ALLERGY_NOT_FOUND = "allergy not found";
         public static string INTOLERANCE_MANAGEMENT_ALREADY_EXISTS = "intolerance management already exists";
+        public static string THERAPEUTIC_PLAN_NOT_EXISTS = "therapeutic plan id does not exists";
         public static string INTOLERANCE_MANAGEMENT_NOT_FOUND = "intolerance management not found";
+        public static string WEEKLY_MOOD_ENTRY_NOT_FOUND = "weekly mood entry not found";
+        public static string PATIENT_ANALYSIS_REPORT_NOT_FOUND = "Patient Analysis Report does not exists";
+
+        public const string FILE_FORMAT_PNG = "IVBOR";
+        public const string FILE_FORMAT_PDF = "JVBER";
+        public const string FILE_FORMAT_TXT = "U1PKC";
+        public const string FILE_FORMAT_JPG = "/9J/4";
+        public const string FILE_FORMAT_JPEG = "/9J/7";
+        public const string FILE_NOT_FOUND = "File Not Found";
+        public const string FILE_NOT_VALID = "File Not Valid";
+
+        public const string FILE_TYPE_PNG = ".png";
+        public const string FILE_TYPE_JPG = ".jpg";
+        public const string FILE_TYPE_PDF = ".pdf";
+        public const string FILE_TYPE_TXT = ".txt";
+
         public static string UPDATED_SUCCESSFULLY = "updated successfully";
         public enum PharmacyTypes
         {
@@ -62,5 +80,23 @@
             hospital
         }
 
+        public enum PeriodTypes
+        {
+            day,
+            week,
+            month,
+        }
+
+        public enum FrequencyIntake
+        {
+            day
+        }
+
+        public enum Intensity
+        {
+            mild,
+            average,
+            serious
+        }
     }
 }

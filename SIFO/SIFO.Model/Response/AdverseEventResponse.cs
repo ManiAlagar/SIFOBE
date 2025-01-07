@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace SIFO.Model.Response
+﻿namespace SIFO.Model.Response
 {
     public class AdverseEventResponse
     {

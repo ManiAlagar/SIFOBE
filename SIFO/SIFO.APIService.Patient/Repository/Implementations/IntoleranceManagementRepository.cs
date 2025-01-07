@@ -16,48 +16,15 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             _context = context;
         }
 
-        public async Task<bool> CreateIntoleranceManagementAsync(IntoleranceManagement entity)
-        {
-            try
-            {
-                var result = await _context.IntoleranceManagements.AddAsync(entity);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<string> DeleteIntoleranceManagementAsync(long intoleranceManagementId)
-        {
-            try
-            {
-                var intoleranceManagementResponse = await _context.IntoleranceManagements.Where(x => x.Id == intoleranceManagementId).SingleOrDefaultAsync();
-                if (intoleranceManagementResponse is not null)
-                {
-                    _context.IntoleranceManagements.Remove(intoleranceManagementResponse);
-                    await _context.SaveChangesAsync();
-                    return Constants.SUCCESS;
-                }
-                return Constants.NOT_FOUND;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<PagedResponse<IntoleranceManagementResponse>> GetAllIntoleranceManagementAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll)
+        public async Task<PagedResponse<IntoleranceManagementResponse>> GetAllIntoleranceManagementAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, long patientId)
         {
             try
             {
                 var query = from intoleranceManagement in _context.IntoleranceManagements
+                            where intoleranceManagement.PatientId == patientId
                             select new IntoleranceManagementResponse
                             {
                                 Id = intoleranceManagement.Id,
-                                Name = intoleranceManagement.Name,
                                 Description = intoleranceManagement.Description,
                                 IsActive = intoleranceManagement.IsActive
                             };
@@ -80,7 +47,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                 if (filter != null && filter.Length > 0)
                 {
                     filter = filter.ToLower();
-                    query = query.Where(x => x.Name.ToLower().Contains(filter));
+                    query = query.Where(x => x.Description.ToLower().Contains(filter));
                     count = query.Count();
                 }
                 query = query.OrderBy(orderByExpression).Skip((pageNo - 1) * pageSize).Take(pageSize).AsQueryable();
@@ -105,10 +72,9 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                                       select new IntoleranceManagementResponse
                                       {
                                           Id = intoleranceManagement.Id,
-                                          Name = intoleranceManagement.Name,
                                           Description = intoleranceManagement.Description,
                                           IsActive = intoleranceManagement.IsActive
-                                      }).FirstOrDefaultAsync(); ;
+                                      }).FirstOrDefaultAsync(); 
                 return response;
             }
             catch (Exception ex)
@@ -117,28 +83,41 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             }
         }
 
-        public async Task<long> IntoleranceManagementNameExistsAsync(string? name, long? intoleranceManagementId)
+        public async Task<bool> CreateIntoleranceManagementAsync(IntoleranceManagement entity)
         {
-            if (intoleranceManagementId > 0)
+            try
             {
-                return await _context.IntoleranceManagements
-                    .Where(c => c.Name.ToLower() == name.Trim().ToLower() && c.Id != intoleranceManagementId).Select(a => a.Id).FirstOrDefaultAsync();
+                var result = await _context.IntoleranceManagements.AddAsync(entity);
+                await _context.SaveChangesAsync();
+                return true;
             }
-            else
+            catch (Exception ex)
             {
-                return await _context.IntoleranceManagements
-                     .Where(c => c.Name.ToLower() == name.Trim().ToLower()).Select(a => a.Id).FirstOrDefaultAsync();
+                throw;
             }
         }
+
+        //public async Task<long> IntoleranceManagementDescriptionExistsAsync(string description, long? intoleranceManagementId)
+        //{
+        //    if (intoleranceManagementId > 0)
+        //    {
+        //        return await _context.IntoleranceManagements
+        //            .Where(c => c.Description.ToLower() == description.Trim().ToLower() && c.Id != intoleranceManagementId).Select(a => a.Id).FirstOrDefaultAsync();
+        //    }
+        //    else
+        //    {
+        //        return await _context.IntoleranceManagements
+        //             .Where(c => c.Description.ToLower() == description.Trim().ToLower()).Select(a => a.Id).FirstOrDefaultAsync();
+        //    }
+        //}
 
         public async Task<bool> UpdateIntoleranceManagementAsync(IntoleranceManagement entity, long intoleranceManagementId)
         {
             try
             {
-                var result = await _context.IntoleranceManagements.Where(a => a.Id == intoleranceManagementId).FirstOrDefaultAsync();
+                var result = await _context.IntoleranceManagements.Where(a => a.Id == intoleranceManagementId).SingleOrDefaultAsync();
                 if (result is not null)
                 {
-                    result.Name = entity.Name;
                     result.Description = entity.Description;
                     result.IsActive = entity.IsActive;
                     result.UpdatedDate = entity.UpdatedDate;
@@ -148,6 +127,25 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                     return true;
                 }
                 return false;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> DeleteIntoleranceManagementAsync(long intoleranceManagementId)
+        {
+            try
+            {
+                var intoleranceManagementResponse = await _context.IntoleranceManagements.Where(x => x.Id == intoleranceManagementId).SingleOrDefaultAsync();
+                if (intoleranceManagementResponse is not null)
+                {
+                    _context.IntoleranceManagements.Remove(intoleranceManagementResponse);
+                    await _context.SaveChangesAsync();
+                    return Constants.SUCCESS;
+                }
+                return Constants.NOT_FOUND;
             }
             catch (Exception ex)
             {

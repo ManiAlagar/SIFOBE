@@ -13,6 +13,9 @@ namespace SIFO.Model.Entity
         [Column("Name")]  
         public string Name { get; set; }
 
+        [Column("Fk_PatientId")]
+        public long PatientId { get; set; }
+
         [Column("Description")]  
         public string? Description { get; set; }  
 

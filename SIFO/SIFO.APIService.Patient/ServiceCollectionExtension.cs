@@ -35,20 +35,24 @@ namespace SIFO.APIService.Hospital
             #region Services
             services.AddTransient<ICommonService, CommonService>();
             services.AddTransient<IIntoleranceManagementService, IntoleranceManagementService>();
+            services.AddTransient<ITherapeuticPlanService, TherapeuticPlanService>();
             services.AddTransient<IAllergyService, AllergyService>();
+            services.AddTransient<IWeeklyMoodEntryService, WeeklyMoodEntryService>();
             services.AddTransient<ISendGridService, SendGridService>();
             services.AddTransient<ITwilioService, TwilioService>(); 
-            //services.AddTransient<IAdverseEventService, AdverseEventService>(); 
-            services.AddTransient<IPatientService, PatientService>(); 
+            services.AddTransient<IAdverseEventService, AdverseEventService>(); 
+            services.AddTransient<IPatientAnalysisReportService,PatientAnalysisReportService>(); 
             #endregion
 
             #region Repositories
             services.AddTransient<IIntoleranceManagementRepository, IntoleranceManagementRepository>();
+            services.AddTransient<ITherapeuticPlanRepository, TherapeuticPlanRepository>();
+            services.AddTransient<IWeeklyMoodEntryRepository, WeeklyMoodEntryRepository>();
             services.AddTransient<IAllergyRepository, AllergyRepository>();
             services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
             services.AddTransient<ITwilioRepository, TwilioRepository>(); 
-            //services.AddTransient<IAdverEventRepository, AdverseEventRepository>(); 
-            services.AddTransient<IPatientRepository,PatientRepository>(); 
+            services.AddTransient<IAdverEventRepository, AdverseEventRepository>(); 
+            services.AddTransient<IPatientAnalysisReportRepository, PatientAnalysisReportRepository>(); 
             #endregion
 
             //DbContext

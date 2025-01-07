@@ -1,6 +1,9 @@
 ﻿using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 using Twilio.Http;
 
 namespace SIFO.Common.Contracts
@@ -17,7 +20,7 @@ namespace SIFO.Common.Contracts
         public Task<bool> SendMail(List<string> to, List<string>? cc, string subject, string body);
         public Task<bool> SendSms(List<string> phoneNumbers, string body);
         public void TrimStrings(ref string? filter, ref string? sortColumn, ref string? sortDirection);
-        public Task<string> SaveFileAsync(string base64File, string? fileType, string destinationFolder);
+        public Task<string> SaveFileAsync(string base64File, string? fileName, string destinationFolder);
         public Task<AuthenticationType> GetAuthenticationTypeByIdAsync(long Id);
         public Task<OtpRequest> CreateOtpRequestAsync(long userId, string authenticationFor, long authenticationType);
         public Task<string> SendOtpRequestAsync(long userId, string authenticationFor, long authenticationType);
@@ -34,5 +37,7 @@ namespace SIFO.Common.Contracts
         public Task<string> HashPassword(string password);
         public Task<long> GetCountryIdByCountryCodeAsync(string countryCode);
         public Task<string> GenerateAssitedCode(long length = 10);
+        public Task<string> DeleteFileAsync(string path);
+        public Task<List<(DateTime WeekStart, DateTime WeekEnd)>> GetWeeksBetweenDates(DateTime startDate, DateTime endDate);
     }
 }
