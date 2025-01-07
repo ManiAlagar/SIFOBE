@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
 using SIFO.Model.Constant;
 using SIFO.Model.Request;
+using Twilio.Http;
 
 namespace SIFO.APIService.Patient.Repository.Implementations
 {
@@ -289,27 +290,48 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             }
         }
 
-        public async Task<bool> CreatePasswordRequest(CreatePasswordRequest request, long userId)
+        public async Task<bool> CreatePasswordRequest(CreatePasswordRequest request)
         {
-            using (var transaction = await _context.Database.BeginTransactionAsync())
+            try
             {
-                try
-                {
-                    var patient = await _context.Patients.Where(a => a.Code == request.Code && a.CreatedBy == userId && a.IsActive == true).FirstOrDefaultAsync();
-                    if (patient == null)
-                        return false;
-
-                    patient.Password = request.Password;
-                    _context.Patients.Update(patient);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    return true;
-                }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
+                var patient = await _context.Patients.Where(a => a.Code == request.Code && a.IsActive == true).SingleOrDefaultAsync();
+                if (patient == null)
                     return false;
-                }
+                patient.Password = request.Password;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<Patients> GetPatientByCodeAsync(string patientCode)
+        {
+            try
+            {
+                var patient = await _context.Patients.Where(a => a.Code == patientCode).SingleOrDefaultAsync();
+                return patient;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> UpdatePatientStatus(string patientCode)
+        {
+            try
+            {
+                var response = await _context.Patients.Where(a => a.Code == patientCode).SingleOrDefaultAsync();
+                response.IsActive = true;
+                await _context.SaveChangesAsync();
+                return Constants.SUCCESS;
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
     }

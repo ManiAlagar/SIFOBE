@@ -141,6 +141,7 @@ namespace SIFO.APIService.Patient.Controllers
 
         [HttpPost]
         [Route("Verify")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
@@ -159,8 +160,8 @@ namespace SIFO.APIService.Patient.Controllers
         }
 
         [HttpPost]
-        [Route("createPassword")]
-        [Authorize(Roles = $"{Constants.ROLE_QC_ADMINISTRATOR}")]
+        [Route("CreatePassword")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
@@ -175,6 +176,27 @@ namespace SIFO.APIService.Patient.Controllers
             catch (Exception)
             {
                 var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpPost]
+        [Route("SendOtp")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SendOtpAsync(PatientOtpRequest request)
+        {
+            try
+            {
+                var result = await _patientService.SendOtpAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }

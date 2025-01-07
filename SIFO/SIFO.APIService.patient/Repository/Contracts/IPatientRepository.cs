@@ -18,7 +18,9 @@ namespace SIFO.APIService.Patient.Repository.Contracts
         public Task<long> GetAuthIdByTypeAsync (string authType);
         public Task<OtpRequest> VerifyPatientAsync(VerifyPatientRequest request);
         public Task<string> UpdateOtpDataAsync(OtpRequest request);
-        public Task<bool> CreatePasswordRequest(CreatePasswordRequest request, long userId);
+        public Task<bool> CreatePasswordRequest(CreatePasswordRequest request);
+        public Task<Patients> GetPatientByCodeAsync(string patientCode);
+        public Task<string> UpdatePatientStatus(string patientCode);
         //public Task<string> UpdatePatientAsync(Patient request);
     }
 }
