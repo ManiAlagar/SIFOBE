@@ -1,0 +1,10 @@
+Hi [Customer Name],  
+
+Thank you for registering with [Your Company Name]!  
+Your code: [Registration Code].  
+
+Complete registration here: https://bit.ly/xyz123/[Registration Code]  
+
+Need help? Call us at [Call Center Number].  
+
+- [Your Company Name]
