@@ -34,6 +34,7 @@
         public const string INVALID_EMAIL_FORMAT = "Invalid email format.";
         public const string EMAIL_ALREADY_EXISTS = "Email already exists.";
         public const string PHONE_ALREADY_EXISTS = "Phone number already exists.";
+        public const string USER_ALREADY_VERIFIED = "user already verified.";
 
         public static string CITY_ALREADY_EXISTS = "city already exists";
         public static string STATE_ALREADY_EXISTS = "state already exists";
@@ -49,14 +50,18 @@
         public static string USER_NOT_AUTHENTICATED = "user not authenticated"; 
         public static string INVALID_ROLE = "you are restricted to do any operations for this role";
         public static string INVALID_OTP = "invalid OTP";
+        public static string INVALID_OLD_PASSWORD = "invalid old password";
         public static string MINISTERIAL_ID_EXISTS = "ministerial id already exists";
         public static string PHARMACY_ID_NOT_EXISTS = "pharmacy id does not exists.";
 
         public static string ALLERGY_ALREADY_EXISTS = "allergy already exists";
+        public static string PATIENT_NOT_EXISTS = "Patient does not exists";
         public static string ALLERGY_NOT_FOUND = "allergy not found";
+        public static string USER_NOT_FOUND = "user not found";
         public static string INTOLERANCE_MANAGEMENT_ALREADY_EXISTS = "intolerance management already exists";
         public static string INTOLERANCE_MANAGEMENT_NOT_FOUND = "intolerance management not found";
         public static string UPDATED_SUCCESSFULLY = "updated successfully";
+        public static string REGISTRATION_NOT_ALLOWED = "you are not allowed to register please contact administator";
         public enum PharmacyTypes
         {
             retail,

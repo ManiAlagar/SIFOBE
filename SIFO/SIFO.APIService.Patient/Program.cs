@@ -3,6 +3,7 @@ using SIFO.Model;
 using SIFO.Model.Entity;
 using SIFO.APIService.Hospital;
 using Microsoft.EntityFrameworkCore;
+using SIFO.Core.MiddleWare;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,8 +31,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();

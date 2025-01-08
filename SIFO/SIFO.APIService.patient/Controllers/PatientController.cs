@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SIFO.APIService.Patient.Service.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using SIFO.APIService.Patient.Service.Contracts;
 
 namespace SIFO.APIService.Patient.Controllers
 {
@@ -23,6 +23,7 @@ namespace SIFO.APIService.Patient.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles=$"{Constants.ROLE_QC_ADMINISTRATOR},{Constants.ROLE_QC_OPERATOR},{Constants.ROLE_DOCTOR},{Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR},{Constants.ROLE_RETAIL_PHARMACY_OPERATOR},{Constants.ROLE_RETAIL_PHARMACY_SUPERVISOR},{Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR}")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<PatientResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
@@ -200,6 +201,13 @@ namespace SIFO.APIService.Patient.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
+
+        [HttpPost]
+        [Route("SendOtp")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> SendOtpAsync(PatientOtpRequest request)
         {
             try
