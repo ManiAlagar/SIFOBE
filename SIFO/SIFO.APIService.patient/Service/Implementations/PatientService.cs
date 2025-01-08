@@ -18,15 +18,15 @@ namespace SIFO.APIService.Patient.Service.Implementations
     {
         private readonly IPatientRepository _patientRepository;
         private readonly ICommonService _commonService;
-        private readonly IMapper _mapper; 
-        private readonly IConfiguration _configuration; 
-        private readonly IHttpContextAccessor _httpContextAccessor; 
+        private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PatientService(IPatientRepository PatientRepository, ICommonService commonService, IMapper mapper, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _patientRepository = PatientRepository;
             _commonService = commonService;
-            _mapper = mapper; 
+            _mapper = mapper;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -39,7 +39,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
             if (isValid.Any())
                 return ApiResponse<PagedResponse<PatientResponse>>.BadRequest(isValid[0]);
 
-            var response = await _patientRepository.GetPatientAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll , tokenData.Role);
+            var response = await _patientRepository.GetPatientAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll, tokenData.Role);
             return ApiResponse<PagedResponse<PatientResponse>>.Success(Constants.SUCCESS, response);
         }
 
@@ -58,7 +58,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
         public async Task<ApiResponse<string>> CreatePatientAsync(PatientRequest request)
         {
             var tokenData = await _commonService.GetDataFromToken();
-            var isPatientExists = await _patientRepository.PhoneNumberOrEmailExists(request.Phone, request.Email,0);
+            var isPatientExists = await _patientRepository.PhoneNumberOrEmailExists(request.Phone, request.Email, 0);
             if (isPatientExists != Constants.NOT_FOUND)
                 return ApiResponse<string>.Conflict(isPatientExists);
 
@@ -84,7 +84,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
 
             var mappedResult = _mapper.Map<Patients>(request);
             mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
-            mappedResult.UpdatedDate= DateTime.UtcNow;
+            mappedResult.UpdatedDate = DateTime.UtcNow;
 
             string response = await _patientRepository.UpdatePatientAsync(mappedResult);
             if (response == Constants.SUCCESS)
@@ -112,7 +112,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
         {
             var tokenData = await _commonService.GetDataFromToken();
             HttpClient _httpClient = new HttpClient();
-            var patientData= await _patientRepository.GetPatientByPhoneNumber(request.PhoneNumber);
+            var patientData = await _patientRepository.GetPatientByPhoneNumber(request.PhoneNumber);
             if (patientData != Constants.NOT_FOUND)
                 return ApiResponse<string>.Conflict(Constants.PHONE_ALREADY_EXISTS);
             string assistedCode = await _commonService.GenerateAssitedCode();
@@ -122,8 +122,8 @@ namespace SIFO.APIService.Patient.Service.Implementations
             if (httpContext == null || !httpContext.User.Identity.IsAuthenticated)
                 throw new UnauthorizedAccessException("user not authenticated");
 
-            if (accessToken.StartsWith("bearer "))  accessToken = accessToken.Substring("bearer ".Length);
-            
+            if (accessToken.StartsWith("bearer ")) accessToken = accessToken.Substring("bearer ".Length);
+
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var authId = await _patientRepository.GetAuthIdByTypeAsync(Constants.EMAIL);
@@ -131,23 +131,23 @@ namespace SIFO.APIService.Patient.Service.Implementations
             patients.Code = assistedCode;
             patients.Phone = request.PhoneNumber;
             patients.CreatedBy = Convert.ToInt64(tokenData.UserId);
-            patients.CreatedDate = DateTime.UtcNow;  
+            patients.CreatedDate = DateTime.UtcNow;
             patients.IsActive = false;
 
-            var registeredPatient = await _patientRepository.RegisterPatientAsync(patients); 
-            if(registeredPatient is null) 
+            var registeredPatient = await _patientRepository.RegisterPatientAsync(patients);
+            if (registeredPatient is null)
                 return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
 
             var filePath = _configuration["Templates:PatientRegistration"];
             string subject = $"Your Otp Code For registration";
             string body = File.ReadAllText(filePath).Replace("[Registration Code]", $"{registeredPatient.Code}");
-            var payload = new 
+            var payload = new
             {
                 To = "string88@yopmail.com",
                 Subject = subject,
                 Body = body,
                 Name = "asgawg"
-            }; 
+            };
             var jsonPayload = JsonConvert.SerializeObject(payload);
 
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
@@ -166,17 +166,17 @@ namespace SIFO.APIService.Patient.Service.Implementations
         }
 
         public async Task<ApiResponse<string>> VerifyPatientAsync(VerifyPatientRequest request)
-        { 
+        {
             var otpData = await _patientRepository.VerifyPatientAsync(request);
             if (otpData is null)
                 return ApiResponse<string>.BadRequest(Constants.INVALID_OTP);
 
-            var updatedPatientData = await _patientRepository.UpdatePatientStatus(request.PatientCode); 
+            var updatedPatientData = await _patientRepository.UpdatePatientStatus(request.PatientCode);
 
-            if(updatedPatientData != Constants.SUCCESS)
+            if (updatedPatientData != Constants.SUCCESS)
                 return ApiResponse<string>.InternalServerError();
 
-            var response =  await _patientRepository.UpdateOtpDataAsync(otpData); 
+            var response = await _patientRepository.UpdateOtpDataAsync(otpData);
             if (response == Constants.SUCCESS)
                 return ApiResponse<string>.Success();
 
@@ -184,7 +184,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
         }
 
         public async Task<ApiResponse<string>> CreatePasswordAsync(CreatePasswordRequest request)
-        { 
+        {
             var hashedPassword = await _commonService.HashPassword(request.Password);
             request.Password = hashedPassword;
             bool isSuccess = await _patientRepository.CreatePasswordRequest(request);
@@ -194,10 +194,10 @@ namespace SIFO.APIService.Patient.Service.Implementations
         }
         public async Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request)
         {
-           var tokendata = await _commonService.GetDataFromToken();
+            var tokendata = await _commonService.GetDataFromToken();
             request.UserId = Convert.ToInt64(tokendata.UserId);
 
-            var patientData = await  _patientRepository.CheckPatientExists(tokendata.UserId);
+            var patientData = await _patientRepository.CheckPatientExists(tokendata.UserId);
 
             if (patientData == null)
                 return ApiResponse<string>.NotFound("user not found");
@@ -212,7 +212,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
                 return ApiResponse<string>.InternalServerError();
             return ApiResponse<string>.Success();
         }
-    }
+
 
         public async Task<ApiResponse<string>> SendOtpAsync(PatientOtpRequest request)
         {
@@ -228,8 +228,8 @@ namespace SIFO.APIService.Patient.Service.Implementations
             string subject = $"Your Otp Code For registration";
             string body = File.ReadAllText(filePath);
             var authType = await _patientRepository.GetAuthIdByTypeAsync(Constants.EMAIL);
-            var otpData = await _commonService.CreateOtpRequestAsync(patientData.Id.Value,"Patient Verification", authType);
-            if(otpData is null) 
+            var otpData = await _commonService.CreateOtpRequestAsync(patientData.Id.Value, "Patient Verification", authType);
+            if (otpData is null)
                 return ApiResponse<string>.InternalServerError();
             var payload = new
             {
@@ -255,3 +255,4 @@ namespace SIFO.APIService.Patient.Service.Implementations
             return ApiResponse<string>.NotFound();
         }
     }
+}

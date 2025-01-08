@@ -71,7 +71,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                     filter = filter.ToLower();
                     query = query.Where(x => x.FirstName.ToLower().Contains(filter));
                     count = query.Count();
-                } 
+                }
                 query = query.OrderBy(orderByExpression).Skip((pageNo - 1) * pageSize).Take(pageSize).AsQueryable();
                 pagedResponse.Result = query;
                 pagedResponse.TotalCount = count;
@@ -93,7 +93,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                                join addressDetails in _context.AddressDetails on patient.AddressId equals addressDetails.Id
                                join country in _context.Countries on addressDetails.CountryId equals country.Id
                                join state in _context.States on addressDetails.Region equals state.Id
-                               join city in _context.Cities on addressDetails.CityId equals city.Id 
+                               join city in _context.Cities on addressDetails.CityId equals city.Id
                                where patient.Id == patientId
                                select new PatientResponse
                                {
@@ -146,14 +146,14 @@ namespace SIFO.APIService.Patient.Repository.Implementations
         public async Task<string> UpdatePatientAsync(Patients entity)
         {
             try
-            { 
-                var result = await _context.Patients.AsNoTracking().Where(a=>a.Id == entity.Id).SingleOrDefaultAsync();
+            {
+                var result = await _context.Patients.AsNoTracking().Where(a => a.Id == entity.Id).SingleOrDefaultAsync();
                 if (result != null)
                 {
                     entity.CreatedBy = result.CreatedBy;
                     entity.CreatedDate = result.CreatedDate;
                 }
-                _context.Patients.Update(entity); 
+                _context.Patients.Update(entity);
                 await _context.SaveChangesAsync();
                 return Constants.SUCCESS;
             }
@@ -186,9 +186,9 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             {
                 var response = new object();
                 if (patientId > 0)
-                     response =  await _context.Patients.Where(c => (c.Phone.ToLower() == phoneNumber.Trim().ToLower()  || c.Email.ToLower() == email.Trim().ToLower()) && c.Id != patientId).SingleOrDefaultAsync();
+                    response = await _context.Patients.Where(c => (c.Phone.ToLower() == phoneNumber.Trim().ToLower() || c.Email.ToLower() == email.Trim().ToLower()) && c.Id != patientId).SingleOrDefaultAsync();
                 else
-                     response = await _context.Patients.Where(c => c.Phone.ToLower() == phoneNumber.Trim().ToLower() || c.Email.ToLower() == email.Trim().ToLower()).SingleOrDefaultAsync();
+                    response = await _context.Patients.Where(c => c.Phone.ToLower() == phoneNumber.Trim().ToLower() || c.Email.ToLower() == email.Trim().ToLower()).SingleOrDefaultAsync();
                 if (response is not null)
                     return Constants.SUCCESS;
                 return Constants.NOT_FOUND;
@@ -197,15 +197,15 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             {
                 throw new Exception(ex.Message);
             }
-        } 
+        }
 
         public async Task<string> GetPatientByPhoneNumber(string phoneNumber)
         {
             try
             {
-                var response = await _context.Patients.Where(a => a.Phone == phoneNumber).SingleOrDefaultAsync(); 
-                if(response is not null) 
-                    return Constants.SUCCESS; 
+                var response = await _context.Patients.Where(a => a.Phone == phoneNumber).SingleOrDefaultAsync();
+                if (response is not null)
+                    return Constants.SUCCESS;
                 return Constants.NOT_FOUND;
             }
             catch (Exception ex)
@@ -232,7 +232,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             try
             {
                 var response = _context.Patients.Add(entity);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
                 return response.Entity;
             }
             catch (Exception ex)
@@ -245,7 +245,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
         {
             try
             {
-                var response = await _context.AuthenticationType.Where(a => a.AuthType.ToLower() == authType.ToLower()).Select(a=>a.Id).SingleOrDefaultAsync();
+                var response = await _context.AuthenticationType.Where(a => a.AuthType.ToLower() == authType.ToLower()).Select(a => a.Id).SingleOrDefaultAsync();
                 return response;
             }
             catch (Exception ex)
@@ -258,7 +258,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
         {
             try
             {
-                var patientId = await _context.Patients.Where(a => a.Code == request.PatientCode).Select(a=>a.Id).SingleOrDefaultAsync();
+                var patientId = await _context.Patients.Where(a => a.Code == request.PatientCode).Select(a => a.Id).SingleOrDefaultAsync();
                 if (patientId is null)
                     return null;
 
@@ -280,8 +280,8 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             try
             {
                 request.isVerified = true;
-                _context.OtpRequests.Update(request); 
-                await _context.SaveChangesAsync(); 
+                _context.OtpRequests.Update(request);
+                await _context.SaveChangesAsync();
                 return Constants.SUCCESS;
             }
             catch (Exception ex)
@@ -292,28 +292,23 @@ namespace SIFO.APIService.Patient.Repository.Implementations
 
         public async Task<bool> CreatePasswordRequest(CreatePasswordRequest request)
         {
+
             try
             {
-                try
-                {
-                    var patient = await _context.Patients.Where(a => a.Code == request.Code && a.IsActive == true).FirstOrDefaultAsync();
+                var patient = await _context.Patients.Where(a => a.Code == request.Code && a.IsActive == true).FirstOrDefaultAsync();
+                if (patient == null)
+                    return false;
 
-                    
-                    if (patient == null)
-                        return false;
-
-                    patient.Password = request.Password;
-                    _context.Patients.Update(patient);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    return true;
-                }
+                patient.Password = request.Password;
+                _context.Patients.Update(patient);
+                await _context.SaveChangesAsync();
+                return true;
+            }
             catch (Exception)
             {
-                          await transaction.RollbackAsync();
                 return false;
             }
-        }
+
         }
 
         public async Task<Patients> GetPatientByCodeAsync(string patientCode)
@@ -349,18 +344,18 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             try
             {
                 var patient = await _context.Patients.Where(a => a.Id == Convert.ToInt64(userId)).FirstOrDefaultAsync();
-                 if(patient != null)
+                if (patient != null)
                 {
                     return patient;
                 }
 
                 return patient;
             }
-          catch
+            catch
             {
                 throw;
             }
-           
+
         }
         public async Task<bool> UpdatePasswordAsync(long? userId, string hashedPassword)
         {
