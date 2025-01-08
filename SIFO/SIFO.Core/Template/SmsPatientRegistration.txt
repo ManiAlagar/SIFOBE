@@ -1,3 +1,10 @@
-your OTP code for verifying your account is [OTP Code]. 
-Please click the link below to complete your verification: [Verification Link].It is valid for [X] minutes
-If you did not request this, please ignore this message.
+Hi [Customer Name],  
+
+Thank you for registering with [Your Company Name]!  
+Your code: [Registration Code].  
+
+Complete registration here: https://bit.ly/xyz123/[Registration Code]  
+
+Need help? Call us at [Call Center Number].  
+
+- [Your Company Name]

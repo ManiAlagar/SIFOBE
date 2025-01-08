@@ -142,6 +142,7 @@ namespace SIFO.APIService.Patient.Controllers
 
         [HttpPost]
         [Route("Verify")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
@@ -193,9 +194,22 @@ namespace SIFO.APIService.Patient.Controllers
                 var result = await _patientService.ChangePasswordAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                var result = ApiResponse<string>.InternalServerError;
+                var result = ApiResponse<string>.InternalServerError(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+        public async Task<IActionResult> SendOtpAsync(PatientOtpRequest request)
+        {
+            try
+            {
+                var result = await _patientService.SendOtpAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }

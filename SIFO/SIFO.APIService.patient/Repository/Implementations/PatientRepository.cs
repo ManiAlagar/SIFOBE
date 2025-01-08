@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
 using SIFO.Model.Constant;
 using SIFO.Model.Request;
+using Twilio.Http;
 
 namespace SIFO.APIService.Patient.Repository.Implementations
 {
@@ -291,7 +292,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
 
         public async Task<bool> CreatePasswordRequest(CreatePasswordRequest request)
         {
-            using (var transaction = await _context.Database.BeginTransactionAsync())
+            try
             {
                 try
                 {
@@ -307,11 +308,39 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                     await transaction.CommitAsync();
                     return true;
                 }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                    return false;
-                }
+            catch (Exception)
+            {
+                          await transaction.RollbackAsync();
+                return false;
+            }
+        }
+        }
+
+        public async Task<Patients> GetPatientByCodeAsync(string patientCode)
+        {
+            try
+            {
+                var patient = await _context.Patients.Where(a => a.Code == patientCode).SingleOrDefaultAsync();
+                return patient;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> UpdatePatientStatus(string patientCode)
+        {
+            try
+            {
+                var response = await _context.Patients.Where(a => a.Code == patientCode).SingleOrDefaultAsync();
+                response.IsActive = true;
+                await _context.SaveChangesAsync();
+                return Constants.SUCCESS;
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
 
