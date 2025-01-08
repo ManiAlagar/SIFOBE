@@ -17,5 +17,7 @@ namespace SIFO.APIService.Authentication.Repository.Contracts
         public Task<string> LogoutAsync(long id);
         public Task CreateUserSessionManagementAsync(UserSessionManagement userSessionManagement);
         public Task<List<UserSessionManagement>> GetUserSessionByUserId(long userId);
+        public Task<PatientsLoginResponse> LoginAsPatientAsync(LoginRequest request);
+       // public Task<Patients> IsPatientExists(long patientId);
     }
 }

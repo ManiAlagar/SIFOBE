@@ -1,12 +1,12 @@
-﻿using SIFO.Common.Contracts;
+﻿using SIFO.APIService.Authentication.Repository.Contracts;
+using SIFO.APIService.Authentication.Service.Contracts;
+using SIFO.Common.Contracts;
 using SIFO.Core.Repository.Contracts;
 using SIFO.Core.Service.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
-using SIFO.APIService.Authentication.Repository.Contracts;
-using SIFO.APIService.Authentication.Service.Contracts;
 
 namespace SIFO.APIService.Authentication.Service.Implementations
 {
@@ -163,5 +163,32 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 return ApiResponse<long>.InternalServerError();
             return ApiResponse<long>.Success(Constants.SUCCESS);
         }
+        public async Task<ApiResponse<PatientsLoginResponse>> LoginAsPatientAsync(LoginRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+                return ApiResponse<PatientsLoginResponse>.BadRequest("Email or password cannot be empty");
+            var has = await _commonService.EncryptPassword(request.Password);
+            request.Password = await _commonService.HashPassword(request.Password);
+            var patientData = await _authenticationRepository.LoginAsPatientAsync(request);
+
+            if (patientData == null || patientData.PswdUpdatedAt < DateTime.UtcNow.AddMonths(-6))
+                return ApiResponse<PatientsLoginResponse>.UnAuthorized("Invalid email and/or password");
+
+            var accessToken = _tokenGenerator.GenerateTokenForPatient(patientData);
+            var loginResponse = new PatientsLoginResponse
+            {
+                Email = patientData.Email,
+                UserName = $"{patientData.FirstName} {patientData.LastName}",
+                Token = accessToken,
+                RoleId = patientData.RoleId,
+                RoleName = patientData.RoleName ?? string.Empty,
+                UserId = patientData.UserId,
+                AuthenticationType = patientData.AuthenticationType
+            };
+
+            return ApiResponse<PatientsLoginResponse>.Success(Constants.SUCCESS, loginResponse);
+        }
+
+       
     }
 }

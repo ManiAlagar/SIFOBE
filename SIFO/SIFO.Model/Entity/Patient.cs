@@ -84,5 +84,13 @@ namespace SIFO.Model.Entity
 
         [Column("password")]
         public string? Password { get; set; }
+
+        [Column("pswdUpdatedAt")]
+        public DateTime? PswdUpdatedAt { get; set; }
+        [Column("roleId")]
+        public long RoleId { get; set; }
+
+        [Column("authenticationType")]
+        public long? AuthenticationType { get; set; }
     }
 }

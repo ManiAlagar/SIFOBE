@@ -189,16 +189,33 @@ namespace SIFO.APIService.Patient.Service.Implementations
         }
 
         public async Task<ApiResponse<string>> CreatePasswordAsync(CreatePasswordRequest request)
-        {
-            var tokenData = await _commonService.GetDataFromToken();
-            var encryptPassword = await _commonService.EncryptPassword(request.Password);
-            var hashedPassword = await _commonService.HashPassword(encryptPassword);
-
+        { 
+            var hashedPassword = await _commonService.HashPassword(request.Password);
             request.Password = hashedPassword;
-            bool isSuccess = await _patientRepository.CreatePasswordRequest(request, Convert.ToInt64(tokenData.UserId));
+            bool isSuccess = await _patientRepository.CreatePasswordRequest(request);
             if (!isSuccess)
                 return ApiResponse<string>.NotFound("Patient not exists");
             return ApiResponse<string>.Success($"patient {Constants.UPDATED_SUCCESSFULLY}");
         }
+        public async Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request)
+        {
+           var tokendata = await _commonService.GetDataFromToken();
+            request.UserId = Convert.ToInt64(tokendata.UserId);
+
+            var patientData = await  _patientRepository.CheckPatientExists(tokendata.UserId);
+
+            if (patientData == null)
+                return ApiResponse<string>.NotFound("user not found");
+
+            request.OldPassword = await _commonService.HashPassword(request.OldPassword);
+            if (request.OldPassword != patientData.Password)
+                return ApiResponse<string>.BadRequest("invalid old password");
+
+            request.Password = await _commonService.HashPassword(request.Password);
+            bool isPasswordUpdated = await _patientRepository.UpdatePasswordAsync(patientData.Id, request.Password);
+            if (!isPasswordUpdated)
+                return ApiResponse<string>.InternalServerError();
+            return ApiResponse<string>.Success();
+        }
     }
-}
+    }

@@ -13,6 +13,7 @@
         public const string ROLE_QC_OPERATOR = "QC Operator"; 
         public const string ROLE_RETAIL_PHARMACY_SUPERVISOR = "Retail Pharmacy Supervisor"; 
         public const string ROLE_RETAIL_PHARMACY_OPERATOR = "Retail Pharmacy Operator"; 
+        public const string ROLE_PATIENT = "Patient"; 
 
 
         public static string SUCCESS = "success";

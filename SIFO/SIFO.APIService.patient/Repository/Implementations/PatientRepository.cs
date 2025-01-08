@@ -289,13 +289,15 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             }
         }
 
-        public async Task<bool> CreatePasswordRequest(CreatePasswordRequest request, long userId)
+        public async Task<bool> CreatePasswordRequest(CreatePasswordRequest request)
         {
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var patient = await _context.Patients.Where(a => a.Code == request.Code && a.CreatedBy == userId && a.IsActive == true).FirstOrDefaultAsync();
+                    var patient = await _context.Patients.Where(a => a.Code == request.Code && a.IsActive == true).FirstOrDefaultAsync();
+
+                    
                     if (patient == null)
                         return false;
 
@@ -312,5 +314,50 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                 }
             }
         }
+
+        public async Task<Patients> CheckPatientExists(string userId)
+        {
+            try
+            {
+                var patient = await _context.Patients.Where(a => a.Id == Convert.ToInt64(userId)).FirstOrDefaultAsync();
+                 if(patient != null)
+                {
+                    return patient;
+                }
+
+                return patient;
+            }
+          catch
+            {
+                throw;
+            }
+           
+        }
+        public async Task<bool> UpdatePasswordAsync(long? userId, string hashedPassword)
+        {
+            using (await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var userData = await _context.Patients.Where(a => a.Id == userId).SingleOrDefaultAsync();
+                    if (userData != null)
+                    {
+                        userData.Password = hashedPassword;
+                        userData.UpdatedDate = DateTime.UtcNow;
+                        userData.UpdatedBy = userId;
+                        userData.PswdUpdatedAt = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+                        await _context.Database.CommitTransactionAsync();
+                        return true;
+                    }
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+            }
+        }
+
     }
 }

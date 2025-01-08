@@ -10,6 +10,7 @@ namespace SIFO.APIService.Patient.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PatientController : ControllerBase
     {
         private readonly IPatientService _patientService;
@@ -160,7 +161,7 @@ namespace SIFO.APIService.Patient.Controllers
 
         [HttpPost]
         [Route("createPassword")]
-        [Authorize(Roles = $"{Constants.ROLE_QC_ADMINISTRATOR}")]
+        [Authorize(Roles = $"{Constants.ROLE_PATIENT}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
@@ -170,6 +171,26 @@ namespace SIFO.APIService.Patient.Controllers
             try
             {
                 var result = await _patientService.CreatePasswordAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+        [HttpPut]
+        [Route("changePassword")]
+        [Authorize(Roles = $"{Constants.ROLE_PATIENT}")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequest request)
+        {
+            try
+            {
+                var result = await _patientService.ChangePasswordAsync(request);
                 return StatusCode(result.StatusCode, result);
             }
             catch (Exception)
