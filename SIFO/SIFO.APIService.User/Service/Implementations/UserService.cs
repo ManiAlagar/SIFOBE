@@ -55,6 +55,7 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.PasswordHash = await _commonService.HashPassword(request.PasswordHash);
             
             var message = await _userRepository.CreateUserAsync(mappedResult, tokenData.UserId);
+            var decrytedPassword = await _commonService.DecryptPassword(request.PasswordHash);
             //if (request.PharmacyIds != null && request.PharmacyIds.Any())
             //{
             //    foreach (var items in request.PharmacyIds)
@@ -70,7 +71,7 @@ namespace SIFO.APIService.User.Service.Implementations
                 string body = File.ReadAllText(filePath)
               .Replace("[UserName]", $"{request.FirstName} {request.LastName}")
               .Replace("[UserEmail]", $"{request.Email}")
-              .Replace("[UserPassword]", request.PasswordHash);
+              .Replace("[UserPassword]", decrytedPassword);
 
      
 
