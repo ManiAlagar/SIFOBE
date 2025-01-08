@@ -22,6 +22,7 @@ namespace SIFO.APIService.Patient.Repository.Contracts
         public Task<Patients> CheckPatientExists(string userId);
         public Task<bool> UpdatePasswordAsync(long? userId, string hashedPassword);
         public Task<Patients> GetPatientByCodeAsync(string patientCode);
+        public Task<string> UpdatePatientStatus(string patientCode);
         //public Task<string> UpdatePatientAsync(Patient request);
     }
 }
