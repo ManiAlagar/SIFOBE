@@ -1,20 +1,19 @@
-﻿using System.Net.Mail;
-using Twilio.Types;
-using Twilio;
-using SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Contracts;
-using Twilio.Rest.Api.V2010.Account;
-using SendGrid.Helpers.Mail;
-using SIFO.Model.Response;
+﻿using Twilio;
 using SendGrid;
+using Twilio.Types;
+using System.Net.Mail;
 using Newtonsoft.Json;
-using SIFO.Model.Request;
-using Twilio.Rest.Verify.V2.Service.Entity;
-using SIFO.Model.Constant;
-using SIFO.APIService.ThirdPartyAlert.Repository.Contracts;
-using SIFO.APIService.ThirdPartyAlert.Repository.Implementations;
-using Microsoft.EntityFrameworkCore;
 using SIFO.Model.Entity;
+using SIFO.Model.Request;
+using SIFO.Model.Response;
+using SIFO.Model.Constant;
 using SIFO.Common.Contracts;
+using SendGrid.Helpers.Mail;
+using Twilio.Rest.Api.V2010.Account;
+using Microsoft.EntityFrameworkCore;
+using Twilio.Rest.Verify.V2.Service.Entity;
+using SIFO.APIService.ThirdPartyAlert.Repository.Contracts;
+using SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Contracts;
 
 namespace SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Implementations
 {
@@ -67,7 +66,6 @@ namespace SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Implementations
 
         }
 
-
         public async Task<bool> SendSms(List<string> phoneNumbers, string body)
         {
             try
@@ -92,6 +90,7 @@ namespace SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Implementations
                 return false;
             }
         }
+
         public async Task<ApiResponse<string>> SendMailAsync(string toMail, string subject, string body, string name)
         {
             var fromEmail = new EmailAddress(_configuration["SendGridSettings:From"], "SIFO");
@@ -104,13 +103,14 @@ namespace SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Implementations
                 if (response.IsSuccessStatusCode)
                     return ApiResponse<string>.Success(Constants.SUCCESS);
 
-                return ApiResponse<string>.InternalServerError();
+                return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
             }
             catch (Exception ex)
             {
                 return ApiResponse<string>.InternalServerError(ex.Message);
             }
         }
+
         public async Task<ApiResponse<object>> Send2FaAsync(long userId)
         {
             try
@@ -133,13 +133,12 @@ namespace SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Implementations
 
                 var response = new TotpResponse
                 {
-                    Message = "success",
+                    Message = Constants.SUCCESS,
                     Sid = newFactor.Sid,
                     bindingsResponse = JsonConvert.DeserializeObject<BindingsResponse>(result)
                 };
 
                 await _thirdPartyRepository.CreateOrUpdateServiceIdAsync(userId, newFactor.Sid);
-
                 return ApiResponse<object>.Success(Constants.SUCCESS, response);
             }
             catch (Exception ex)
@@ -179,7 +178,6 @@ namespace SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Implementations
         public async Task<string> SendOtpRequestAsync(long userId, string authenticationFor, long authenticationType)
         {
             var userData = await _context.Users.Where(a => a.Id == userId).SingleOrDefaultAsync();
-
             var authType = await _commmonService.GetAuthenticationTypeByIdAsync(authenticationType);
             var otpData = await _commmonService. CreateOtpRequestAsync(userId, authenticationFor, authenticationType);
 
@@ -248,12 +246,12 @@ namespace SIFO.APIService.ThirdPartyAlert.ThirdPartyService.Implementations
                       factorSid: pathId,
                       pathServiceSid: serviceSid,
                       pathIdentity: registeredMobNum);
-                    if (response.Status.ToString().ToLower() == "approved")
+                    if (response.Status.ToString().ToLower() == Constants.APPROVED.ToLower())
                         return ApiResponse<string>.Success(Constants.SUCCESS);
-                    return ApiResponse<string>.BadRequest("otp expired");
+                    return ApiResponse<string>.BadRequest(Constants.OTP_EXPIRED);
                 }
                 else
-                    return ApiResponse<string>.InternalServerError();
+                    return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
             }
             catch (Exception ex)
             {

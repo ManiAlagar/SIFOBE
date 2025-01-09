@@ -1,21 +1,22 @@
-﻿using SIFO.APIService.Patient.Repository.Contracts;
-using SIFO.Model.Entity;
-using SIFO.Model.Response;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
-using SIFO.Model.Constant;
+﻿using SIFO.Model.Entity;
 using SIFO.Model.Request;
-using Twilio.Http;
+using SIFO.Model.Response;
+using SIFO.Model.Constant;
+using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore;
+using SIFO.APIService.Patient.Repository.Contracts;
 
 namespace SIFO.APIService.Patient.Repository.Implementations
 {
     public class PatientRepository : IPatientRepository
     {
         private readonly SIFOContext _context;
+
         public PatientRepository(SIFOContext context)
         {
             _context = context;
         }
+
         public async Task<PagedResponse<PatientResponse>> GetPatientAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, string roleName)
         {
             try
@@ -130,6 +131,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<string> CreatePatientAsync(Patients entity)
         {
             try
@@ -143,6 +145,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<string> UpdatePatientAsync(Patients entity)
         {
             try
@@ -162,6 +165,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<string> DeletePatientByIdAsync(long patientId)
         {
             try
@@ -266,7 +270,6 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                 && a.AuthenticationFor.ToLower() == request.AuthenticationFor.ToLower() && a.AuthenticationType == request.AuthenticationType
                 && a.UserId == patientId
                 && a.ExpirationDate > DateTime.UtcNow && a.isVerified == null).FirstOrDefaultAsync();
-
                 return otpData;
             }
             catch (Exception ex)
@@ -382,6 +385,5 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                 }
             }
         }
-
     }
 }

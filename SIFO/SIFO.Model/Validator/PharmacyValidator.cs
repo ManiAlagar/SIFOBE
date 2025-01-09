@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SIFO.Model.Constant;
 using SIFO.Model.Request;
 
 namespace SIFO.Model.Validator
@@ -8,32 +9,32 @@ namespace SIFO.Model.Validator
         public PharmacyValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("pharmacy name is required.");
+                .NotEmpty().WithMessage(Constants.PHARMACY_NAME_REQUIRED);
             RuleFor(x => x.Province)
-               .NotEmpty().MaximumLength(2).WithMessage("hospital name is required.")
-               .MaximumLength(2).WithMessage("province cannot exceed more than 2 characters.");
+               .NotEmpty().WithMessage(Constants.PROVINCE_REQUIRED)
+               .MaximumLength(2).WithMessage(Constants.PROVINCE_TOO_LONG);
             RuleFor(x => x.CAP)
-                .NotEmpty().WithMessage("cap is required.")
-                .MaximumLength(6).WithMessage("cap code cannot exceed more than 6 characters.");
+                .NotEmpty().WithMessage(Constants.CAP_CODE_REQUIRED)
+                .MaximumLength(6).WithMessage(Constants.CAP_CODE_TOO_LONG);
             RuleFor(x => x.PharmacyTypeId)
-                .NotEmpty().WithMessage("pharmacy type is required.");
+                .NotEmpty().WithMessage(Constants.PHARMACY_TYPE_REQUIRED);
             RuleFor(x => x.Address)
-                .NotEmpty().WithMessage("address is required.");
+                .NotEmpty().WithMessage(Constants.ADDRESS_REQUIRED);
             RuleFor(x => x.City)
-                .NotEmpty().WithMessage("city is required.");
+                .NotEmpty().WithMessage(Constants.CITY_REQUIRED);
             RuleFor(x => x.ASL)
-               .NotEmpty().WithMessage("asl is required.");
+               .NotEmpty().WithMessage(Constants.ASL_REQUIRED);
             RuleFor(x => x.PhoneNumber)
-               .NotEmpty().WithMessage("phone number is required.")
-               .MaximumLength(15).WithMessage("phone number cannot exceed more than 15 characters."); 
+               .NotEmpty().WithMessage(Constants.PHONE_NUMBER_REQUIRED)
+               .MaximumLength(15).WithMessage(Constants.PHONE_NUMBER_TOO_LONG); 
             RuleForEach(x => x.Contact)
                 .ChildRules(contact =>
                 {
-                    contact.RuleFor(c => c.ContactName).NotEmpty().WithMessage("First name is required.");
-                    contact.RuleFor(c => c.ContactSurname).NotEmpty().WithMessage("Last name is required.");
-                    contact.RuleFor(c => c.Role).NotEmpty().WithMessage("role is required.");
-                    contact.RuleFor(c => c.PhoneNumber).NotEmpty().WithMessage("phone number is required.")
-                    .MaximumLength(15).WithMessage("phone number cannot exceed more than 15 characters.");
+                    contact.RuleFor(c => c.ContactName).NotEmpty().WithMessage(Constants.FIRST_NAME_REQUIRED);
+                    contact.RuleFor(c => c.ContactSurname).NotEmpty().WithMessage(Constants.LAST_NAME_REQUIRED);
+                    contact.RuleFor(c => c.Role).NotEmpty().WithMessage(Constants.ROLE_REQUIRED);
+                    contact.RuleFor(c => c.PhoneNumber).NotEmpty().WithMessage(Constants.PHONE_NUMBER_REQUIRED)
+                    .MaximumLength(15).WithMessage(Constants.PHONE_NUMBER_TOO_LONG);
                 });
         }
     }

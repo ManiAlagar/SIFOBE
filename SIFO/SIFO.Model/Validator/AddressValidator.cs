@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SIFO.Model.Constant;
 using SIFO.Model.Request;
 
 namespace SIFO.Model.Validator
@@ -8,8 +9,7 @@ namespace SIFO.Model.Validator
         public AddressValidator() 
         {
             RuleFor(x => x.address)
-               .NotEmpty().WithMessage("address name is required.");
-
+               .NotEmpty().WithMessage(Constants.ADDRESS_NAME_REQUIRED);
         }
     }
 }

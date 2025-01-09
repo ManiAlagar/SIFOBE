@@ -7,7 +7,6 @@ using SIFO.Common.Contracts;
 using SIFO.Utility.Implementations;
 using SIFO.APIService.Patient.Service.Contracts;
 using SIFO.APIService.Patient.Repository.Contracts;
-using SIFO.APIService.Patient.Repository.Implementations;
 
 namespace SIFO.APIService.Patient.Service.Implementations
 {
@@ -45,7 +44,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
         public async Task<ApiResponse<string>> DeleteAllergyAsync(long allergyId)
         {
             if (allergyId <= 0)
-                return ApiResponse<string>.BadRequest();
+                return ApiResponse<string>.BadRequest(Constants.BAD_REQUEST);
 
             var result = await _allergyRepository.GetAllergyByIdAsync(allergyId);
             if (result is null)
@@ -71,13 +70,13 @@ namespace SIFO.APIService.Patient.Service.Implementations
         public async Task<ApiResponse<AllergyResponse>> GetAllergyByIdAsync(long allergyId)
         {
             if (allergyId <= 0)
-                return ApiResponse<AllergyResponse>.BadRequest();
+                return ApiResponse<AllergyResponse>.BadRequest(Constants.BAD_REQUEST);
 
             var response = await _allergyRepository.GetAllergyByIdAsync(allergyId);
             if (response != null)
                 return ApiResponse<AllergyResponse>.Success(Constants.SUCCESS, response);
 
-            return ApiResponse<AllergyResponse>.NotFound();
+            return ApiResponse<AllergyResponse>.NotFound(Constants.NOT_FOUND);
         }
 
         public async Task<ApiResponse<string>> UpdateAllergyAsync(AllergyRequest request, long allergyId)

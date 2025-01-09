@@ -1,5 +1,4 @@
-﻿
-
+﻿using SIFO.Model.Constant;
 using System.Reflection;
 
 namespace SIFO.Utility.Implementations
@@ -36,19 +35,19 @@ namespace SIFO.Utility.Implementations
             var errors = new List<string>();
 
             if (pageNo <= 0)
-                errors.Add("Page number must be greater than 0");
+                errors.Add(Constants.INVALID_PAGE_NUMBER);
 
             if (pageSize <= 0)
-                errors.Add("Page size must be greater than 0");
+                errors.Add(Constants.INVALID_PAGE_SIZE);
 
             if (!string.IsNullOrEmpty(filter) && filter.Length > 255)
-                errors.Add("Filter length cannot exceed 255 characters");
+                errors.Add(Constants.INVALID_FILTER_LENGTH);
 
             if (string.IsNullOrEmpty(sortColumn))
-                errors.Add("Invalid sort column");
+                errors.Add(Constants.INVALID_SORT_COLUMN);
 
             if (!string.IsNullOrEmpty(sortDirection) && !new[] { "asc", "desc" }.Contains(sortDirection.ToLower()))
-                errors.Add("Invalid sort direction. It should be 'asc' or 'desc'");
+                errors.Add(Constants.INVALID_SORT_DIRECTION);
 
             return errors;
         }

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SIFO.Model.Constant;
 using SIFO.Model.Request;
 
 namespace SIFO.Model.Validator
@@ -8,26 +9,26 @@ namespace SIFO.Model.Validator
         public HospitalFacilityValidator()
         {
             RuleFor(x => x.HospitalFacilityName)
-                .NotEmpty().WithMessage("hospital facility name is required.");
+                .NotEmpty().WithMessage(Constants.HOSPITAL_FACILITY_NAME_REQUIRED);
             RuleFor(x => x.Province)
-               .NotEmpty().WithMessage("province is required.") 
-               .MaximumLength(2).WithMessage("province cannot exceed more than 2 characters.");
+               .NotEmpty().WithMessage(Constants.PROVINCE_REQUIRED) 
+               .MaximumLength(2).WithMessage(Constants.PROVINCE_TOO_LONG);
             RuleFor(x => x.Address)
-               .NotEmpty().WithMessage("address is required.");
+               .NotEmpty().WithMessage(Constants.ADDRESS_REQUIRED);
             RuleFor(x => x.City)
-               .NotEmpty().WithMessage("city is required.");
+               .NotEmpty().WithMessage(Constants.CITY_REQUIRED);
             RuleFor(x => x.CAP)
-                .NotEmpty().WithMessage("cap code is required.");
+                .NotEmpty().WithMessage(Constants.CAP_CODE_REQUIRED);
             RuleFor(x => x.PhoneNumber)
-                .NotEmpty().WithMessage("phone number is required.");
+                .NotEmpty().WithMessage(Constants.PHONE_NUMBER_REQUIRED);
             RuleForEach(x => x.Contact)
                 .ChildRules(contact =>
                 {
-                    contact.RuleFor(c => c.ContactName).NotEmpty().WithMessage("First name is required.");
-                    contact.RuleFor(c => c.ContactSurname).NotEmpty().WithMessage("Last name is required.");
-                    contact.RuleFor(c => c.Role).NotEmpty().WithMessage("role is required.");
-                    contact.RuleFor(c => c.PhoneNumber).NotEmpty().WithMessage("phone number is required.")
-                    .MaximumLength(15).WithMessage("phone number cannot exceed more than 15 characters.");
+                    contact.RuleFor(c => c.ContactName).NotEmpty().WithMessage(Constants.FIRST_NAME_REQUIRED);
+                    contact.RuleFor(c => c.ContactSurname).NotEmpty().WithMessage(Constants.LAST_NAME_REQUIRED);
+                    contact.RuleFor(c => c.Role).NotEmpty().WithMessage(Constants.ROLE_REQUIRED);
+                    contact.RuleFor(c => c.PhoneNumber).NotEmpty().WithMessage(Constants.PHONE_NUMBER_REQUIRED)
+                    .MaximumLength(15).WithMessage(Constants.PHONE_NUMBER_TOO_LONG);
                 });
         }
     }

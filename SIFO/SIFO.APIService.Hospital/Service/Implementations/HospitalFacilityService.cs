@@ -36,33 +36,31 @@ namespace SIFO.APIService.Hospital.Service.Implementations
         public async Task<ApiResponse<HospitalFacilityDetailResponse>> GetHospitalFacilityByIdAsync(long hospitalFacilityId)
         {
             if (hospitalFacilityId <= 0)
-                return ApiResponse<HospitalFacilityDetailResponse>.BadRequest();
+                return ApiResponse<HospitalFacilityDetailResponse>.BadRequest(Constants.BAD_REQUEST);
 
             var response = await _hospitalFacilityRepository.GetHospitalFacilityByIdAsync(hospitalFacilityId);
 
             if (response != null)
                 return ApiResponse<HospitalFacilityDetailResponse>.Success(Constants.SUCCESS, response);
 
-            return ApiResponse<HospitalFacilityDetailResponse>.NotFound();
+            return ApiResponse<HospitalFacilityDetailResponse>.NotFound(Constants.NOT_FOUND);
         }
 
         public async Task<ApiResponse<string>> CreateHospitalFacilityAsync(HospitalFacilityRequest request)
         {
             var tokenData = await _commonService.GetDataFromToken();
-
             var pharmacyResponse = await _hospitalFacilityRepository.GetPharmaciesByIdsAsync(request.PharmacyIds);
             if (pharmacyResponse.Count != request.PharmacyIds.Count)
-                return ApiResponse<string>.NotFound("pharmacy id does not exists.");
+                return ApiResponse<string>.NotFound(Constants.PHARMACY_ID_NOT_EXISTS);
 
             var retailPharmacyId = await _pharmacyRepository.GetRetailPharmacyAsync();
             var result = pharmacyResponse.Where(a => a.PharmacyTypeId == retailPharmacyId).ToList();
             if (result.Count > 0)
-                return ApiResponse<string>.BadRequest("only hospital pharmacies can be created. Please provide a valid pharmacy Ids.");
+                return ApiResponse<string>.BadRequest(Constants.ONLY_HOSPITAL_PHARMACIES_CAN_BE_CREATED);
 
             bool isSuccess = await _hospitalFacilityRepository.CreateHospitalFacilityAsync(request);
-
             if (isSuccess)
-                return ApiResponse<string>.Success("hospital facility, contact, and pharmacy created successfully!!");
+                return ApiResponse<string>.Success(Constants.HOSPITAL_FACILITY_CONTACT_PHARMACY_CREATED_SUCCESSFULLY);
             
             return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
         }
@@ -70,7 +68,7 @@ namespace SIFO.APIService.Hospital.Service.Implementations
         public async Task<ApiResponse<string>> UpdateHospitalFacilityAsync(HospitalFacilityRequest request, long hospitalFacilityId)
         {
             if (hospitalFacilityId <= 0)
-                return ApiResponse<string>.BadRequest();
+                return ApiResponse<string>.BadRequest(Constants.BAD_REQUEST);
 
             var addressData = await _commonService.GetAddressDetailByIdAsync(request.AddressId);
 
@@ -79,12 +77,12 @@ namespace SIFO.APIService.Hospital.Service.Implementations
 
             var pharmacyResponse = await _hospitalFacilityRepository.GetPharmaciesByIdsAsync(request.PharmacyIds);
             if (pharmacyResponse.Count != request.PharmacyIds.Count)
-                return ApiResponse<string>.NotFound("pharmacy id does not exists.");
+                return ApiResponse<string>.NotFound(Constants.PHARMACY_ID_NOT_EXISTS);
 
             var retailPharmacyId = await _pharmacyRepository.GetRetailPharmacyAsync();
             var result = pharmacyResponse.Where(a => a.PharmacyTypeId == retailPharmacyId).ToList();
             if (result.Count > 0)
-                return ApiResponse<string>.BadRequest("only hospital pharmacies can be created. Please provide a valid pharmacy Ids.");
+                return ApiResponse<string>.BadRequest(Constants.ONLY_HOSPITAL_PHARMACIES_CAN_BE_CREATED);
 
             var isSuccess = await _hospitalFacilityRepository.UpdateHospitalFacilityAsync(request, hospitalFacilityId);
             if (isSuccess)
@@ -96,7 +94,7 @@ namespace SIFO.APIService.Hospital.Service.Implementations
         public async Task<ApiResponse<string>> DeleteHospitalFacilityAsync(long hospitalFacilityId)
         {
             if (hospitalFacilityId <= 0)
-                return ApiResponse<string>.BadRequest();
+                return ApiResponse<string>.BadRequest(Constants.BAD_REQUEST);
 
             var result = await _hospitalFacilityRepository.GetHospitalFacilityByIdAsync(hospitalFacilityId);
             if (result is null)

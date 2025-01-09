@@ -7,7 +7,6 @@ using SIFO.Common.Contracts;
 using SIFO.Utility.Implementations;
 using SIFO.APIService.Patient.Service.Contracts;
 using SIFO.APIService.Patient.Repository.Contracts;
-using SIFO.APIService.Patient.Repository.Implementations;
 
 namespace SIFO.APIService.Patient.Service.Implementations
 {
@@ -37,19 +36,19 @@ namespace SIFO.APIService.Patient.Service.Implementations
         public async Task<ApiResponse<IntoleranceManagementResponse>> GetIntoleranceManagementByIdAsync(long intoleranceManagementId)
         {
             if (intoleranceManagementId <= 0)
-                return ApiResponse<IntoleranceManagementResponse>.BadRequest();
+                return ApiResponse<IntoleranceManagementResponse>.BadRequest(Constants.BAD_REQUEST);
 
             var response = await _intoleranceManagementRepository.GetIntoleranceManagementByIdAsync(intoleranceManagementId);
             if (response != null)
                 return ApiResponse<IntoleranceManagementResponse>.Success(Constants.SUCCESS, response);
 
-            return ApiResponse<IntoleranceManagementResponse>.NotFound();
+            return ApiResponse<IntoleranceManagementResponse>.NotFound(Constants.NOT_FOUND);
         }
 
         public async Task<ApiResponse<string>> DeleteIntoleranceManagementAsync(long intoleranceManagementId)
         {
             if (intoleranceManagementId <= 0)
-                return ApiResponse<string>.BadRequest();
+                return ApiResponse<string>.BadRequest(Constants.BAD_REQUEST);
 
             var response = await _intoleranceManagementRepository.DeleteIntoleranceManagementAsync(intoleranceManagementId);
             if (response == Constants.NOT_FOUND)
@@ -84,7 +83,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
 
             var tokenData = await _commonService.GetDataFromToken();
             if (intoleranceManagementId <= 0)
-                return ApiResponse<string>.BadRequest();
+                return ApiResponse<string>.BadRequest(Constants.BAD_REQUEST);
 
             var response = await _intoleranceManagementRepository.GetIntoleranceManagementByIdAsync(intoleranceManagementId);
             if (response is null)

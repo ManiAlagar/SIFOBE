@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SIFO.Model.Constant;
 using SIFO.Model.Request;
 
 namespace SIFO.Model.Validator
@@ -7,8 +8,8 @@ namespace SIFO.Model.Validator
     {
         public CalendarValidator()
         {
-            RuleFor(x => x.PharmacyId).NotNull().WithMessage("Pharmacy id is required");
-            RuleFor(x => x.CalendarDate).GreaterThan(DateTime.UtcNow.Date).WithMessage("calendar date must be greater than today");
+            RuleFor(x => x.PharmacyId).NotNull().WithMessage(Constants.PHARMACY_ID_REQUIRED);
+            RuleFor(x => x.CalendarDate).GreaterThan(DateTime.UtcNow.Date).WithMessage(Constants.CALENDAR_DATE_GREATER_THAN_TODAY);
         }
     }
 }

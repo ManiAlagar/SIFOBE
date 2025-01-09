@@ -35,14 +35,14 @@ namespace SIFO.APIService.Master.Service.Implementations
         public async Task<ApiResponse<CountryResponse>> GetCountryByIdAsync(string countryCode)
         {
             if (string.IsNullOrEmpty(countryCode))
-                return ApiResponse<CountryResponse>.BadRequest();
+                return ApiResponse<CountryResponse>.BadRequest(Constants.BAD_REQUEST);
 
             var response = await _countryRepository.GetCountryByIdAsync(countryCode);
 
             if (response != null)
                 return ApiResponse<CountryResponse>.Success(Constants.SUCCESS, response);
 
-            return ApiResponse<CountryResponse>.NotFound();
+            return ApiResponse<CountryResponse>.NotFound(Constants.NOT_FOUND);
         }
 
         public async Task<ApiResponse<Country>> CreateCountryAsync(CountryRequest entity)
@@ -50,7 +50,7 @@ namespace SIFO.APIService.Master.Service.Implementations
             bool isNameExists = await _countryRepository.CountryExistsByNameAsync(entity.Name);
 
             if (isNameExists)
-                return new ApiResponse<Country>(StatusCodes.Status409Conflict, Constants.COUNTRY_ALREADY_EXISTS);
+                return ApiResponse<Country>.Conflict(Constants.COUNTRY_ALREADY_EXISTS);
 
             //entity.Iso2 = entity.Name.Substring(0, 2);
             entity.Iso3 = entity.Name.Substring(0,3);
@@ -60,9 +60,9 @@ namespace SIFO.APIService.Master.Service.Implementations
             var response = await _countryRepository.CreateCountryAsync(mappedResult);
 
             if (response.Id > 0)
-                return ApiResponse <Country>.Success(Constants.SUCCESS, response);
+                return ApiResponse<Country>.Success(Constants.SUCCESS, response);
 
-            return new ApiResponse<Country>(StatusCodes.Status500InternalServerError);
+            return ApiResponse<Country>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
         }
 
         public async Task<ApiResponse<Country>> UpdateCountryAsync(CountryRequest entity)
@@ -70,7 +70,7 @@ namespace SIFO.APIService.Master.Service.Implementations
             bool isCountryExists = await _countryRepository.CountryExistsByIdAsync(entity.Iso2);
 
             if (!isCountryExists)
-                return new ApiResponse<Country>(StatusCodes.Status404NotFound, Constants.COUNTRY_NOT_FOUND);
+                return ApiResponse<Country>.NotFound(Constants.COUNTRY_NOT_FOUND);
 
             var mappedResult = _mapper.Map<Country>(entity);
 
@@ -79,14 +79,14 @@ namespace SIFO.APIService.Master.Service.Implementations
             if (response != null)   
                 return ApiResponse<Country>.Success(Constants.SUCCESS, response);
 
-            return new ApiResponse<Country>(StatusCodes.Status500InternalServerError);
+            return ApiResponse<Country>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
         }
 
         public async Task<ApiResponse<string>> DeleteCountryAsync(string countryCode)
         {
             var response = await _countryRepository.DeleteCountryAsync(countryCode);
             if (response == Constants.NOT_FOUND)
-                return new ApiResponse<string>(StatusCodes.Status404NotFound, Constants.COUNTRY_NOT_FOUND);
+                return ApiResponse<string>.NotFound(Constants.COUNTRY_NOT_FOUND);
             if (response == Constants.SUCCESS)
                 return ApiResponse<string>.Success(Constants.SUCCESS, response); 
             return ApiResponse<string>.BadRequest(response);

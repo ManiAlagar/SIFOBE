@@ -110,21 +110,21 @@ namespace SIFO.APIService.Hospital.Service.Implementations
         public async Task<ApiResponse<Dictionary<string, List<CalendarResponse>>>> GetCalendarByIdAsync(long pharmacyId, DateTime startDate, DateTime endDate)
         {
             if (pharmacyId <= 0)
-                return ApiResponse<Dictionary<string, List<CalendarResponse>>>.BadRequest();
+                return ApiResponse<Dictionary<string, List<CalendarResponse>>>.BadRequest(Constants.BAD_REQUEST);
 
             if (startDate == DateTime.MinValue || endDate == DateTime.MinValue)
-                return ApiResponse<Dictionary<string, List<CalendarResponse>>>.BadRequest();
+                return ApiResponse<Dictionary<string, List<CalendarResponse>>>.BadRequest(Constants.BAD_REQUEST);
 
             var pharmacyData = await _hospitalRepository.GetPharmacyByIdAsync(pharmacyId);
             if (!pharmacyData)
-                return ApiResponse< Dictionary<string, List<CalendarResponse>>>.BadRequest();
+                return ApiResponse< Dictionary<string, List<CalendarResponse>>>.BadRequest(Constants.BAD_REQUEST);
 
             var response = await _hospitalRepository.GetCalendarByIdAsync(pharmacyId, startDate, endDate);
 
             if (response != null)
                 return ApiResponse<Dictionary<string, List<CalendarResponse>>>.Success(Constants.SUCCESS, response);
 
-            return ApiResponse<Dictionary<string, List<CalendarResponse>>>.NotFound();
+            return ApiResponse<Dictionary<string, List<CalendarResponse>>>.NotFound(Constants.NOT_FOUND);
         }
 
         public async Task<ApiResponse<string>> CreateCalendarAsync(CalendarRequest request)
@@ -133,17 +133,17 @@ namespace SIFO.APIService.Hospital.Service.Implementations
             {
                 var pharmacyData = await _hospitalRepository.GetPharmacyByIdAsync(request.PharmacyId); 
                 if(!pharmacyData) 
-                    return ApiResponse<string>.BadRequest();
+                    return ApiResponse<string>.BadRequest(Constants.BAD_REQUEST);
 
                 var tokenData = await _commonService.GetDataFromToken();
                 var mappedResult = _mapper.Map<Calendar>(request);
 
-                mappedResult.CreatedBy =Convert.ToInt64(tokenData.UserId);
+                mappedResult.CreatedBy = Convert.ToInt64(tokenData.UserId);
                 string calendarData = await _hospitalRepository.CreateCalendarAsync(mappedResult);
 
                 if (calendarData == Constants.SUCCESS)
                     return ApiResponse<string>.Created(Constants.SUCCESS);
-                return ApiResponse<string>.InternalServerError();
+                return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
 
             }
             catch (Exception ex)
@@ -159,11 +159,11 @@ namespace SIFO.APIService.Hospital.Service.Implementations
                 var tokenData = await _commonService.GetDataFromToken();
                 var pharmacyData = await _hospitalRepository.GetPharmacyByIdAsync(request.PharmacyId);
                 if (!pharmacyData)
-                    return ApiResponse<string>.BadRequest();
+                    return ApiResponse<string>.BadRequest(Constants.BAD_REQUEST);
 
                 bool isCalendarExists = await _hospitalRepository.CalendarExistsAsync(request.id.Value); 
                 if (!isCalendarExists) 
-                    return ApiResponse<string>.NotFound();
+                    return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
 
                 var mappedResult = _mapper.Map<Calendar>(request);
                 mappedResult.UpdatedBy = Convert.ToInt64(tokenData.UserId);
@@ -172,12 +172,12 @@ namespace SIFO.APIService.Hospital.Service.Implementations
                 var result = await _hospitalRepository.UpdateCalendarAsync(mappedResult);
 
                 if (result == Constants.SUCCESS)
-                    return ApiResponse<string>.Success(); 
-                return ApiResponse<string>.InternalServerError();
+                    return ApiResponse<string>.Success(Constants.SUCCESS); 
+                return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
             }
             catch (Exception ex)
             {
-                return ApiResponse<string>.InternalServerError();
+                return ApiResponse<string>.InternalServerError(ex.Message);
             }
         }
     }

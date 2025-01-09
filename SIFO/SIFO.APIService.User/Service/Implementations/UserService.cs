@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using SIFO.APIService.User.Repository.Contracts;
-using SIFO.APIService.User.Service.Contracts;
-using SIFO.Common.Contracts;
-using SIFO.Model.Constant;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using SIFO.Model.Constant;
+using SIFO.Common.Contracts;
 using SIFO.Utility.Implementations;
+using SIFO.APIService.User.Repository.Contracts;
+using SIFO.APIService.User.Service.Contracts;
 
 namespace SIFO.APIService.User.Service.Implementations
 {
@@ -35,7 +35,7 @@ namespace SIFO.APIService.User.Service.Implementations
             {
                 var writtenPath = await _commonService.SaveFileAsync(request.ProfileImg, null, Path.Join(_configuration["FileUploadPath:Path"], $"Users/{request.UserId}"));
                 if (writtenPath is null)
-                    return ApiResponse<string>.BadRequest("ProfileImg is invalid");
+                    return ApiResponse<string>.BadRequest(Constants.PROFILE_IMG_IS_INVALID);
                 else
                     request.ProfileImg = writtenPath;
             }
@@ -65,45 +65,34 @@ namespace SIFO.APIService.User.Service.Implementations
             //}
             if (message == Constants.SUCCESS)
             {
-              
-                    var filePath = _configuration["Templates:WelcomeEmail"];
+                var filePath = _configuration["Templates:WelcomeEmail"];
                 string subject = $"Welcome User";
-                string body = File.ReadAllText(filePath)
-              .Replace("[UserName]", $"{request.FirstName} {request.LastName}")
-              .Replace("[UserEmail]", $"{request.Email}")
-              .Replace("[UserPassword]", decrytedPassword);
-
-     
-
+                string body = File.ReadAllText(filePath).Replace("[UserName]", $"{request.FirstName} {request.LastName}").Replace("[UserEmail]", $"{request.Email}").Replace("[UserPassword]", decrytedPassword);
 
                 //var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");  
                 var toUser = new string[] { request.Email };
                 var mailResponse = await _commonService.SendMail(toUser.ToList(), null, subject, body);
                 if (!mailResponse)
                     //if (!mailResponse.IsSuccess)
-                    return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
+                    return ApiResponse<string>.InternalServerError(Constants.SOMETHING_WENT_WRONG_WHILE_SENDING_MAIL);
                 return ApiResponse<string>.Created(Constants.SUCCESS);
-           
             }
             return ApiResponse<string>.InternalServerError(message);
         }
+
         public async Task<ApiResponse<PagedResponse<UserResponse>>> GetAllUsersAsync(int pageIndex, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, long? roleId)
         {
             var isValid = await HelperService.ValidateGet(pageIndex, pageSize, filter, sortColumn, sortDirection);
-
             if (isValid.Any())
                 return ApiResponse<PagedResponse<UserResponse>>.BadRequest(isValid[0]);
-            var tokenData = await _commonService.GetDataFromToken();
 
-            
+            var tokenData = await _commonService.GetDataFromToken();
             if (tokenData.ParentRoleId.Contains(roleId.ToString()))
             {
                 var response = await _userRepository.GetAllUsersAsync(pageIndex, pageSize, filter, sortColumn, sortDirection, isAll, roleId, tokenData.ParentRoleId);
                 return ApiResponse<PagedResponse<UserResponse>>.Success(Constants.SUCCESS, response);
             }
-           
-            return ApiResponse<PagedResponse<UserResponse>>.Forbidden();
-
+            return ApiResponse<PagedResponse<UserResponse>>.Forbidden(Constants.FORBIDDEN);
         }
 
         public async Task<ApiResponse<string>> DeleteUserById(long id, long roleId)
@@ -113,14 +102,15 @@ namespace SIFO.APIService.User.Service.Implementations
             {
                 var response = await _userRepository.DeleteUserById(id, roleId, tokenData.ParentRoleId);
                 if (response == Constants.NOT_FOUND)
-                    return ApiResponse<string>.NotFound();
+                    return ApiResponse<string>.NotFound(Constants.NOT_FOUND);
                 else
                 {
                     return ApiResponse<string>.Success(Constants.SUCCESS);
                 }
             }
-            return ApiResponse<string>.Forbidden();
+            return ApiResponse<string>.Forbidden(Constants.FORBIDDEN);
         }
+
 
         //public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest request)
         //{
@@ -152,6 +142,7 @@ namespace SIFO.APIService.User.Service.Implementations
         //    }
         //    return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
         //}
+
         public async Task<ApiResponse<string>> UpdateUserAsync(UserRequest request)
         {
             var tokenData = await _commonService.GetDataFromToken();
@@ -165,7 +156,7 @@ namespace SIFO.APIService.User.Service.Implementations
             {
                 var writtenPath = await _commonService.SaveFileAsync(request.ProfileImg, null, Path.Join(_configuration["FileUploadPath:Path"], $"Users/{request.UserId}"));
                 if (writtenPath is null)
-                    return ApiResponse<string>.BadRequest("ProfileImg is invalid");
+                    return ApiResponse<string>.BadRequest(Constants.PROFILE_IMG_IS_INVALID);
                 else
                     request.ProfileImg = writtenPath;
             }
@@ -185,25 +176,20 @@ namespace SIFO.APIService.User.Service.Implementations
             {
                 if(isActive != request.IsActive)
                 {
-                    string statusMessage = user.IsActive.Value ? "activated" : "deactivated";
-                    string emailSubject = user.IsActive.Value ? "Account Activation" : "Account Deactivation";
+                    string statusMessage = user.IsActive.Value ? Constants.ACTIVATED.ToLower() : Constants.DEACTIVATED.ToLower();
+                    string emailSubject = user.IsActive.Value ? Constants.ACCOUNT_ACTIVATION : Constants.ACCOUNT_DEACTIVATION;
                     var filePath = _configuration["Templates:StatusTemplate"];
                     string subject = emailSubject;
-                    string body = File.ReadAllText(filePath)
-                  .Replace("[UserName]", $"{user.FirstName} {user.LastName}")
-                  .Replace("[Status]", $"{statusMessage}")
-                  .Replace("[status]", statusMessage.ToLower());
+                    string body = File.ReadAllText(filePath).Replace("[UserName]", $"{user.FirstName} {user.LastName}").Replace("[Status]", $"{statusMessage}").Replace("[status]", statusMessage.ToLower());
                     //var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");  
                     var toUser = new string[] { request.Email };
                     var mailResponse = await _commonService.SendMail(toUser.ToList(), null, subject, body);
                     if (!mailResponse)
                         //if (!mailResponse.IsSuccess)
-                        return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
+                        return ApiResponse<string>.InternalServerError(Constants.SOMETHING_WENT_WRONG_WHILE_SENDING_MAIL);
                 }
                 return ApiResponse<string>.Success(Constants.SUCCESS);
             }
-          
-
             return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
         }
 
@@ -214,12 +200,12 @@ namespace SIFO.APIService.User.Service.Implementations
             {
                 var user = await _userRepository.GetUserById(id, RoleId, tokenData.ParentRoleId);
                 if (user == null)
-                    return ApiResponse<UserResponse>.NotFound();
+                    return ApiResponse<UserResponse>.NotFound(Constants.NOT_FOUND);
                 else 
                     return ApiResponse<UserResponse>.Success(Constants.SUCCESS, user);
             }
             else
-                return ApiResponse<UserResponse>.Forbidden();
+                return ApiResponse<UserResponse>.Forbidden(Constants.FORBIDDEN);
         }
     }
 }

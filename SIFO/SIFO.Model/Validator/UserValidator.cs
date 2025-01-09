@@ -1,6 +1,11 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using SIFO.Model.Constant;
+using SIFO.Model.Entity;
 using SIFO.Model.Request;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SIFO.Model.Validator
 {
@@ -11,31 +16,41 @@ namespace SIFO.Model.Validator
         {
             _httpcontextAccessor = _contextAccessor;
             RuleFor(x => x.LastName)
-                .NotEmpty().WithMessage("Last Name is required.");
-            RuleFor(x => x.FirstName).NotEmpty().WithMessage("first name is required.");
-            RuleFor(x => x.Email).NotEmpty().WithMessage("email is required.");
-            RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("phone number is required.");
-            RuleFor(x => x.PhoneNumber).MaximumLength(10).WithMessage("Phone number should not exceeds 10 characters .");
-            RuleFor(x => x.AuthenticationType).NotEmpty().WithMessage("AuthenticationType is required.");
-            RuleFor(x => x.CountryCode).NotEmpty().WithMessage("Country code is required.");
-            RuleFor(x => x.FiscalCode).MinimumLength(1).WithMessage("Fiscal code should not be empty .");
-            RuleFor(x => x.FiscalCode).MaximumLength(16).WithMessage("Fiscal code should not exceeds 16 characters .");
+                .NotEmpty().WithMessage(Constants.LAST_NAME_REQUIRED);
+            RuleFor(x => x.FirstName)
+                .NotEmpty().WithMessage(Constants.FIRST_NAME_REQUIRED);
+            RuleFor(x => x.Email)
+                .NotEmpty().WithMessage(Constants.EMAIL_REQUIRED);
+            RuleFor(x => x.PhoneNumber)
+                .NotEmpty().WithMessage(Constants.PHONE_NUMBER_REQUIRED);
+            RuleFor(x => x.PhoneNumber)
+                .MaximumLength(10).WithMessage(Constants.USER_PHONE_NUMBER_TOO_LONG);
+            RuleFor(x => x.AuthenticationType)
+                .NotEmpty().WithMessage(Constants.AUTHENTICATION_TYPE_REQUIRED);
+            RuleFor(x => x.CountryCode)
+                .NotEmpty().WithMessage(Constants.COUNTRY_CODE_REQUIRED);
+            RuleFor(x => x.FiscalCode)
+                .MinimumLength(1).WithMessage(Constants.FISCAL_CODE_REQUIRED);
+            RuleFor(x => x.FiscalCode)
+                .MaximumLength(16).WithMessage(Constants.FISCAL_CODE_TOO_LONG);
             When(x => x.PharmacyIds != null, () =>
             {
-                RuleFor(x => x.PharmacyIds).NotEmpty().WithMessage("Pharmacy ID list is required.")
-                .ForEach(id => id.NotNull().WithMessage("Each Pharmacy ID is required."));
+                RuleFor(x => x.PharmacyIds)
+                    .NotEmpty().WithMessage(Constants.PHARMACY_ID_LIST_REQUIRED)
+                    .ForEach(id => id.NotNull().WithMessage(Constants.EACH_PHARMACY_ID_REQUIRED));
            
             });
             When(x => x.HospitalIds != null, () =>
             {
-                RuleFor(x => x.HospitalIds).NotEmpty().WithMessage("Hospital Id list is required.")
-                .ForEach(id => id.NotNull().WithMessage("Each Hospital Id  is  required."));
+                RuleFor(x => x.HospitalIds)
+                    .NotEmpty().WithMessage(Constants.HOSPITAL_ID_LIST_REQUIRED)
+                    .ForEach(id => id.NotNull().WithMessage(Constants.EACH_HOSPITAL_ID_REQUIRED));
 
             });
             When(x => _contextAccessor.HttpContext.Request.Method == "POST", () =>
             {
                 RuleFor(x => x.PasswordHash).NotEmpty().WithMessage("password is required.");
-            });
-            }
+            }); 
+        }
     }
 }

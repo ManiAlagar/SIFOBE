@@ -1,20 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SIFO.APIService.User.Repository.Contracts;
+﻿using SIFO.Model.Entity;
 using SIFO.Model.Constant;
-using SIFO.Model.Entity;
-using SIFO.Model.Entity.SIFO.Model.Entity;
 using SIFO.Model.Response;
 using System.Linq.Dynamic.Core;
-
+using Microsoft.EntityFrameworkCore;
+using SIFO.Model.Entity.SIFO.Model.Entity;
+using SIFO.APIService.User.Repository.Contracts;
 
 namespace SIFO.APIService.User.Repository.Implementations
 {
     public class UserRepository : IUserRepository
     {
         private readonly SIFOContext _context;
-
         private readonly IConfiguration _configuration;
-     
+
         public UserRepository(SIFOContext context, IConfiguration configuration)
         {
             _context = context;
@@ -62,7 +60,7 @@ namespace SIFO.APIService.User.Repository.Implementations
         {
             try
             {
-                if(user.HospitalIds != null && user.HospitalIds.Any() && !user.HospitalIds.Contains(0))
+                if (user.HospitalIds != null && user.HospitalIds.Any() && !user.HospitalIds.Contains(0))
                 {
                     bool allHospitals = await _context.HospitalFacilities
                         .Where(a => user.HospitalIds.Contains(a.Id) && a.IsActive && a.CreatedBy == Convert.ToInt64(userId))
@@ -93,8 +91,7 @@ namespace SIFO.APIService.User.Repository.Implementations
             }
         }
 
-
-        public async Task<string> CreateUserAsync(Users user,string userId)
+        public async Task<string> CreateUserAsync(Users user, string userId)
         {
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
@@ -111,27 +108,25 @@ namespace SIFO.APIService.User.Repository.Implementations
                         if (!resultMsg)
                         {
                             await transaction.RollbackAsync();
-                            return "Error while saving Pharmacy Details.";
+                            return Constants.ERROR_SAVING_PHARMACY_DETAILS;
                         }
                     }
-                    if(roleName.Name == Constants.ROLE_HOSPITAL_REFERENT)
+                    if (roleName.Name == Constants.ROLE_HOSPITAL_REFERENT)
                     {
                         user.Id = result.Entity.Id;
                         bool resultMsg = await CreateUserHospitalMapping(user, userId);
                         if (!resultMsg)
                         {
                             await transaction.RollbackAsync();
-                            return "Error while saving Hospital Details.";
+                            return Constants.ERROR_SAVING_HOSPITAL_DETAILS;
                         }
                     }
-
                     await transaction.CommitAsync();
                     return Constants.SUCCESS;
                 }
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-
                     return $"An error occurred while creating the user: {ex.Message}";
                 }
             }
@@ -139,24 +134,17 @@ namespace SIFO.APIService.User.Repository.Implementations
 
         public async Task<string> CheckIfEmailOrPhoneExists(string email, string phoneNumber, long? userId)
         {
-            var userExists = await _context.Users.AsNoTracking()
-                .Where(u => (u.Email == email || u.PhoneNumber == phoneNumber) && u.Id != userId)
-                .Select(u => new { u.Email, u.PhoneNumber })
-                .FirstOrDefaultAsync();
-
+            var userExists = await _context.Users.AsNoTracking().Where(u => (u.Email == email || u.PhoneNumber == phoneNumber) && u.Id != userId)
+                            .Select(u => new { u.Email, u.PhoneNumber })
+                            .FirstOrDefaultAsync();
             if (userExists != null)
             {
                 if (userExists.Email == email)
-                {
                     return Constants.EMAIL_ALREADY_EXISTS;
-                }
 
                 if (userExists.PhoneNumber == phoneNumber)
-                {
                     return Constants.PHONE_ALREADY_EXISTS;
-                }
             }
-
             return Constants.SUCCESS;
         }
 
@@ -164,8 +152,6 @@ namespace SIFO.APIService.User.Repository.Implementations
         {
             try
             {
-
-
                 var userData = from user in _context.Users
                                join role in _context.Roles on user.RoleId equals role.Id
                                join countries in _context.Countries on user.CountryId equals countries.Id
@@ -208,14 +194,12 @@ namespace SIFO.APIService.User.Repository.Implementations
 
         public async Task<string> DeleteUserById(long id, long roleId, string parentRoleId)
         {
-
             using (var context = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
                     var userToDelete = await (from user in _context.Users
                                               join role in _context.Roles on user.RoleId equals role.Id
-
                                               where parentRoleId.Contains(user.RoleId.ToString()) && user.RoleId == roleId && user.Id == id
                                               select user).FirstOrDefaultAsync();
                     if (userToDelete != null)
@@ -237,7 +221,6 @@ namespace SIFO.APIService.User.Repository.Implementations
                         await _context.Database.CommitTransactionAsync();
                         return Constants.SUCCESS;
                     }
-
                     return Constants.NOT_FOUND;
                 }
                 catch (Exception ex)
@@ -248,24 +231,20 @@ namespace SIFO.APIService.User.Repository.Implementations
             }
         }
 
-
         public async Task<(string, bool)> GetPasswordByUserId(long id)
         {
-            var user = await _context.Users
-                .Where(a => a.Id == id)
-                .Select(a => new { a.PasswordHash, a.IsActive })
-                .FirstOrDefaultAsync();
-
+            var user = await _context.Users.Where(a => a.Id == id).Select(a => new { a.PasswordHash, a.IsActive }).FirstOrDefaultAsync();
             return (user.PasswordHash, user.IsActive.Value);
         }
-        public async Task<(string, Users?)> UpdateUserAsync(Users user,string userId)
+
+        public async Task<(string, Users?)> UpdateUserAsync(Users user, string userId)
         {
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
                     var roleName = await GetRoleById(user.RoleId);
-                    var result =_context.Users.Update(user);
+                    var result = _context.Users.Update(user);
                     await _context.SaveChangesAsync();
                     var updatedUser = await _context.Users.FindAsync(user.Id);
 
@@ -280,32 +259,30 @@ namespace SIFO.APIService.User.Repository.Implementations
                         if (!resultMsg)
                         {
                             await transaction.RollbackAsync();
-                            return ("Error while saving Pharmacy Details.",null);
+                            return (Constants.ERROR_SAVING_PHARMACY_DETAILS, null);
                         }
                     }
+
                     if (roleName.Name == Constants.ROLE_HOSPITAL_REFERENT)
                     {
                         var deletedData = await _context.UserHospitalMappings.Where(x => x.UserId == user.Id).ToListAsync();
                         _context.UserHospitalMappings.RemoveRange(deletedData);
-
                         await _context.SaveChangesAsync();
 
                         bool resultMsg = await CreateUserHospitalMapping(user, userId);
                         if (!resultMsg)
                         {
                             await transaction.RollbackAsync();
-                            return ("Error while saving Hospital Details.", null);
+                            return (Constants.ERROR_SAVING_HOSPITAL_DETAILS, null);
                         }
                     }
-
                     await transaction.CommitAsync();
                     return (Constants.SUCCESS, updatedUser);
                 }
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-
-                    return ($"An error occurred while creating the user: {ex.Message}",null);
+                    return ($"An error occurred while creating the user: {ex.Message}", null);
                 }
             }
         }
@@ -349,7 +326,6 @@ namespace SIFO.APIService.User.Repository.Implementations
 
 
             var sqlQuery = query.ToQueryString();
-
             var count = query.Count();
             PagedResponse<UserResponse> pagedResponse = new PagedResponse<UserResponse>();
 
@@ -365,7 +341,6 @@ namespace SIFO.APIService.User.Repository.Implementations
             }
 
             string orderByExpression = $"{sortColumn} {sortDirection}";
-
             if (!string.IsNullOrWhiteSpace(filter))
             {
                 query = query.Where(u => u.FirstName.Contains(filter) || u.LastName.Contains(filter) || u.Email.Contains(filter));
@@ -373,14 +348,11 @@ namespace SIFO.APIService.User.Repository.Implementations
             }
 
             query = query.OrderBy(orderByExpression).Skip((pageIndex - 1) * pageSize).Take(pageSize);
-
             var pagedResult = await query.ToListAsync();
-
             pagedResponse.Result = pagedResult.AsEnumerable();
             pagedResponse.TotalCount = count;
             pagedResponse.TotalPages = (int)Math.Ceiling((pagedResponse.TotalCount ?? 0) / (double)pageSize);
             pagedResponse.CurrentPage = pageIndex;
-
             return pagedResponse;
         }
 

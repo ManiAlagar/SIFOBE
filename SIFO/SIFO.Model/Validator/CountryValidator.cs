@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SIFO.Model.Constant;
 using SIFO.Model.Request;
 
 namespace SIFO.Model.Validator
@@ -8,14 +9,14 @@ namespace SIFO.Model.Validator
         public CountryValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Country Name is required.")
-                .MaximumLength(100).WithMessage("Name cannot exceed 100 characters.");
+                .NotEmpty().WithMessage(Constants.COUNTRY_NAME_REQUIRED)
+                .MaximumLength(100).WithMessage(Constants.NAME_TOO_LONG);
             RuleFor(x => x.Iso3)
-                .Length(3).WithMessage("ISO-3 code cannot exceed 3 characters.");
+                .Length(3).WithMessage(Constants.ISO3_CODE_TOO_LONG);
             RuleFor(x => x.Iso2)
-                .Length(2).WithMessage("ISO-2 code cannot exceed 2 characters.");
+                .Length(2).WithMessage(Constants.ISO2_CODE_TOO_LONG);
             RuleFor(x => x.PhoneCode)
-                .MaximumLength(255).WithMessage("Phone code cannot exceed 255 characters.");
+                .MaximumLength(255).WithMessage(Constants.PHONE_CODE_TOO_LONG);
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using SIFO.APIService.Authentication.Repository.Contracts;
-using SIFO.APIService.Authentication.Service.Contracts;
-using SIFO.Common.Contracts;
-using SIFO.Core.Repository.Contracts;
-using SIFO.Core.Service.Contracts;
-using SIFO.Model.Constant;
-using SIFO.Model.Entity;
+﻿using SIFO.Model.Entity;
 using SIFO.Model.Request;
+using SIFO.Model.Constant;
 using SIFO.Model.Response;
+using SIFO.Common.Contracts;
+using SIFO.Core.Service.Contracts;
+using SIFO.Core.Repository.Contracts;
+using SIFO.APIService.Authentication.Repository.Contracts;
+using SIFO.APIService.Authentication.Service.Contracts;
 
 namespace SIFO.APIService.Authentication.Service.Implementations
 {
@@ -19,8 +19,8 @@ namespace SIFO.APIService.Authentication.Service.Implementations
         private readonly ISendGridService _sendGridService;
         private readonly ITwilioRepository _twilioRepository;
 
-        public AuthenticationService(IConfiguration configuration, IAuthenticationRepository authenticationRepository, ICommonService commonService, JwtTokenGenerator tokenGenerator,
-            ISendGridService sendGridService, ITwilioRepository twilioRepository)
+        public AuthenticationService(IConfiguration configuration, IAuthenticationRepository authenticationRepository, ICommonService commonService,
+            JwtTokenGenerator tokenGenerator, ISendGridService sendGridService, ITwilioRepository twilioRepository)
         {
             _configuration = configuration;
             _authenticationRepository = authenticationRepository;
@@ -29,35 +29,36 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             _sendGridService = sendGridService;
             _twilioRepository = twilioRepository;
         }
+
         public async Task<ApiResponse<object>> LoginAsync(LoginRequest request)
         {
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
-                return ApiResponse<object>.BadRequest("mail or password cannot be empty");
+                return ApiResponse<object>.BadRequest(Constants.MAIL_OR_PASSWORD_CANNOT_BE_EMPTY);
 
             request.Password = await _commonService.HashPassword(request.Password);
             var userData = await _authenticationRepository.LoginAsync(request);
 
             if (userData == null || userData.PswdUpdatedAt < DateTime.UtcNow.AddMonths(-6))
-                return ApiResponse<object>.UnAuthorized("invalid email and/or password");
+                return ApiResponse<object>.UnAuthorized(Constants.INVALID_EMAIL_OR_PASSWORD);
 
             var userSession = await _authenticationRepository.GetUserSessionByUserId(userData.Id);
             if (userData.IsTempPassword == true && !userSession.Any())
             {
                 var loginData = await VerifyLoginAsync(userData.Id); 
                 loginData.Data.IsFirstAccess = true;
-                return ApiResponse<object>.Success("Success", loginData.Data);
+                return ApiResponse<object>.Success(Constants.SUCCESS, loginData.Data);
             }
             else if (userData.IsTempPassword == true && userSession.Any())
             {
                 var loginData = await VerifyLoginAsync(userData.Id);
                 loginData.Data.IsFirstAccess = false;
-                return ApiResponse<object>.Success("Success", loginData.Data);
+                return ApiResponse<object>.Success(Constants.SUCCESS, loginData.Data);
             }
             else
             {
                 var otpResponse = await _commonService.SendOtpRequestAsync(userData.Id, "Login", userData.AuthenticationType.Value);
                 if (otpResponse != Constants.SUCCESS)
-                    return ApiResponse<object>.InternalServerError();
+                    return ApiResponse<object>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
                 var response = new
                 {
                     UserId = userData.Id,
@@ -73,7 +74,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
         public async Task<ApiResponse<string>> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.Email))
-                return ApiResponse<string>.BadRequest();
+                return ApiResponse<string>.BadRequest(Constants.BAD_REQUEST);
 
             var userData = await _authenticationRepository.GetUserByEmail(request.Email);
             if (userData is null)
@@ -85,48 +86,45 @@ namespace SIFO.APIService.Authentication.Service.Implementations
 
             var isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, hashedPassword, true);
             if(!isPasswordUpdated) 
-                return ApiResponse<string>.InternalServerError();
+                return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
 
             var filePath = _configuration["Templates:ForgotPassword"];
             string subject = $"Reset password Request";
             string body = File.ReadAllText(filePath).Replace("[UserName]", $"{userData.FirstName} {userData.LastName}").Replace("[Password]",password);
-
 
             //var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");  
             var toUser = new string[] { userData.Email };
             var mailResponse = await _commonService.SendMail(toUser.ToList(), null, subject, body); 
             if(!mailResponse)
             //if (!mailResponse.IsSuccess)
-                return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
-            return ApiResponse<string>.Success();
+                return ApiResponse<string>.InternalServerError(Constants.SOMETHING_WENT_WRONG_WHILE_SENDING_MAIL);
+            return ApiResponse<string>.Success(Constants.SUCCESS);
         }
 
         public async Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request)
         {
             var tokendata = await _commonService.GetDataFromToken();
             request.UserId = Convert.ToInt64(tokendata.UserId);
-
             var userData = await _authenticationRepository.IsUserExists(request.UserId);
-
             if (userData == null)
-                return ApiResponse<string>.NotFound("user not found");
+                return ApiResponse<string>.NotFound(Constants.USER_NOT_FOUND);
 
             request.OldPassword = await _commonService.HashPassword(request.OldPassword);
             if (request.OldPassword != userData.PasswordHash)
-                return ApiResponse<string>.BadRequest("invalid old password");
+                return ApiResponse<string>.BadRequest(Constants.INVALID_OLD_PASSWORD);
 
             request.Password = await _commonService.HashPassword(request.Password);
             bool isPasswordUpdated = await _authenticationRepository.UpdatePasswordAsync(userData.Id, request.Password, false);
             if (!isPasswordUpdated)
-                return ApiResponse<string>.InternalServerError();
-            return ApiResponse<string>.Success();
+                return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
+            return ApiResponse<string>.Success(Constants.SUCCESS);
         }
 
         public async Task<ApiResponse<LoginResponse>> VerifyLoginAsync(long userId)
         {
             var userData = await _authenticationRepository.IsUserExists(userId);
             if (userData == null)
-                return ApiResponse<LoginResponse>.NotFound();
+                return ApiResponse<LoginResponse>.NotFound(Constants.NOT_FOUND);
 
             var accessToken = _tokenGenerator.GenerateToken(userData);
             LoginResponse loginResponse = new LoginResponse();
@@ -151,7 +149,6 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 TokenSession = accessToken
             };
             await _authenticationRepository.CreateUserSessionManagementAsync(userSessionManagement);
-
             return ApiResponse<LoginResponse>.Success(Constants.SUCCESS, loginResponse);
         } 
         public async Task<ApiResponse<long>> LogoutAsync()
@@ -160,19 +157,20 @@ namespace SIFO.APIService.Authentication.Service.Implementations
             string response = await _authenticationRepository.LogoutAsync(Convert.ToInt64(userData.UserId));
             
             if (response != Constants.SUCCESS)
-                return ApiResponse<long>.InternalServerError();
+                return ApiResponse<long>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
             return ApiResponse<long>.Success(Constants.SUCCESS);
         }
         public async Task<ApiResponse<PatientsLoginResponse>> LoginAsPatientAsync(LoginRequest request)
         {
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
-                return ApiResponse<PatientsLoginResponse>.BadRequest("Email or password cannot be empty");
+                return ApiResponse<PatientsLoginResponse>.BadRequest(Constants.EMAIL_PASSWORD_NOT_EMPTY);
+
             var has = await _commonService.EncryptPassword(request.Password);
             request.Password = await _commonService.HashPassword(request.Password);
             var patientData = await _authenticationRepository.LoginAsPatientAsync(request);
 
             if (patientData == null || patientData.PswdUpdatedAt < DateTime.UtcNow.AddMonths(-6))
-                return ApiResponse<PatientsLoginResponse>.UnAuthorized("Invalid email and/or password");
+                return ApiResponse<PatientsLoginResponse>.UnAuthorized(Constants.INVALID_EMAIL_OR_PASSWORD);
 
             var accessToken = _tokenGenerator.GenerateTokenForPatient(patientData);
             var loginResponse = new PatientsLoginResponse
@@ -185,10 +183,7 @@ namespace SIFO.APIService.Authentication.Service.Implementations
                 UserId = patientData.UserId,
                 AuthenticationType = patientData.AuthenticationType
             };
-
             return ApiResponse<PatientsLoginResponse>.Success(Constants.SUCCESS, loginResponse);
         }
-
-       
     }
 }

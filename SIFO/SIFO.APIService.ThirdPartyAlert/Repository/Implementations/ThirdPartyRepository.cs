@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SIFO.Model.Entity;
+﻿using SIFO.Model.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace SIFO.APIService.ThirdPartyAlert.Repository.Implementations
 {
     public class ThirdPartyRepository
     {
         private readonly SIFOContext _context;
+
         public ThirdPartyRepository(SIFOContext context)
         {
             _context = context;

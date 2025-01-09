@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SIFO.Model.Constant;
 using SIFO.Model.Request;
 
 namespace SIFO.Model.Validator
@@ -8,7 +9,7 @@ namespace SIFO.Model.Validator
         public AdverseEventValidator()
         {
             RuleFor(x => x.Name)
-               .NotEmpty().WithMessage("name is required.");
+               .NotEmpty().WithMessage(Constants.NAME_REQUIRED);
         }
     }
 }

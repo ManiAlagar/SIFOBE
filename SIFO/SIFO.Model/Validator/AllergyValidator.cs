@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using SIFO.Model.Constant;
 using SIFO.Model.Request;
 
 namespace SIFO.Model.Validator
@@ -8,9 +9,9 @@ namespace SIFO.Model.Validator
         public AllergyValidator()
         {
             RuleFor(x => x.Name)
-               .NotEmpty().WithMessage("name is required.");
+               .NotEmpty().WithMessage(Constants.NAME_REQUIRED);
             RuleFor(x => x.IsActive.ToString())
-               .NotEmpty().WithMessage("is active is required.");
+               .NotEmpty().WithMessage(Constants.IS_ACTIVE_REQUIRED);
         }
     }
 }

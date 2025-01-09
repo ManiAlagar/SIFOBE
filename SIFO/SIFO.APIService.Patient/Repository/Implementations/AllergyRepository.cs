@@ -77,9 +77,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                             };
 
                 var count = _context.Allergys.Count();
-
                 PagedResponse<AllergyResponse> pagedResponse = new PagedResponse<AllergyResponse>();
-
                 if (isAll)
                 {
                     var result = await query.ToListAsync();
