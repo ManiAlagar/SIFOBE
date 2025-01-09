@@ -79,7 +79,7 @@ namespace SIFO.APIService.User.Controllers
             }
             catch (Exception ex)
             {
-                var result = ApiResponse<string>.InternalServerError;
+                var result = ApiResponse<string>.InternalServerError(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }

@@ -110,22 +110,22 @@ namespace SIFO.APIService.Patient.Service.Implementations
         public async Task<ApiResponse<string>> RegisterPatient(RegisterPatientRequest request)
         {
             var tokenData = await _commonService.GetDataFromToken();
-            HttpClient _httpClient = new HttpClient();
-            var patientData = await _patientRepository.GetPatientByPhoneNumber(request.PhoneNumber); 
-            if(tokenData.Role != Constants.ROLE_QC_ADMINISTRATOR)
-                return ApiResponse<string>.UnAuthorized(Constants.REGISTRATION_NOT_ALLOWED);
+
+            var patientData = await _patientRepository.GetPatientByPhoneNumber(request.PhoneNumber);
             if (patientData != Constants.NOT_FOUND)
                 return ApiResponse<string>.Conflict(Constants.PHONE_ALREADY_EXISTS);
-
             string assistedCode = await _commonService.GenerateAssitedCode();
-            var authId = await _patientRepository.GetAuthIdByTypeAsync(Constants.EMAIL);
 
+            var roleId = await _patientRepository.GetPatientRole();
             Patients patients = new Patients();
             patients.Code = assistedCode;
             patients.Phone = request.PhoneNumber;
             patients.CreatedBy = Convert.ToInt64(tokenData.UserId);
             patients.CreatedDate = DateTime.UtcNow;
             patients.IsActive = false;
+            patients.AuthenticationType = 1;
+            patients.RoleId = roleId;
+
             var registeredPatient = await _patientRepository.RegisterPatientAsync(patients);
             if (registeredPatient is null)
                 return ApiResponse<string>.InternalServerError(Constants.INTERNAL_SERVER_ERROR);
@@ -141,11 +141,15 @@ namespace SIFO.APIService.Patient.Service.Implementations
                 Name = "test patient"
             };
             var jsonPayload = JsonConvert.SerializeObject(payload);
+
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            HttpClient _httpClient = new HttpClient();
+
             var response = await _httpClient.PostAsync(
                 $"{_configuration["Url"]}/SendGrid/SendMail",
                 content
             );
+
             if (response.IsSuccessStatusCode)
             {
                 var responseData = await response.Content.ReadAsStringAsync();

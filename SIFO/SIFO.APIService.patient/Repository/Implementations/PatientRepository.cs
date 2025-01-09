@@ -387,5 +387,18 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                 }
             }
         }
+
+        public async Task<long> GetPatientRole()
+        {
+            try
+            {
+                long roleId = await _context.Roles.Where(a => a.Name == Constants.ROLE_PATIENT).Select(a => a.Id).SingleOrDefaultAsync();
+                return roleId;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

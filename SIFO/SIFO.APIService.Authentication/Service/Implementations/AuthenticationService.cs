@@ -167,7 +167,6 @@ namespace SIFO.APIService.Authentication.Service.Implementations
         {
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
                 return ApiResponse<PatientsLoginResponse>.BadRequest("Email or password cannot be empty");
-            var has = await _commonService.EncryptPassword(request.Password);
             request.Password = await _commonService.HashPassword(request.Password);
             var patientData = await _authenticationRepository.LoginAsPatientAsync(request);
 
