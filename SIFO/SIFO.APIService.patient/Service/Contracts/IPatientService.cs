@@ -11,7 +11,7 @@ namespace SIFO.APIService.Patient.Service.Contracts
         public Task<ApiResponse<string>> UpdatePatientAsync(PatientRequest request);
         public Task<ApiResponse<string>> DeletePatientAsync(long patientId);
         public Task<ApiResponse<string>> RegisterPatient(RegisterPatientRequest request);
-        public Task<ApiResponse<string>> VerifyPatientAsync(VerifyPatientRequest request);
+        public Task<ApiResponse<object>> VerifyPatientAsync(VerifyPatientRequest request);
         public Task<ApiResponse<string>> CreatePasswordAsync(CreatePasswordRequest request);
         public Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request);
         public Task<ApiResponse<string>> SendOtpAsync(PatientOtpRequest request);

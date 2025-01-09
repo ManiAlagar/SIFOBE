@@ -124,6 +124,7 @@ namespace SIFO.APIService.Patient.Controllers
 
         [HttpPost]
         [Route("Register")]
+        [Authorize(Roles = $"{Constants.ROLE_QC_ADMINISTRATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR},{Constants.ROLE_QC_OPERATOR}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
@@ -183,7 +184,7 @@ namespace SIFO.APIService.Patient.Controllers
         }
         [HttpPut]
         [Route("changePassword")]
-        [Authorize(Roles = $"{Constants.ROLE_QC_ADMINISTRATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_OPERATOR}, {Constants.ROLE_HOSPITAL_PHARMACY_SUPERVISOR},{Constants.ROLE_QC_OPERATOR},{Constants.ROLE_PATIENT}")]
+        [Authorize(Roles = $"{Constants.ROLE_PATIENT}")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]

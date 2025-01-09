@@ -6,13 +6,13 @@ namespace SIFO.APIService.Patient.Repository.Contracts
 {
     public interface IPatientRepository
     {
-        public Task<PagedResponse<PatientResponse>> GetPatientAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll,string roleName);
+        public Task<PagedResponse<PatientResponse>> GetPatientAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, string roleName, long? roleId);
         public Task<PatientResponse> GetPatientByIdAsync(long patientId);
         public Task<string> CreatePatientAsync(Patients Patient);
         public Task<string> UpdatePatientAsync(Patients Patient);
         public Task<string> DeletePatientByIdAsync(long patientId);
         public Task<string> PhoneNumberOrEmailExists (string phoneNumber,string email,long patientId);
-        public Task<string> GetPatientByPhoneNumber(string phoneNumber);
+        public Task<Patients> GetPatientByPhoneNumber(string phoneNumber);
         public Task<bool> AssistedCodeExistsAsync(string assistedCode);
         public Task<Patients> RegisterPatientAsync(Patients entity);
         public Task<long> GetAuthIdByTypeAsync (string authType);
@@ -22,8 +22,8 @@ namespace SIFO.APIService.Patient.Repository.Contracts
         public Task<Patients> CheckPatientExists(string userId);
         public Task<bool> UpdatePasswordAsync(long? userId, string hashedPassword);
         public Task<Patients> GetPatientByCodeAsync(string patientCode);
-        public Task<string> UpdatePatientStatus(string patientCode);
-        public  Task<long> GetPatientRole();
+        public Task<string> UpdatePatientStatus(string phoneNumber);
+        public Task<long> GetPatientRole();
         //public Task<string> UpdatePatientAsync(Patient request);
     }
 }

@@ -83,7 +83,7 @@ namespace SIFO.Model.Entity
         public DateTime? PswdUpdatedAt { get; set; }
 
         [Column("roleId")]
-        public long RoleId { get; set; }
+        public long? RoleId { get; set; }
 
         [Column("authenticationType")]
         public long? AuthenticationType { get; set; }

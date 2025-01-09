@@ -17,11 +17,11 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             _context = context;
         }
 
-        public async Task<PagedResponse<PatientResponse>> GetPatientAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, string roleName)
+        public async Task<PagedResponse<PatientResponse>> GetPatientAsync(int pageNo, int pageSize, string filter, string sortColumn, string sortDirection, bool isAll, string roleName, long? roleId)
         {
             try
             {
-                var query = from patient in _context.Patients
+                var query = from patient in _context.Patients 
                             join addressDetails in _context.AddressDetails on patient.AddressId equals addressDetails.Id
                             join country in _context.Countries on addressDetails.CountryId equals country.Id
                             join state in _context.States on addressDetails.Region equals state.Id
@@ -54,6 +54,24 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                                 ConsentDataProfiling = patient.ConsentDataProfiling,
                                 ConsentThirdPartyMarketing = patient.ConsentThirdPartyMarketing,
                             };
+
+
+                if (roleName == Constants.ROLE_QC_ADMINISTRATOR || roleName == Constants.ROLE_QC_OPERATOR)  
+                {
+                    query = from patientResponse in query
+                            join role in _context.Roles on patientResponse.RoleId equals role.Id
+                            where role.Name == roleName
+                            select patientResponse;
+                }
+
+                if (roleName == Constants.ROLE_DOCTOR)
+                {
+                    query = from patientResponse in query
+                            join userRole in _context.UserHospitalMappings on roleId equals userRole.UserId
+                            join hospitalContacts in _context.Contacts on userRole.HospitalId equals hospitalContacts.FacilityId
+                            where userRole.UserId == roleId
+                            select patientResponse;
+                }
 
                 var count = _context.Patients.Count();
                 PagedResponse<PatientResponse> pagedResponse = new PagedResponse<PatientResponse>();
@@ -204,14 +222,12 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             }
         }
 
-        public async Task<string> GetPatientByPhoneNumber(string phoneNumber)
+        public async Task<Patients> GetPatientByPhoneNumber(string phoneNumber)
         {
             try
             {
                 var response = await _context.Patients.Where(a => a.Phone == phoneNumber).SingleOrDefaultAsync();
-                if (response is not null)
-                    return Constants.SUCCESS;
-                return Constants.NOT_FOUND;
+                return response;
             }
             catch (Exception ex)
             {
@@ -263,7 +279,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
         {
             try
             {
-                var patientId = await _context.Patients.Where(a => a.Code == request.PatientCode).Select(a => a.Id).SingleOrDefaultAsync();
+                var patientId = await _context.Patients.Where(a => a.Phone == request.PhoneNumber).Select(a => a.Id).SingleOrDefaultAsync();
                 if (patientId is null)
                     return null;
 
@@ -305,7 +321,7 @@ namespace SIFO.APIService.Patient.Repository.Implementations
                     return false;
 
                 patient.Password = request.Password;
-                _context.Patients.Update(patient);
+                patient.PswdUpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -329,11 +345,11 @@ namespace SIFO.APIService.Patient.Repository.Implementations
             }
         }
 
-        public async Task<string> UpdatePatientStatus(string patientCode)
+        public async Task<string> UpdatePatientStatus(string phoneNumber)
         {
             try
             {
-                var response = await _context.Patients.Where(a => a.Code == patientCode).SingleOrDefaultAsync();
+                var response = await _context.Patients.Where(a => a.Phone == phoneNumber).SingleOrDefaultAsync();
                 response.IsActive = true;
                 await _context.SaveChangesAsync();
                 return Constants.SUCCESS;
@@ -364,27 +380,23 @@ namespace SIFO.APIService.Patient.Repository.Implementations
 
         public async Task<bool> UpdatePasswordAsync(long? userId, string hashedPassword)
         {
-            using (await _context.Database.BeginTransactionAsync())
+            try
             {
-                try
+                var userData = await _context.Patients.Where(a => a.Id == userId).SingleOrDefaultAsync();
+                if (userData != null)
                 {
-                    var userData = await _context.Patients.Where(a => a.Id == userId).SingleOrDefaultAsync();
-                    if (userData != null)
-                    {
-                        userData.Password = hashedPassword;
-                        userData.UpdatedDate = DateTime.UtcNow;
-                        userData.UpdatedBy = userId;
-                        userData.PswdUpdatedAt = DateTime.UtcNow;
-                        await _context.SaveChangesAsync();
-                        await _context.Database.CommitTransactionAsync();
-                        return true;
-                    }
-                    return false;
+                    userData.Password = hashedPassword;
+                    userData.UpdatedDate = DateTime.UtcNow;
+                    userData.UpdatedBy = userId;
+                    userData.PswdUpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                    return true;
                 }
-                catch (Exception ex)
-                {
-                    throw;
-                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 

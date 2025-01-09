@@ -30,5 +30,6 @@ namespace SIFO.Model.Response
         public bool ConsentSensitiveData { get; set; }
         public bool? ConsentDataProfiling { get; set; }
         public bool? ConsentThirdPartyMarketing { get; set; }
+        public long? RoleId { get; set; }
     }
 }

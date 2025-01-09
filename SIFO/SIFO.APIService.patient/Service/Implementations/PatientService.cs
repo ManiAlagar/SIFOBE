@@ -36,7 +36,7 @@ namespace SIFO.APIService.Patient.Service.Implementations
             if (isValid.Any())
                 return ApiResponse<PagedResponse<PatientResponse>>.BadRequest(isValid[0]);
 
-            var response = await _patientRepository.GetPatientAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll, tokenData.Role);
+            var response = await _patientRepository.GetPatientAsync(pageNo, pageSize, filter, sortColumn, sortDirection, isAll, tokenData.Role, tokenData.RoleId);
             return ApiResponse<PagedResponse<PatientResponse>>.Success(Constants.SUCCESS, response);
         }
 
@@ -110,9 +110,9 @@ namespace SIFO.APIService.Patient.Service.Implementations
         public async Task<ApiResponse<string>> RegisterPatient(RegisterPatientRequest request)
         {
             var tokenData = await _commonService.GetDataFromToken();
-
-            var patientData = await _patientRepository.GetPatientByPhoneNumber(request.PhoneNumber);
-            if (patientData != Constants.NOT_FOUND)
+            HttpClient _httpClient = new HttpClient();
+            var patientData = await _patientRepository.GetPatientByPhoneNumber(request.PhoneNumber); 
+            if (patientData is not null)
                 return ApiResponse<string>.Conflict(Constants.PHONE_ALREADY_EXISTS);
             string assistedCode = await _commonService.GenerateAssitedCode();
 
@@ -141,40 +141,48 @@ namespace SIFO.APIService.Patient.Service.Implementations
                 Name = "test patient"
             };
             var jsonPayload = JsonConvert.SerializeObject(payload);
-
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            HttpClient _httpClient = new HttpClient();
-
             var response = await _httpClient.PostAsync(
                 $"{_configuration["Url"]}/SendGrid/SendMail",
                 content
             );
-
             if (response.IsSuccessStatusCode)
             {
                 var responseData = await response.Content.ReadAsStringAsync();
                 PatientOtpRequest patientOtpRequest = new();
-                patientOtpRequest.PatientCode = registeredPatient.Code;
+                patientOtpRequest.PhoneNumber = registeredPatient.Phone;
                 await SendOtpAsync(patientOtpRequest);
                 return ApiResponse<string>.Success(Constants.SUCCESS, registeredPatient.Code);
             }
             return ApiResponse<string>.InternalServerError();
         }
 
-        public async Task<ApiResponse<string>> VerifyPatientAsync(VerifyPatientRequest request)
+        public async Task<ApiResponse<object>> VerifyPatientAsync(VerifyPatientRequest request)
         {
             var otpData = await _patientRepository.VerifyPatientAsync(request);
             if (otpData is null)
-                return ApiResponse<string>.BadRequest(Constants.INVALID_OTP);
+                return ApiResponse<object>.BadRequest(Constants.INVALID_OTP);
 
-            var updatedPatientData = await _patientRepository.UpdatePatientStatus(request.PatientCode);
+            var updatedPatientData = await _patientRepository.UpdatePatientStatus(request.PhoneNumber);
             if (updatedPatientData != Constants.SUCCESS)
-                return ApiResponse<string>.InternalServerError();
+                return ApiResponse<object>.InternalServerError();
 
-            var response = await _patientRepository.UpdateOtpDataAsync(otpData);
-            if (response == Constants.SUCCESS)
-                return ApiResponse<string>.Success();
-            return ApiResponse<string>.InternalServerError();
+            var patientData = await _patientRepository.GetPatientByPhoneNumber(request.PhoneNumber);
+            if(patientData is null)
+                return ApiResponse<object>.NotFound();
+
+            var result = await _patientRepository.UpdateOtpDataAsync(otpData);
+
+            var response = new
+            {
+                IsVerifedUser = patientData.IsVerified, 
+                PatientCode = patientData.Code, 
+                UserName = $"{patientData.FirstName} {patientData.LastName}", 
+                UserId = patientData.Id,
+            };
+            if (result == Constants.SUCCESS)
+                return ApiResponse<object>.Success(Constants.SUCCESS,response);
+            return ApiResponse<object>.InternalServerError();
         }
 
         public async Task<ApiResponse<string>> CreatePasswordAsync(CreatePasswordRequest request)
@@ -210,9 +218,9 @@ namespace SIFO.APIService.Patient.Service.Implementations
         public async Task<ApiResponse<string>> SendOtpAsync(PatientOtpRequest request)
         {
             HttpClient _httpClient = new HttpClient();
-            var patientData = await _patientRepository.GetPatientByCodeAsync(request.PatientCode);
+            var patientData = await _patientRepository.GetPatientByPhoneNumber(request.PhoneNumber);
             if (patientData is null)
-                return ApiResponse<string>.NotFound();
+                return ApiResponse<string>.NotFound("you are not a authorized user please contact adminstrator");
 
             if (patientData.IsActive)
                 return ApiResponse<string>.BadRequest(Constants.USER_ALREADY_VERIFIED);

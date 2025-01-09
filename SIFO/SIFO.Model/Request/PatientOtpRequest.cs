@@ -2,6 +2,6 @@
 {
     public class PatientOtpRequest
     { 
-        public string PatientCode { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }
