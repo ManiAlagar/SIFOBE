@@ -257,5 +257,43 @@ namespace SIFO.APIService.Authentication.Repository.Implementations
                 throw new Exception(ex.Message);
             }
         }
+        public async Task<PatientsLoginResponse> LoginAsPatientAsync(LoginRequest request)
+        {
+            try
+            {
+                var patientData = await (from patient in _context.Patients
+                                      join role in _context.Roles on patient.RoleId equals role.Id
+                                      join authType in _context.AuthenticationType on patient.AuthenticationType equals authType.Id
+                                      where patient.Email == request.Email && patient.Password == request.Password && patient.IsActive == true
+                                      select new PatientsLoginResponse
+                                      {
+                                          UserId = patient.Id.Value,
+                                          RoleId = patient.RoleId,
+                                          RoleName = role.Name,
+                                          PswdUpdatedAt = patient.PswdUpdatedAt,
+                                          AuthenticationType = patient.AuthenticationType,
+                                          Email = patient.Email,
+                                          FirstName = patient.FirstName,
+                                          LastName = patient.LastName
+
+                                      }).FirstOrDefaultAsync();
+
+                return patientData;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Patients> IsPatientExists(long patientId)
+        {
+          var patient = await _context.Patients.Where(a=>a.Id == patientId).FirstOrDefaultAsync();   
+            if(patient == null)
+            {
+                return null; 
+            }
+            return patient;
+        }
     }
 }

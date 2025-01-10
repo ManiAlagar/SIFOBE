@@ -114,5 +114,25 @@ namespace SIFO.APIService.Authentication.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
+        [HttpPost]
+        [Route("patient/login")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> LoginAsPatientAsync(LoginRequest request)
+        {
+            try
+            {
+                var result = await _authService.LoginAsPatientAsync(request);
+                return StatusCode(result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var result = ApiResponse<string>.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
     }
 }

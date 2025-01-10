@@ -55,6 +55,7 @@ namespace SIFO.APIService.User.Service.Implementations
             mappedResult.PasswordHash = await _commonService.HashPassword(request.PasswordHash);
             
             var message = await _userRepository.CreateUserAsync(mappedResult, tokenData.UserId);
+            var decrytedPassword = await _commonService.DecryptPassword(request.PasswordHash);
             //if (request.PharmacyIds != null && request.PharmacyIds.Any())
             //{
             //    foreach (var items in request.PharmacyIds)
@@ -65,16 +66,9 @@ namespace SIFO.APIService.User.Service.Implementations
             if (message == Constants.SUCCESS)
             {
               
-                    var filePath = _configuration["Templates:WelcomeEmail"];
+                var filePath = _configuration["Templates:WelcomeEmail"];
                 string subject = $"Welcome User";
-                string body = File.ReadAllText(filePath)
-              .Replace("[UserName]", $"{request.FirstName} {request.LastName}")
-              .Replace("[UserEmail]", $"{request.Email}")
-              .Replace("[UserPassword]", request.PasswordHash);
-
-     
-
-
+                string body = File.ReadAllText(filePath).Replace("[UserName]", $"{request.FirstName} {request.LastName}").Replace("[UserEmail]", $"{request.Email}").Replace("[UserPassword]", decrytedPassword);
                 //var mailResponse = await _sendGridService.SendMailAsync(request.Email, subject, body, $"{userData.FirstName} {userData.LastName}");  
                 var toUser = new string[] { request.Email };
                 var mailResponse = await _commonService.SendMail(toUser.ToList(), null, subject, body);
@@ -82,7 +76,6 @@ namespace SIFO.APIService.User.Service.Implementations
                     //if (!mailResponse.IsSuccess)
                     return ApiResponse<string>.InternalServerError("something went wrong while sending the mail");
                 return ApiResponse<string>.Created(Constants.SUCCESS);
-           
             }
             return ApiResponse<string>.InternalServerError(message);
         }

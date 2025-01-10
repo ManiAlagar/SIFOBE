@@ -58,12 +58,6 @@ namespace SIFO.Model.Entity
         [Column("consentThirdPartyMarketing")]
         public bool? ConsentThirdPartyMarketing { get; set; }
 
-        [Column("deviceId")]
-        public string? DeviceId { get; set; }
-
-        [Column("deviceType")]
-        public string? DeviceType { get; set; }
-
         [Column("createdBy")]
         public long CreatedBy { get; set; }
 
@@ -84,5 +78,14 @@ namespace SIFO.Model.Entity
 
         [Column("password")]
         public string? Password { get; set; }
+
+        [Column("pswdUpdatedAt")]
+        public DateTime? PswdUpdatedAt { get; set; }
+
+        [Column("roleId")]
+        public long? RoleId { get; set; }
+
+        [Column("authenticationType")]
+        public long? AuthenticationType { get; set; }
     }
 }

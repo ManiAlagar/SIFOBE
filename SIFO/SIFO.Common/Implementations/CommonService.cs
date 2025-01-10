@@ -599,18 +599,36 @@ namespace SIFO.Utility.Implementations
             }
         }
 
-        public async Task<string> GenerateAssitedCode(long length = 10)
+        public async Task<string> GenerateAssitedCode()
         {
-            if (length < 1)
-                length = 10;
-            Random random = new Random();
-            const string characters = "0123456789abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            var assistedCodeBuilder = new StringBuilder();
-            for (int i = 0; i < length; i++)
+            try
             {
-                assistedCodeBuilder.Append(characters[random.Next(characters.Length)]);
+                string generatedCode = string.Empty;
+                int maxRetries = 5;
+                int retryCount = 0;
+                do
+                {
+                    var lastCode = await _context.Patients.OrderByDescending(a => a.Id).Select(a => a.Code).FirstOrDefaultAsync();
+                    if (string.IsNullOrEmpty(lastCode))
+                        generatedCode = "SIFOPA1000000";
+                    else
+                    {
+                        var lastNumber = Convert.ToInt64(lastCode.Substring(6));
+                        var newNumber = lastNumber + 1;
+                        generatedCode = $"SIFOPA{newNumber:D7}";
+                    }
+                    var codeExists = await _context.Patients.AnyAsync(a => a.Code == generatedCode);
+                    if (!codeExists)
+                        return generatedCode;
+                    retryCount++;
+                }
+                while (retryCount < maxRetries);
+                throw new Exception("Error generating assisted code");
             }
-            return assistedCodeBuilder.ToString();
+            catch (Exception ex)
+            {
+                throw new Exception($"Error generating assisted code message {ex.Message} - innerMessage - {ex.InnerException}");
+            }
         }
     }
 }

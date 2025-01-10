@@ -33,6 +33,6 @@ namespace SIFO.Common.Contracts
         public Task<DateTime> GetStartOfWeek(DateTime date);
         public Task<string> HashPassword(string password);
         public Task<long> GetCountryIdByCountryCodeAsync(string countryCode);
-        public Task<string> GenerateAssitedCode(long length = 10);
+        public Task<string> GenerateAssitedCode();
     }
 }
