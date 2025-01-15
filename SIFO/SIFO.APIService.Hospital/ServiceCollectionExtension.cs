@@ -39,6 +39,7 @@ namespace SIFO.APIService.Hospital
             services.AddTransient<IHospitalFacilityService, HospitalFacilityService>();
             services.AddTransient<ITwilioService, TwilioService>();
             services.AddTransient<ISendGridService, SendGridService>();
+            services.AddTransient<IDrugService, DrugService>();
 
             //Repositories
             services.AddTransient<IHospitalRepository, HospitalRepository>();
@@ -46,6 +47,7 @@ namespace SIFO.APIService.Hospital
             services.AddTransient<IHospitalFacilityRepository, HospitalFacilityRepository>();
             services.AddTransient<ITwilioRepository, TwilioRepository>();
             services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
+            services.AddTransient<IDrugRepository,DrugRepository>();
 
             //DbContext
             services.AddTransient<SIFOContext>();

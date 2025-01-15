@@ -1,29 +1,35 @@
 ﻿using SIFO.APIService.Hospital.Repository.Contracts;
+using SIFO.APIService.Hospital.Service.Contracts;
+using SIFO.Common.Contracts;
 using SIFO.Model.Constant;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
 using SIFO.Utility.Implementations;
+using Twilio.Http;
 
 namespace SIFO.APIService.Hospital.Service.Implementations
 {
-    public class DrugService
+    public class DrugService :IDrugService
     {
         private readonly IDrugRepository _drugRepository;
         private readonly IConfiguration _configuration;
-        public DrugService(IDrugRepository drugRepository, IConfiguration configuration)
+        private readonly ICommonService _commonService;
+        public DrugService(IDrugRepository drugRepository, IConfiguration configuration,ICommonService commonService)
         {
             _drugRepository = drugRepository;
+            _commonService = commonService;
         }
         public async Task<ApiResponse<string>> CreateDrugAsync(DrugRequest drugRequest)
         {
             try
             {
                 bool IsAICExists = await _drugRepository.IsAICExists(drugRequest.AIC);
+                var tokenData = await _commonService.GetDataFromToken();
+                var createdUserId = tokenData.UserId;
                 if (IsAICExists)
                 {
                     return ApiResponse<string>.BadRequest("AIC value already exists. Please use a unique AIC value.!");
                 }
-
                 if (drugRequest.DD && !drugRequest.DrugRegionRequests.Any(dr => dr.DrugType.ToLower() == "dd"))
                 {
                     return ApiResponse<string>.BadRequest("At least one DD region is required when DD is true.");
@@ -32,7 +38,18 @@ namespace SIFO.APIService.Hospital.Service.Implementations
                 {
                     return ApiResponse<string>.BadRequest("At least one DPC region is required when DPC is true.");
                 }
-                bool isDrugSaved = await _drugRepository.SaveDrugAsync(drugRequest);
+                bool isRegionExists = await _drugRepository.IsRegionExists(drugRequest.DrugRegionRequests);
+                if(!isRegionExists)
+                {
+                    return ApiResponse<string>.BadRequest("Drug region already exists");
+                }
+                bool isRegionsDuplicated = await _drugRepository.IsRegionDuplicated(drugRequest.DrugRegionRequests);
+                if(isRegionsDuplicated)
+                {
+                    return ApiResponse<string>.BadRequest("No duplicate regions allowed.");
+                }
+
+                bool isDrugSaved = await _drugRepository.SaveDrugAsync(drugRequest, Convert.ToInt64(createdUserId));
                 if (isDrugSaved)
                 {
                     return ApiResponse<string>.Success("Drug Created Successfully!");
@@ -59,19 +76,19 @@ namespace SIFO.APIService.Hospital.Service.Implementations
                 {
                     return ApiResponse<string>.BadRequest("AIC value already exists. Please use a unique AIC value.!");
                 }
-                foreach (var drug in drugRequest.DrugRegionRequests)
-                {
-                    if (drug.IsNew == false)
-                    {
-                        bool drugRegionExists = await _drugRepository.IsDrugRegionExists(drug.DrugsRegionsId);
-                        if (!drugRegionExists)
-                            return ApiResponse<string>.NotFound("Drug Region not exists");
+                //foreach (var drug in drugRequest.DrugRegionRequests)
+                //{
+                //    if (drug.IsNew == false)
+                //    {
+                //        bool drugRegionExists = await _drugRepository.IsDrugRegionExists(drug.DrugsRegionsId);
+                //        if (!drugRegionExists)
+                //            return ApiResponse<string>.NotFound("Drug Region not exists");
 
-                    }
-                    bool regionExists = await _drugRepository.IsRegionExists(drug.RegionId);
-                    if (regionExists)
-                        return ApiResponse<string>.NotFound("Region already exists");
-                }
+                //    }
+                //    bool regionExists = await _drugRepository.IsRegionExists(drug.RegionId);
+                //    if (regionExists)
+                //        return ApiResponse<string>.NotFound("Region already exists");
+                //}
 
                 if (drugRequest.DD && !drugRequest.DrugRegionRequests.Any(dr => dr.DrugType == "DD"))
                 {

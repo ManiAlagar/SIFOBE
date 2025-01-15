@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SIFO.APIService.Hospital.Service.Contracts;
+using SIFO.Model.Constant;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
 
@@ -9,6 +11,7 @@ namespace SIFO.APIService.Hospital.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DrugController : ControllerBase
     {
         private readonly IValidator<DrugRequest> _validator;
@@ -20,6 +23,7 @@ namespace SIFO.APIService.Hospital.Controllers
         }
         [HttpPost]
         [Route("")]
+        [Authorize(Roles = $"{Constants.ROLE_QC_ADMINISTRATOR}")]
         [ProducesResponseType(typeof(ApiResponse<Model.Entity.Drugs>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status500InternalServerError)]

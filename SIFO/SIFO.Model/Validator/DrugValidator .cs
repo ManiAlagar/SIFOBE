@@ -25,22 +25,22 @@ namespace SIFO.Model.Validator
             When(x => x.DD || x.DPC, () =>
             {
                 RuleFor(x => x.ProductType.Trim())
-                    .NotEmpty().WithMessage("ProductType is required when DD or DPC is flagged.");
+                    .NotEmpty().WithMessage("ProductType is required when DD  is flagged.");
                 RuleFor(x => x.Class.Trim())
-                    .NotEmpty().WithMessage("Class is required when DD or DPC is flagged.");
+                    .NotEmpty().WithMessage("Class is required when DDis flagged.");
                 RuleFor(x => x.PharmaceuticalForm.Trim())
-                    .NotEmpty().WithMessage("PharmaceuticalForm is required when DD or DPC is flagged.");
+                    .NotEmpty().WithMessage("PharmaceuticalForm is required when DD is flagged.");
                 RuleFor(x => x.UMR)
-                    .NotEmpty().WithMessage("UMR is required when DD or DPC is flagged.")
+                    .NotEmpty().WithMessage("UMR is required when DD is flagged.")
                     .GreaterThan(0).WithMessage("UMR must be greater than zero.");
                 RuleFor(x => x.PrescriptionType.Trim())
-                    .NotEmpty().WithMessage("PrescriptionType is required when DD or DPC is flagged.");
+                    .NotEmpty().WithMessage("PrescriptionType is required when DD is flagged.");
                 RuleFor(x => x.ProductImage.Trim())
-                    .NotEmpty().WithMessage("ProductImage is required when DD or DPC is flagged.");
+                    .NotEmpty().WithMessage("ProductImage is required when DD is flagged.");
                 RuleFor(x => x.TherapeuticIndications.Trim())
                     .NotEmpty().WithMessage("TherapeuticIndications are required when DD is flagged.");
                 RuleFor(x => x.Temperature.Trim())
-                    .NotEmpty().WithMessage("Temperature is required when DD or DPC is flagged.");
+                    .NotEmpty().WithMessage("Temperature is required when DD is flagged.");
                 RuleFor(x => x.DrugDosage.Trim())
                     .NotEmpty().WithMessage("DrugDosage is required when DD is flagged.");
                 RuleFor(x => x.DrugRegionRequests)

@@ -4,6 +4,7 @@ using SIFO.Common.Contracts;
 using SIFO.Model.Entity;
 using SIFO.Model.Request;
 using SIFO.Model.Response;
+using System.Linq;
 
 namespace SIFO.APIService.Hospital.Repository.Implementations
 {
@@ -12,16 +13,23 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
 
         private readonly SIFOContext _context;
         private readonly ICommonService _commonService;
-        public DrugRepository(SIFOContext context, ICommonService commonService)
+        private readonly IConfiguration _configuration;
+        public DrugRepository(SIFOContext context, ICommonService commonService, IConfiguration configuration)
         {
             _context = context;
             _commonService = commonService;
+            _configuration = configuration;
         }
-        public async Task<bool> IsRegionExists(long RegionId)
+        public async Task<bool> IsRegionExists(List<DrugRegionRequest> regionRequests)
         {
-            return await _context.States.AnyAsync(a => a.Id == RegionId);
+            var regionIds = regionRequests.Select(r => r.RegionId).ToList();
+            return await _context.States
+                                 .Where(a => regionIds.Contains(a.Id))
+                                 .AnyAsync();
         }
-        public async Task<bool> SaveDrugAsync(DrugRequest drugRequest)
+
+
+        public async Task<bool> SaveDrugAsync(DrugRequest drugRequest, long userId)
         {
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -47,34 +55,38 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                     NumberGGAlert = drugRequest.NumberGGAlert,
                     AlertHours = drugRequest.AlertHours,
                     IsActive = true,
-                    CreatedBy = 1 // Example CreatedBy value
+                    DrugDosage = drugRequest.DrugDosage,
+                    CreatedBy = userId
                 };
+
+                if (!string.IsNullOrEmpty(drugRequest.ProductImage))
+                {
+                    var writtenPath = await _commonService.SaveFileAsync(drugRequest.ProductImage, null, Path.Join(_configuration["FileUploadPath:Path"], $"Users/{userId}"));
+                    if (writtenPath is null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        drugData.ProductImage = writtenPath;
+                    }
+                }
+
                 // Add the new drug to the context
                 await _context.Drugs.AddAsync(drugData);
                 await _context.SaveChangesAsync();
-                // Check for duplicated regions
-                bool isRegionsDuplicated = await IsRegionDuplicated(drugRequest.DrugRegionRequests);
-                if (isRegionsDuplicated)
-                {
-                    await transaction.RollbackAsync();
-                    return false;
-                }
+
                 // Save all drug regions
                 foreach (var item in drugRequest.DrugRegionRequests)
                 {
-                    bool regionExists = await IsRegionExists(item.RegionId);
-                    if (!regionExists)
-                    {
-                        await transaction.RollbackAsync();
-                        return false;
-                    }
-                    bool isDrugRegionSaved = await SaveDrugRegion(item, drugData.Id, 1);
+                    bool isDrugRegionSaved = await SaveDrugRegion(item, drugData.Id, userId);
                     if (!isDrugRegionSaved)
                     {
                         await transaction.RollbackAsync();
                         return false;
                     }
                 }
+
                 // Commit the transaction after all operations
                 await transaction.CommitAsync();
                 return true;
@@ -85,6 +97,7 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                 return false;
             }
         }
+
         public async Task<bool> SaveDrugRegion(DrugRegionRequest drugRegionRequest, long id, long userId)
         {
             try
@@ -141,25 +154,25 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
                     existingDrug.UpdatedDate = DateTime.UtcNow;
                     _context.Drugs.Update(existingDrug);
                     await _context.SaveChangesAsync();
-                    foreach (var drugRegionRequest in drugRequest.DrugRegionRequests)
-                    {
-                        if (drugRegionRequest.IsDeleted == true)
-                        {
-                            var existingDrugRegion = await _context.DrugRegions
-                            .Where(a => a.DrugsRegionsId == drugRegionRequest.DrugsRegionsId
-                                        && a.DrugId == drugId)
-                            .FirstOrDefaultAsync();
-                            if (existingDrugRegion != null)
-                            {
-                                _context.DrugRegions.Remove(existingDrugRegion);
-                                await _context.SaveChangesAsync();
-                            }
-                        }
-                        if ((bool)drugRegionRequest.IsNew)
-                        {
-                            await SaveDrugRegion(drugRegionRequest, drugId, 1);
-                        }
-                    }
+                    //foreach (var drugRegionRequest in drugRequest.DrugRegionRequests)
+                    //{
+                    //    if (drugRegionRequest.IsDeleted == true)
+                    //    {
+                    //        var existingDrugRegion = await _context.DrugRegions
+                    //        .Where(a => a.DrugsRegionsId == drugRegionRequest.DrugsRegionsId
+                    //                    && a.DrugId == drugId)
+                    //        .FirstOrDefaultAsync();
+                    //        if (existingDrugRegion != null)
+                    //        {
+                    //            _context.DrugRegions.Remove(existingDrugRegion);
+                    //            await _context.SaveChangesAsync();
+                    //        }
+                    //    }
+                    //    if ((bool)drugRegionRequest.IsNew)
+                    //    {
+                    //        await SaveDrugRegion(drugRegionRequest, drugId, 1);
+                    //    }
+                    //}
                     await _context.Database.CommitTransactionAsync();
                     return true;
                 }
@@ -327,17 +340,16 @@ namespace SIFO.APIService.Hospital.Repository.Implementations
         public async Task<bool> IsRegionDuplicated(IEnumerable<DrugRegionRequest> drugRegionRequests)
         {
             // Extract region IDs to check
-            var regionIds = drugRegionRequests.Where(a => a.IsDeleted == false).Select(a => a.RegionId).ToList();
+            var regionIds = drugRegionRequests.Select(a => a.RegionId).ToList();
             // Fetch DD regions from the database
-            var ddRegions = await _context.DrugRegions
-                                          .Where(dr => dr.DrugType == "DD" && regionIds.Contains(dr.RegionId))
+            var ddRegions =  drugRegionRequests
+                                          .Where(dr => dr.DrugType == "dd") 
                                           .Select(dr => dr.RegionId)
-                                          .ToListAsync();
+                                          .ToList();
             // Fetch DPC regions from the database
-            var dpcRegions = await _context.DrugRegions
-                                           .Where(dr => dr.DrugType == "DPC" && regionIds.Contains(dr.RegionId))
-                                           .Select(dr => dr.RegionId)
-                                           .ToListAsync();
+            var dpcRegions =  drugRegionRequests
+                                           .Where(dr => dr.DrugType == "dpc").Select(dr => dr.RegionId)
+                                           .ToList();
             // Check for intersections
             return ddRegions.Intersect(dpcRegions).Any();
         }

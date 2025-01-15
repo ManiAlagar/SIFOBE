@@ -63,5 +63,8 @@ namespace SIFO.Model.Entity
         public long CreatedBy { get; set; }
         [Column("UpdatedBy")]
         public long? UpdatedBy { get; set; }
+
+        [Column("DrugDosage")]
+        public string? DrugDosage { get; set; }
     }
 }

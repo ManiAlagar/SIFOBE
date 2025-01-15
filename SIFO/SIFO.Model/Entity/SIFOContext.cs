@@ -37,5 +37,7 @@ namespace SIFO.Model.Entity
         public virtual DbSet<IntoleranceManagement> IntoleranceManagements { get; set; }
         public virtual DbSet<Allergy> Allergys { get; set; } 
         public virtual DbSet<Patients> Patients { get; set; } 
+        public virtual DbSet<Drugs> Drugs { get; set; } 
+        public virtual DbSet<DrugRegion> DrugRegions { get; set; } 
     }
 }
